@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客服指揮中心 — BI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #060a14;
+  --bg-card: rgba(8, 14, 32, 0.92);
+  --border-glow: rgba(0, 180, 255, 0.18);
+  --border-mech: rgba(0, 160, 255, 0.28);
+  --accent-cyan: #00e0ff;
+  --accent-blue: #0060ee;
+  --accent-purple: #7c4dff;
+  --accent-green: #00ff88;
+  --accent-orange: #ff6b35;
+  --accent-red: #ff3355;
+  --text-primary: #ecf2fc;
+  --text-secondary: #8a9cba;
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Noto Sans TC', sans-serif;
+}
+body {
+  background: var(--bg-primary);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(0,160,255,0.025) 79px, rgba(0,160,255,0.025) 80px),
+    repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(0,160,255,0.025) 79px, rgba(0,160,255,0.025) 80px),
+    radial-gradient(ellipse at 12% 45%, rgba(0,60,200,0.13) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 12%, rgba(124,77,255,0.09) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 95%, rgba(0,180,255,0.05) 0%, transparent 35%);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0;
+  height: 120px;
+  background: linear-gradient(180deg, rgba(0,180,255,0.04), transparent);
+  animation: scanBeam 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 9998;
+}
+@keyframes scanBeam { 0% { top: -120px; } 50% { top: 100vh; } 100% { top: -120px; } }
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border-mech);
+  background:
+    linear-gradient(180deg, rgba(0,120,255,0.05) 0%, transparent 100%),
+    linear-gradient(90deg, rgba(124,77,255,0.03), transparent 30%, transparent 70%, rgba(0,200,255,0.03));
+  position: relative;
+}
+.header::before, .header::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-color: var(--accent-cyan);
+  border-style: solid;
+  opacity: 0.4;
+}
+.header::before { top: 8px; left: 12px; border-width: 2px 0 0 2px; }
+.header::after  { top: 8px; right: 12px; border-width: 2px 2px 0 0; }
+.header-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 8px rgba(0,224,255,0.6), 0 0 24px rgba(0,224,255,0.2), 0 1px 2px rgba(0,0,0,0.6);
+}
+.header-title span { color: var(--text-secondary); font-weight: 500; opacity: 0.75; margin-left: 14px; font-size: 13px; letter-spacing: 2px; }
+.header-right { text-align: right; }
+.header-status {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--accent-green);
+  text-shadow: 0 0 8px rgba(0,255,136,0.4);
+  margin-bottom: 4px;
+  animation: statusPulse 3s ease-in-out infinite;
+}
+@keyframes statusPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.header-clock {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 6px rgba(0,224,255,0.5), 0 1px 2px rgba(0,0,0,0.5);
+  letter-spacing: 3px;
+}
+.header-date { font-size: 12px; color: var(--text-secondary); text-align: right; margin-top: 2px; font-family: var(--font-body); }
+
+/* ── Layout ── */
+.dashboard { padding: 20px 28px 12px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── KPI Cards Row ── */
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.kpi-card {
+  background:
+    linear-gradient(135deg, rgba(0,120,255,0.05) 0%, transparent 50%, rgba(124,77,255,0.03) 100%),
+    var(--bg-card);
+  border: 1px solid var(--border-mech);
+  border-radius: 4px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+.kpi-card:hover {
+  border-color: rgba(0,224,255,0.45);
+  box-shadow: 0 0 28px rgba(0,224,255,0.1), inset 0 0 30px rgba(0,120,255,0.03);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-purple), transparent);
+  opacity: 0.6;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.03), transparent);
+  animation: cardSweep 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes cardSweep { 0% { left: -100%; } 40% { left: 100%; } 100% { left: 100%; } }
+.kpi-card .corner-tl, .kpi-card .corner-tr, .kpi-card .corner-bl, .kpi-card .corner-br {
+  position: absolute;
+  width: 16px; height: 16px;
+  pointer-events: none;
+  opacity: 0.45;
+}
+.kpi-card .corner-tl { top: 3px; left: 3px; border-top: 2px solid var(--accent-cyan); border-left: 2px solid var(--accent-cyan); }
+.kpi-card .corner-tr { top: 3px; right: 3px; border-top: 2px solid var(--accent-purple); border-right: 2px solid var(--accent-purple); }
+.kpi-card .corner-bl { bottom: 3px; left: 3px; border-bottom: 2px solid var(--accent-purple); border-left: 2px solid var(--accent-purple); }
+.kpi-card .corner-br { bottom: 3px; right: 3px; border-bottom: 2px solid var(--accent-cyan); border-right: 2px solid var(--accent-cyan); }
+.kpi-label { font-size: 13px; color: var(--text-secondary); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; position: relative; z-index: 1; font-weight: 500; }
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+.kpi-value.cyan { color: var(--accent-cyan); text-shadow: 0 0 8px rgba(0,224,255,0.5), 0 0 20px rgba(0,224,255,0.15); }
+.kpi-value.green { color: var(--accent-green); text-shadow: 0 0 8px rgba(0,255,136,0.45), 0 0 20px rgba(0,255,136,0.12); }
+.kpi-value.orange { color: var(--accent-orange); text-shadow: 0 0 8px rgba(255,107,53,0.45), 0 0 20px rgba(255,107,53,0.12); }
+.kpi-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; margin-top: 8px; padding: 3px 8px; border-radius: 3px; position: relative; z-index: 1; }
+.kpi-trend.up { color: var(--accent-green); background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.1); }
+.kpi-trend.down { color: var(--accent-red); background: rgba(255,51,85,0.08); border: 1px solid rgba(255,51,85,0.1); }
+.kpi-sub { font-size: 12px; color: var(--text-secondary); margin-top: 6px; position: relative; z-index: 1; }
+
+/* ── Charts Row ── */
+.charts-row { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+.panel {
+  background:
+    linear-gradient(160deg, rgba(0,100,255,0.04) 0%, transparent 40%, rgba(124,77,255,0.02) 100%),
+    var(--bg-card);
+  border: 1px solid var(--border-mech);
+  border-radius: 4px;
+  padding: 20px 22px;
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  position: relative;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(0,160,255,0.06);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 20px; right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-purple), transparent);
+  opacity: 0.4;
+}
+.chart-container { position: relative; width: 100%; height: 320px; overflow: hidden; }
+.chart-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,224,255,0.2), rgba(124,77,255,0.15), transparent);
+  box-shadow: 0 0 12px rgba(0,180,255,0.15), 0 0 30px rgba(0,180,255,0.06);
+  pointer-events: none;
+}
+.panel-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 0 0 6px rgba(0,224,255,0.35), 0 1px 2px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 1;
+}
+.panel-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0,224,255,0.5);
+}
+.panel-title::after {
+  content: attr(data-module);
+  color: var(--accent-purple);
+  opacity: 0.45;
+  font-size: 10px;
+  margin-left: auto;
+  font-family: var(--font-display);
+  letter-spacing: 1px;
+  border: 1px solid rgba(124,77,255,0.2);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* ── Table ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(0,240,255,0.12);
+}
+.data-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.data-table tbody tr { transition: background 0.2s; }
+.data-table tbody tr:hover { background: rgba(0,240,255,0.04); }
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+}
+.rank-1 { background: rgba(255,215,0,0.15); color: #ffd700; }
+.rank-2 { background: rgba(192,192,192,0.12); color: #c0c0c0; }
+.rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; }
+.rank-other { background: rgba(0,140,255,0.06); color: var(--text-secondary); }
+.bar-cell { display: flex; align-items: center; gap: 8px; }
+.bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+.satisfaction-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.sat-high { background: rgba(0,255,136,0.1); color: var(--accent-green); }
+.sat-mid { background: rgba(255,200,0,0.1); color: #ffc800; }
+.sat-low { background: rgba(255,51,85,0.1); color: var(--accent-red); }
+
+/* ── Dual Marquee ── */
+.marquee-group { display: flex; flex-direction: column; gap: 14px; }
+.marquee-bar {
+  border-radius: 3px;
+  padding: 0 20px;
+  overflow: hidden;
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+.marquee-bar.good {
+  background:
+    linear-gradient(90deg, rgba(0,255,136,0.04), rgba(180,255,50,0.05), rgba(0,255,136,0.04)),
+    rgba(8,14,32,0.8);
+  border: 1px solid rgba(0,255,136,0.15);
+  box-shadow: inset 0 0 30px rgba(0,255,136,0.02);
+}
+.marquee-bar.bad {
+  background:
+    linear-gradient(90deg, rgba(255,51,85,0.04), rgba(255,80,120,0.05), rgba(255,51,85,0.04)),
+    rgba(8,14,32,0.8);
+  border: 1px solid rgba(255,51,85,0.15);
+  box-shadow: inset 0 0 30px rgba(255,51,85,0.02);
+}
+.marquee-badge {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.marquee-bar.good .marquee-badge {
+  color: #00ff88;
+  background: rgba(0,255,136,0.12);
+  border: 1px solid rgba(0,255,136,0.3);
+  outline: 1px solid rgba(0,255,136,0.08);
+  outline-offset: 2px;
+  text-shadow: 0 0 8px rgba(0,255,136,0.5);
+  box-shadow: 0 0 16px rgba(0,255,136,0.12);
+}
+.marquee-bar.bad .marquee-badge {
+  color: #ff5078;
+  background: rgba(255,80,120,0.12);
+  border: 1px solid rgba(255,80,120,0.3);
+  outline: 1px solid rgba(255,80,120,0.08);
+  outline-offset: 2px;
+  text-shadow: 0 0 8px rgba(255,80,120,0.5);
+  box-shadow: 0 0 16px rgba(255,80,120,0.12);
+  animation: alertPulse 2.5s ease-in-out infinite;
+}
+@keyframes alertPulse { 0%,100% { box-shadow: 0 0 16px rgba(255,80,120,0.12); } 50% { box-shadow: 0 0 26px rgba(255,80,120,0.28); } }
+.marquee-track {
+  display: flex;
+  padding-left: 150px;
+}
+.marquee-bar.good .marquee-track { animation: marquee 50s linear infinite; }
+.marquee-bar.bad .marquee-track  { animation: marquee 42s linear infinite; }
+.marquee-item {
+  white-space: nowrap;
+  padding: 0 44px;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  font-weight: 400;
+}
+.marquee-item .m-time { font-family: var(--font-display); font-size: 12px; margin-right: 10px; }
+.marquee-bar.good .m-time { color: #80ffb4; text-shadow: 0 0 4px rgba(0,255,136,0.3); font-weight: 700; }
+.marquee-bar.good .m-text { color: #c0ffd8; font-weight: 500; }
+.marquee-bar.bad .m-time  { color: #ff9a80; text-shadow: 0 0 4px rgba(255,107,53,0.3); font-weight: 700; }
+.marquee-bar.bad .m-text.critical { color: #ff6088; text-shadow: 0 0 3px rgba(255,80,120,0.2); font-weight: 500; }
+.marquee-bar.bad .m-text.warning  { color: #ff9a80; font-weight: 500; }
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── App Layout ── */
+.app-layout { display: flex; min-height: 100vh; }
+.app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; min-width: 240px;
+  background: linear-gradient(180deg, rgba(0,80,200,0.06) 0%, transparent 40%, rgba(124,77,255,0.04) 100%), rgba(6,10,20,0.97);
+  border-right: 1px solid var(--border-mech);
+  display: flex; flex-direction: column;
+  position: relative; z-index: 100;
+  backdrop-filter: blur(20px);
+}
+.sidebar::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px;
+  background: linear-gradient(180deg, var(--accent-cyan), transparent 30%, transparent 70%, var(--accent-purple));
+  opacity: 0.25; pointer-events: none;
+}
+.sidebar-brand { padding: 20px 20px 16px; border-bottom: 1px solid rgba(0,160,255,0.10); text-align: center; }
+.sidebar-brand-text { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--accent-cyan); text-shadow: 0 0 6px rgba(0,224,255,0.4); }
+.sidebar-brand-sub { font-size: 10px; color: var(--text-secondary); margin-top: 4px; letter-spacing: 1px; font-family: var(--font-display); opacity: 0.5; }
+.sidebar-nav { flex: 1; padding: 12px 0; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 13px 18px;
+  cursor: pointer; position: relative;
+  transition: background 0.25s, color 0.25s, transform 0.25s, box-shadow 0.25s;
+  color: var(--text-secondary); font-size: 13px; font-weight: 500; letter-spacing: 0.3px;
+  border-left: 3px solid transparent; border-radius: 0 4px 4px 0; margin-right: 8px;
+}
+.nav-item:hover {
+  background: rgba(0,160,255,0.07);
+  color: var(--text-primary);
+  transform: translateX(4px);
+  box-shadow: 0 0 16px rgba(0,224,255,0.06);
+  border-left-color: rgba(0,224,255,0.3);
+}
+.nav-item.active {
+  color: var(--accent-cyan);
+  background: rgba(0,160,255,0.10);
+  border-left-color: var(--accent-cyan);
+  text-shadow: 0 0 6px rgba(0,224,255,0.3);
+  box-shadow: 0 0 20px rgba(0,224,255,0.08);
+}
+.nav-item.active .nav-glow {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0,224,255,0.6), 0 0 24px rgba(0,224,255,0.2);
+}
+.nav-idx {
+  font-family: var(--font-display); font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; color: var(--accent-purple); opacity: 0.45; min-width: 22px;
+}
+.nav-item.active .nav-idx { color: var(--accent-cyan); opacity: 0.8; }
+.sidebar-footer {
+  padding: 16px 20px; border-top: 1px solid rgba(0,160,255,0.08);
+  font-family: var(--font-display); font-size: 8px; letter-spacing: 2px;
+  color: var(--text-secondary); opacity: 0.3; text-align: center;
+}
+
+/* ── Page sections ── */
+.page { display: none; flex: 1; flex-direction: column; }
+.page.active { display: flex; }
+.page-placeholder {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px; padding: 60px 40px;
+}
+.page-placeholder-icon { font-family: var(--font-display); font-size: 52px; color: var(--accent-cyan); opacity: 0.10; }
+.page-placeholder-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: 3px; color: var(--accent-cyan); opacity: 0.30; }
+.page-placeholder-sub { font-size: 13px; color: var(--text-secondary); opacity: 0.45; max-width: 500px; text-align: center; line-height: 1.8; }
+
+/* ── Enhanced Hover (panels, kpi) ── */
+.panel { transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+.panel:hover {
+  border-color: rgba(0,224,255,0.35);
+  box-shadow: 0 4px 24px rgba(0,224,255,0.08), 0 0 1px rgba(0,224,255,0.3);
+  transform: translateY(-2px);
+}
+.kpi-card { transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+.kpi-card:hover { transform: translateY(-3px); }
+.marquee-bar { transition: border-color 0.3s, box-shadow 0.3s; }
+.marquee-bar:hover { border-color: rgba(0,224,255,0.25); box-shadow: 0 0 18px rgba(0,224,255,0.06); }
+
+/* ── Responsive ── */
+@media (max-width: 1400px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1000px) { .charts-row { grid-template-columns: 1fr; } .sidebar { width: 200px; min-width: 200px; } }
+@media (max-width: 768px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .header { flex-direction: column; gap: 8px; text-align: center; } .sidebar { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-text">CS CMD</div>
+    <div class="sidebar-brand-sub">v1.0</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-page="page-overview"><span class="nav-glow"></span><span class="nav-idx">01</span>總覽指揮台</div>
+    <div class="nav-item" data-page="page-members"><span class="nav-glow"></span><span class="nav-idx">02</span>組員檔案總表</div>
+    <div class="nav-item" data-page="page-attendance"><span class="nav-glow"></span><span class="nav-idx">03</span>出勤與排班記錄</div>
+    <div class="nav-item" data-page="page-performance"><span class="nav-glow"></span><span class="nav-idx">04</span>績效與質檢分析</div>
+    <div class="nav-item" data-page="page-daily"><span class="nav-glow"></span><span class="nav-idx">05</span>組員需求與日報追蹤</div>
+    <div class="nav-item" data-page="page-products"><span class="nav-glow"></span><span class="nav-idx">06</span>產品連結與版本更新</div>
+  </nav>
+  <div class="sidebar-footer">CYBER MECH SYSTEM</div>
+</aside>
+
+<!-- ── Main Content ── -->
+<div class="app-main">
+
+<!-- Page 1: 總覽指揮台 -->
+<div class="page active" id="page-overview">
+
+<!-- ── Header ── -->
+<header class="header">
+  <div>
+    <div class="header-title">客服指揮中心<span>CUSTOMER SERVICE COMMAND CENTER</span></div>
+  </div>
+  <div class="header-right">
+    <div class="header-status">● SYSTEM ONLINE</div>
+    <div class="header-clock" id="clock">--:--:--</div>
+    <div class="header-date" id="date-display">----/--/--</div>
+  </div>
+</header>
+
+<!-- ── Dashboard ── -->
+<div class="dashboard">
+
+  <!-- KPI Cards -->
+  <section class="kpi-row">
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">出缺勤</div>
+      <div class="kpi-value cyan">28 / 30</div>
+      <div class="kpi-sub">出勤率 93.3%</div>
+    </div>
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">退費投訴數量</div>
+      <div class="kpi-value orange">47</div>
+      <div class="kpi-trend down">▲ 8 件 vs 昨日</div>
+    </div>
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">退費投訴金額</div>
+      <div class="kpi-value orange">¥38,520</div>
+      <div class="kpi-trend down">▲ 12.5% vs 昨日</div>
+    </div>
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">質檢錯誤率</div>
+      <div class="kpi-value green">3.2%</div>
+      <div class="kpi-trend up">▼ 0.5% vs 上週</div>
+      <div class="kpi-sub">目標 ≤ 5%</div>
+    </div>
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">總回覆量</div>
+      <div class="kpi-value cyan">1,284</div>
+      <div class="kpi-trend up">▲ 6.7% vs 昨日</div>
+    </div>
+    <div class="kpi-card">
+      <span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>
+      <div class="kpi-label">產品App異常提報</div>
+      <div class="kpi-value" style="color:var(--accent-red);text-shadow:0 0 18px rgba(255,51,85,0.3)">12</div>
+      <div class="kpi-trend down">▲ 3 件 vs 昨日</div>
+    </div>
+  </section>
+
+  <!-- Charts Row 1: Trend + Channel -->
+  <section class="charts-row">
+    <div class="panel">
+      <div class="panel-title" data-module="SYS-01">每日進線量 vs 實際回覆單量（近 14 天）</div>
+      <div class="chart-container"><canvas id="chart-trend"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title" data-module="SYS-02">各班別回覆量</div>
+      <div class="chart-container"><canvas id="chart-channel"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Charts Row 2: Agent Table + Category Bar -->
+  <section class="charts-row">
+    <div class="panel">
+      <div class="panel-title" data-module="SYS-03">周回覆量統計（近 6 週）</div>
+      <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title" data-module="SYS-04">營運數據總覽</div>
+      <div class="chart-container"><canvas id="chart-category"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Dual Marquee -->
+  <section class="marquee-group">
+    <div class="marquee-bar good"><span class="marquee-badge">MK-01 ✦ GOOD</span><div class="marquee-track" id="marquee-good"></div></div>
+    <div class="marquee-bar bad"><span class="marquee-badge">MK-02 ⚠ ALERT</span><div class="marquee-track" id="marquee-bad"></div></div>
+  </section>
+</div>
+</div><!-- /page-overview -->
+
+<!-- Page 2: 組員檔案總表 -->
+<div class="page" id="page-members">
+  <header class="header"><div><div class="header-title">組員檔案總表<span>MEMBER PROFILE DATABASE</span></div></div><div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-2">--:--:--</div></div></header>
+  <div class="page-placeholder">
+    <div class="page-placeholder-icon">02</div>
+    <div class="page-placeholder-title">MEMBER PROFILES</div>
+    <div class="page-placeholder-sub">組員姓名、崗位、班別、在職狀態、AI 使用狀態<br>模組建置中，敬請期待</div>
+  </div>
+</div>
+
+<!-- Page 3: 出勤與排班記錄 -->
+<div class="page" id="page-attendance">
+  <header class="header"><div><div class="header-title">出勤與排班記錄<span>ATTENDANCE & SCHEDULING</span></div></div><div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-3">--:--:--</div></div></header>
+  <div class="page-placeholder">
+    <div class="page-placeholder-icon">03</div>
+    <div class="page-placeholder-title">ATTENDANCE LOG</div>
+    <div class="page-placeholder-sub">出勤率、請假、遲到、班別分布、排班總覽<br>模組建置中，敬請期待</div>
+  </div>
+</div>
+
+<!-- Page 4: 績效與質檢分析 -->
+<div class="page" id="page-performance">
+  <header class="header"><div><div class="header-title">績效與質檢分析<span>PERFORMANCE & QC ANALYSIS</span></div></div><div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-4">--:--:--</div></div></header>
+  <div class="page-placeholder">
+    <div class="page-placeholder-icon">04</div>
+    <div class="page-placeholder-title">PERFORMANCE QC</div>
+    <div class="page-placeholder-sub">回覆量、質檢錯誤率、投訴量、退費相關分析<br>模組建置中，敬請期待</div>
+  </div>
+</div>
+
+<!-- Page 5: 組員需求與日報追蹤 -->
+<div class="page" id="page-daily">
+  <header class="header"><div><div class="header-title">組員需求與日報追蹤<span>DAILY REPORT & REQUEST</span></div></div><div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-5">--:--:--</div></div></header>
+  <div class="page-placeholder">
+    <div class="page-placeholder-icon">05</div>
+    <div class="page-placeholder-title">DAILY TRACKER</div>
+    <div class="page-placeholder-sub">需求狀態、日報提交狀態、異常追蹤<br>模組建置中，敬請期待</div>
+  </div>
+</div>
+
+<!-- Page 6: 產品連結與版本更新 -->
+<div class="page" id="page-products">
+  <header class="header"><div><div class="header-title">產品連結與版本更新<span>PRODUCT LINKS & VERSIONS</span></div></div><div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-6">--:--:--</div></div></header>
+  <div class="page-placeholder">
+    <div class="page-placeholder-icon">06</div>
+    <div class="page-placeholder-title">PRODUCT HUB</div>
+    <div class="page-placeholder-sub">產品名稱、最新連結、更新時間、版本備註<br>模組建置中，敬請期待</div>
+  </div>
+</div>
+
+</div><!-- /app-main -->
+</div><!-- /app-layout -->
+
+<script>
+// ── Page Navigation ──
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = btn.getAttribute('data-page');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+// ── Clock (syncs all clock elements) ──
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('zh-TW', { hour12: false });
+  const date = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'long' });
+  document.querySelectorAll('[id^="clock"]').forEach(el => el.textContent = time);
+  const dd = document.getElementById('date-display');
+  if (dd) dd.textContent = date;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Fake Data ──
+const DAYS_14 = ['03/18','03/19','03/20','03/21','03/22','03/23','03/24','03/25','03/26','03/27','03/28','03/29','03/30','03/31'];
+const DAILY_INCOMING  = [310, 285, 340, 298, 325, 150, 120, 335, 348, 290, 315, 360, 142, 328];
+const DAILY_REPLIED   = [295, 270, 322, 280, 310, 140, 112, 318, 330, 275, 300, 345, 135, 312];
+
+const SHIFT_DATA = {
+  labels: ['早班 (08-16)', '中班 (16-00)', '晚班 (00-08)'],
+  values: [520, 485, 279],
+  colors: ['#00e0ff', '#0060ee', '#7c4dff']
+};
+
+const WEEKLY_DATA = {
+  labels: ['W09 (2/24)', 'W10 (3/3)', 'W11 (3/10)', 'W12 (3/17)', 'W13 (3/24)', 'W14 (3/31)'],
+  values: [1820, 1945, 2010, 1878, 2105, 1284]
+};
+
+const OPS_DATA = {
+  labels: ['提交查詢處理單量', '產品總數量', '交接數量', '周回覆量'],
+  values: [186, 1520, 42, 2105]
+};
+
+const GOOD_NEWS = [
+  { time: '14:45', text: '今日總回覆量達 1,284 件，較昨日同時段提升 6.7%' },
+  { time: '14:20', text: '早班回覆量 520 件，達成率 104%，超額完成目標' },
+  { time: '13:50', text: '質檢錯誤率降至 3.2%，連續 3 日低於 5% 目標線' },
+  { time: '13:15', text: '今日出勤率 93.3%，人力配置穩定' },
+  { time: '12:40', text: '周回覆量已達 2,105 件，預估本週可超越上週表現' },
+  { time: '12:10', text: '退費投訴處理完結率達 89%，較上週提升 5%' },
+];
+const BAD_NEWS = [
+  { time: '14:32', level: 'critical', text: '退費投訴金額今日已達 ¥38,520，超過日均 ¥30,000 閾值' },
+  { time: '14:10', level: 'warning', text: '質檢錯誤率近 2 小時上升至 4.8%，接近 5% 警戒線' },
+  { time: '13:45', level: 'critical', text: '產品 App 異常提報新增 3 件，近 1 小時集中在支付模組' },
+  { time: '13:20', level: 'warning', text: '中班人員出勤率僅 85%，低於排班需求' },
+  { time: '12:55', level: 'warning', text: '提交查詢處理單量積壓達 186 件，較昨日同時段多 32%' },
+  { time: '12:30', level: 'warning', text: '交接數量已達 42 件，請確認跨班交接完成度' },
+];
+
+// ── Chart Defaults ──
+Chart.defaults.color = '#8a9cba';
+Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+Chart.defaults.font.size = 13;
+Chart.defaults.font.weight = 500;
+
+// ── Bar 3D plugin (mech-style with side/top/edge/glow + hover lift) ──
+const D3 = 10;
+Chart.register({
+  id: 'bar3D',
+  afterDatasetsDraw(chart) {
+    if (chart.config.type !== 'bar') return;
+    const { ctx } = chart;
+    const isH = chart.options.indexAxis === 'y';
+    const activeEls = chart.getActiveElements();
+    const hoverIdx = activeEls.length ? activeEls[0].index : -1;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if (meta.hidden) return;
+      meta.data.forEach((bar, bi) => {
+        const hot = bi === hoverIdx;
+        const lift = hot ? 3 : 0;
+        ctx.save();
+        if (!isH) {
+          const x0 = bar.x - bar.width / 2, y0 = bar.y - lift;
+          const w = bar.width, h = bar.base - bar.y;
+          // bottom glow ellipse
+          ctx.save();
+          ctx.shadowColor = hot ? 'rgba(0,224,255,0.5)' : 'rgba(0,180,255,0.22)';
+          ctx.shadowBlur = hot ? 26 : 14;
+          ctx.shadowOffsetY = hot ? 8 : 4;
+          ctx.beginPath();
+          ctx.ellipse(x0 + w / 2, y0 + h + lift, w * 0.55, 3, 0, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,0,0,0)';
+          ctx.fill();
+          ctx.restore();
+          // right side face
+          const rg = ctx.createLinearGradient(x0 + w, 0, x0 + w + D3, 0);
+          rg.addColorStop(0, 'rgba(0,50,140,0.38)');
+          rg.addColorStop(1, 'rgba(0,15,50,0.50)');
+          ctx.beginPath();
+          ctx.moveTo(x0 + w, y0);
+          ctx.lineTo(x0 + w + D3, y0 - D3);
+          ctx.lineTo(x0 + w + D3, y0 + h - D3);
+          ctx.lineTo(x0 + w, y0 + h);
+          ctx.closePath();
+          ctx.fillStyle = rg;
+          ctx.fill();
+          // top face
+          const tg = ctx.createLinearGradient(0, y0, 0, y0 - D3);
+          tg.addColorStop(0, 'rgba(140,210,255,0.16)');
+          tg.addColorStop(1, hot ? 'rgba(210,245,255,0.38)' : 'rgba(200,240,255,0.24)');
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x0 + D3, y0 - D3);
+          ctx.lineTo(x0 + w + D3, y0 - D3);
+          ctx.lineTo(x0 + w, y0);
+          ctx.closePath();
+          ctx.fillStyle = tg;
+          ctx.fill();
+          // left edge highlight
+          ctx.beginPath();
+          ctx.moveTo(x0, y0); ctx.lineTo(x0, y0 + h);
+          ctx.strokeStyle = hot ? 'rgba(0,224,255,0.55)' : 'rgba(0,224,255,0.18)';
+          ctx.lineWidth = 1; ctx.stroke();
+          // top front edge
+          ctx.beginPath();
+          ctx.moveTo(x0, y0); ctx.lineTo(x0 + w, y0);
+          ctx.strokeStyle = hot ? 'rgba(0,224,255,0.50)' : 'rgba(0,224,255,0.14)';
+          ctx.lineWidth = 1; ctx.stroke();
+          // top-left diagonal
+          ctx.beginPath();
+          ctx.moveTo(x0, y0); ctx.lineTo(x0 + D3, y0 - D3);
+          ctx.strokeStyle = 'rgba(180,230,255,0.16)';
+          ctx.lineWidth = 1; ctx.stroke();
+        } else {
+          const x0 = bar.base, y0 = bar.y - bar.height / 2;
+          const w = bar.x - bar.base, h = bar.height;
+          // bottom glow
+          ctx.save();
+          ctx.shadowColor = hot ? 'rgba(0,224,255,0.45)' : 'rgba(0,180,255,0.18)';
+          ctx.shadowBlur = hot ? 22 : 10;
+          ctx.shadowOffsetY = hot ? 5 : 3;
+          ctx.beginPath(); ctx.rect(x0, y0 + h, w, 1);
+          ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fill();
+          ctx.restore();
+          // top face
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x0 + D3, y0 - D3);
+          ctx.lineTo(x0 + w + D3, y0 - D3);
+          ctx.lineTo(x0 + w, y0);
+          ctx.closePath();
+          ctx.fillStyle = hot ? 'rgba(180,230,255,0.28)' : 'rgba(180,220,255,0.14)';
+          ctx.fill();
+          // right face
+          ctx.beginPath();
+          ctx.moveTo(x0 + w, y0);
+          ctx.lineTo(x0 + w + D3, y0 - D3);
+          ctx.lineTo(x0 + w + D3, y0 + h - D3);
+          ctx.lineTo(x0 + w, y0 + h);
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(0,50,140,0.35)';
+          ctx.fill();
+          // top edge
+          ctx.beginPath();
+          ctx.moveTo(x0, y0); ctx.lineTo(x0 + w, y0);
+          ctx.strokeStyle = hot ? 'rgba(0,224,255,0.45)' : 'rgba(0,224,255,0.14)';
+          ctx.lineWidth = 1; ctx.stroke();
+          // right edge
+          ctx.beginPath();
+          ctx.moveTo(x0 + w, y0); ctx.lineTo(x0 + w, y0 + h);
+          ctx.strokeStyle = 'rgba(0,224,255,0.10)';
+          ctx.lineWidth = 1; ctx.stroke();
+        }
+        ctx.restore();
+      });
+    });
+  }
+});
+
+// ── Trend Chart: Daily Incoming vs Replied (fixed 14-point window) ──
+const trendChart = new Chart(document.getElementById('chart-trend'), {
+  type: 'line',
+  data: {
+    labels: DAYS_14,
+    datasets: [
+      {
+        label: '每日進線量',
+        data: [...DAILY_INCOMING],
+        borderColor: '#00e0ff',
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+          g.addColorStop(0, 'rgba(0,224,255,0.18)');
+          g.addColorStop(0.6, 'rgba(0,224,255,0.03)');
+          g.addColorStop(1, 'transparent');
+          return g;
+        },
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#00e0ff',
+      },
+      {
+        label: '實際回覆單量',
+        data: [...DAILY_REPLIED],
+        borderColor: '#7c4dff',
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+          g.addColorStop(0, 'rgba(124,77,255,0.10)');
+          g.addColorStop(1, 'transparent');
+          return g;
+        },
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        borderDash: [6, 3],
+        pointRadius: 3,
+        pointBackgroundColor: '#7c4dff',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { padding: 20, usePointStyle: true, pointStyle: 'circle' } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(0,140,255,0.06)' } },
+      y: { grid: { color: 'rgba(0,140,255,0.06)' }, beginAtZero: true, suggestedMax: 400 }
+    },
+    interaction: { intersect: false, mode: 'index' }
+  }
+});
+// Gentle live update on today's data point only (index 13)
+setInterval(() => {
+  const d0 = trendChart.data.datasets[0].data;
+  const d1 = trendChart.data.datasets[1].data;
+  d0[13] = Math.max(1, Math.round(DAILY_INCOMING[13] + (Math.random() - 0.5) * 30));
+  d1[13] = Math.max(1, Math.round(DAILY_REPLIED[13] + (Math.random() - 0.5) * 25));
+  trendChart.update('none');
+}, 5000);
+
+// ── Doughnut center HUD plugin (strict center via chartArea) ──
+const doughnutCenter = {
+  id: 'doughnutCenter',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut') return;
+    const { ctx, chartArea } = chart;
+    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+    // strict center from chartArea
+    const cx = (chartArea.left + chartArea.right) / 2;
+    const cy = (chartArea.top + chartArea.bottom) / 2;
+    const r = Math.min(chartArea.width, chartArea.height) / 2;
+    // hover detection — scale up if any element active
+    const hot = chart.getActiveElements().length > 0;
+    const scale = hot ? 1.03 : 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    // outer decorative ring
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2);
+    ctx.strokeStyle = hot ? 'rgba(0,224,255,0.25)' : 'rgba(0,224,255,0.10)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // inner decorative ring
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(124,77,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // total number
+    ctx.font = "900 32px 'Orbitron'";
+    ctx.fillStyle = '#00e0ff';
+    ctx.shadowColor = 'rgba(0,224,255,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(total.toLocaleString(), 0, -8);
+    // TOTAL label
+    ctx.shadowBlur = 0;
+    ctx.font = "700 12px 'Orbitron'";
+    ctx.fillStyle = '#8a9cba';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('TOTAL', 0, 18);
+    ctx.restore();
+  }
+};
+Chart.register(doughnutCenter);
+
+// ── Shift Doughnut: 各班別回覆量 ──
+new Chart(document.getElementById('chart-channel'), {
+  type: 'doughnut',
+  data: {
+    labels: SHIFT_DATA.labels,
+    datasets: [{
+      data: SHIFT_DATA.values,
+      backgroundColor: SHIFT_DATA.colors,
+      borderColor: 'rgba(6,10,20,0.9)',
+      borderWidth: 3,
+      hoverOffset: 14,
+      hoverBorderColor: 'rgba(0,224,255,0.5)',
+      hoverBorderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    animation: { animateRotate: true, animateScale: false },
+    plugins: {
+      legend: { position: 'right', labels: { padding: 18, usePointStyle: true, pointStyle: 'rectRounded', font: { size: 13, weight: 500 } } }
+    }
+  }
+});
+
+// ── Weekly Reply Bar Chart ──
+new Chart(document.getElementById('chart-weekly'), {
+  type: 'bar',
+  data: {
+    labels: WEEKLY_DATA.labels,
+    datasets: [{
+      label: '周回覆量',
+      data: WEEKLY_DATA.values,
+      backgroundColor: (ctx) => {
+        const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.height, 0, 0);
+        g.addColorStop(0, 'rgba(0,60,200,0.40)');
+        g.addColorStop(0.4, 'rgba(0,180,255,0.55)');
+        g.addColorStop(0.8, 'rgba(80,200,255,0.50)');
+        g.addColorStop(1, 'rgba(124,77,255,0.40)');
+        return g;
+      },
+      hoverBackgroundColor: (ctx) => {
+        const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.height, 0, 0);
+        g.addColorStop(0, 'rgba(0,80,220,0.60)');
+        g.addColorStop(0.4, 'rgba(0,200,255,0.75)');
+        g.addColorStop(0.8, 'rgba(100,220,255,0.70)');
+        g.addColorStop(1, 'rgba(140,100,255,0.55)');
+        return g;
+      },
+      borderColor: 'rgba(0,224,255,0.30)',
+      borderWidth: 1,
+      borderRadius: 4,
+      barThickness: 42
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(0,140,255,0.06)' } },
+      y: { grid: { color: 'rgba(0,140,255,0.06)' }, beginAtZero: true }
+    }
+  }
+});
+
+// ── Ops Overview Horizontal Bar ──
+new Chart(document.getElementById('chart-category'), {
+  type: 'bar',
+  data: {
+    labels: OPS_DATA.labels,
+    datasets: [{
+      data: OPS_DATA.values,
+      backgroundColor: ['#ff6b35', '#00e0ff', '#7c4dff', '#00ff88'],
+      borderColor: ['rgba(255,107,53,0.35)','rgba(0,224,255,0.35)','rgba(124,77,255,0.35)','rgba(0,255,136,0.35)'],
+      borderWidth: 1,
+      borderRadius: 3,
+      barThickness: 28
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(0,140,255,0.06)' }, beginAtZero: true },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Dual Marquee ──
+const goodTrack = document.getElementById('marquee-good');
+const badTrack  = document.getElementById('marquee-bad');
+const goodHTML = GOOD_NEWS.map(g =>
+  `<div class="marquee-item"><span class="m-time">${g.time}</span><span class="m-text">${g.text}</span></div>`
+).join('');
+const badHTML = BAD_NEWS.map(b =>
+  `<div class="marquee-item"><span class="m-time">${b.time}</span><span class="m-text ${b.level}">${b.text}</span></div>`
+).join('');
+goodTrack.innerHTML = goodHTML + goodHTML;
+badTrack.innerHTML  = badHTML + badHTML;
+</script>
+</body>
+</html>
