@@ -205,11 +205,127 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
   text-shadow:0 0 3px rgba(0,240,255,0.3);
   text-transform:uppercase;
 }
-.header-right { text-align:right; }
-.header-status { font-family:var(--font-display); font-size:13px; letter-spacing:2px; color:var(--accent-green); text-shadow:0 0 4px rgba(0,255,136,0.6); margin-bottom:3px; animation:statusPulse 3s ease-in-out infinite; }
-@keyframes statusPulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
-.header-clock { font-family:var(--font-display); font-size:28px; font-weight:700; color:var(--accent-cyan); text-shadow:0 0 4px rgba(0,240,255,0.6); letter-spacing:3px; }
-.header-date { font-size:14px; color:var(--text-secondary); font-weight:500; text-align:right; margin-top:2px; }
+/* ── Header Right — Cyber Command Panel ── */
+.header-right {
+  position:relative; display:flex; align-items:center; gap:18px;
+  padding:8px 22px 8px 28px;
+  background:
+    linear-gradient(135deg, rgba(0,60,140,0.18) 0%, rgba(0,30,80,0.12) 40%, rgba(6,12,28,0.95) 100%),
+    linear-gradient(180deg, rgba(0,180,255,0.06) 0%, transparent 60%);
+  border:1px solid rgba(0,195,255,0.25);
+  border-radius:6px;
+  box-shadow:
+    0 0 18px rgba(0,180,255,0.08),
+    0 0 40px rgba(0,120,255,0.04),
+    inset 0 1px 0 rgba(0,240,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.3),
+    inset 2px 0 12px rgba(0,100,200,0.05);
+  overflow:hidden;
+}
+/* 顶部高光边 */
+.header-right::before {
+  content:''; position:absolute; top:0; left:10%; right:10%; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,240,255,0.6), rgba(148,102,255,0.3), transparent);
+  box-shadow:0 0 8px rgba(0,240,255,0.3);
+}
+/* 底部流光扫描 */
+.header-right::after {
+  content:''; position:absolute; bottom:0; left:0; width:60%; height:1px;
+  background:linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+  opacity:0.5;
+  animation:hrSweep 4s ease-in-out infinite;
+}
+@keyframes hrSweep { 0%{left:-60%} 100%{left:100%} }
+
+/* 状态指示灯区 */
+.header-status-group {
+  display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+  padding-right:16px; border-right:1px solid rgba(0,195,255,0.15);
+  position:relative;
+}
+.header-status {
+  font-family:var(--font-display); font-size:14px; font-weight:700;
+  letter-spacing:2.5px; color:var(--accent-green);
+  text-shadow:0 0 6px rgba(0,255,136,0.7), 0 0 14px rgba(0,255,136,0.2);
+  display:flex; align-items:center; gap:8px;
+  animation:statusPulse 3s ease-in-out infinite;
+}
+@keyframes statusPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.header-status-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--accent-green);
+  box-shadow:0 0 6px rgba(0,255,136,0.8), 0 0 14px rgba(0,255,136,0.3);
+  animation:dotBlink 2s ease-in-out infinite;
+}
+@keyframes dotBlink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.header-status-label {
+  font-family:var(--font-display); font-size:10px; letter-spacing:1.5px;
+  color:var(--text-dim); opacity:0.7;
+}
+
+/* 时钟主区 */
+.header-clock-group {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  position:relative;
+}
+.header-clock-label {
+  font-family:var(--font-display); font-size:9px; letter-spacing:3px;
+  color:rgba(0,240,255,0.45); text-transform:uppercase;
+}
+.header-clock {
+  font-family:var(--font-display); font-size:40px; font-weight:900;
+  color:var(--accent-cyan); letter-spacing:5px; line-height:1;
+  text-shadow:
+    0 0 8px rgba(0,240,255,0.7),
+    0 0 20px rgba(0,240,255,0.25),
+    0 0 40px rgba(0,200,255,0.08),
+    0 2px 4px rgba(0,0,0,0.5);
+  position:relative;
+}
+/* 时钟金属反光 */
+.header-clock::after {
+  content:attr(data-time);
+  position:absolute; top:0; left:0; right:0;
+  background:linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  pointer-events:none;
+}
+
+/* 日期区 */
+.header-date-group {
+  display:flex; flex-direction:column; align-items:flex-end; gap:3px;
+  padding-left:16px; border-left:1px solid rgba(0,195,255,0.15);
+}
+.header-date {
+  font-family:var(--font-display); font-size:16px; font-weight:700;
+  color:var(--text-primary); letter-spacing:2px;
+  text-shadow:0 0 3px rgba(0,240,255,0.3), 0 1px 2px rgba(0,0,0,0.4);
+}
+.header-weekday {
+  font-family:var(--font-display); font-size:11px; letter-spacing:2px;
+  color:var(--accent-purple); opacity:0.8;
+  text-shadow:0 0 4px rgba(148,102,255,0.4);
+}
+.header-uptime {
+  font-family:var(--font-display); font-size:9px; letter-spacing:1.5px;
+  color:var(--text-dim); opacity:0.6;
+}
+
+/* 右侧装饰竖线 */
+.hr-deco-line {
+  position:absolute; right:6px; top:15%; bottom:15%; width:2px;
+  background:linear-gradient(180deg, transparent, var(--accent-cyan), var(--accent-purple), transparent);
+  opacity:0.3; border-radius:1px;
+  box-shadow:0 0 6px rgba(0,240,255,0.2);
+}
+/* 左侧斜切角装饰 */
+.hr-corner-cut {
+  position:absolute; top:0; left:0; width:12px; height:12px;
+  border-left:2px solid rgba(0,240,255,0.35);
+  border-top:2px solid rgba(0,240,255,0.35);
+  border-radius:2px 0 0 0;
+}
 
 /* ══════════════════════════════════════
    Dashboard
@@ -296,6 +412,94 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .kpi-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; position:relative; z-index:1; font-weight:500; line-height:1; }
 
 /* ══════════════════════════════════════
+   Crystal Matrix — 各班别回复量
+   ══════════════════════════════════════ */
+.crystal-scene{position:relative;width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;perspective:800px;overflow:hidden}
+/* 中央核心 */
+.cr-core{position:absolute;z-index:10;text-align:center;animation:crFloat 4s ease-in-out infinite}
+@keyframes crFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.cr-core-num{font-family:var(--font-display);font-size:52px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;-webkit-text-stroke:0.5px rgba(255,255,255,0.15);text-shadow:0 0 16px rgba(0,240,255,0.9),0 0 36px rgba(0,240,255,0.45),0 0 64px rgba(0,200,255,0.18),0 0 96px rgba(0,180,255,0.08),0 2px 3px rgba(0,0,0,0.7),0 0 0 rgba(0,0,0,0.3)}
+.cr-core-label{font-size:13px;font-weight:700;letter-spacing:4px;color:rgba(0,240,255,0.9);font-family:var(--font-display);margin-top:6px;text-shadow:0 0 6px rgba(0,240,255,0.4),0 1px 2px rgba(0,0,0,0.5)}
+/* 核心外环 */
+.cr-ring-outer{position:absolute;width:148px;height:148px;border-radius:50%;border:1.5px solid rgba(0,240,255,0.3);top:50%;left:50%;transform:translate(-50%,-50%);animation:crRingSpin 18s linear infinite,crRingBreath 3.5s ease-in-out infinite;box-shadow:0 0 32px rgba(0,240,255,0.18),0 0 64px rgba(0,240,255,0.08),0 0 96px rgba(0,200,255,0.03),inset 0 0 32px rgba(0,240,255,0.08)}
+.cr-ring-outer::before{content:'';position:absolute;top:-3px;left:50%;width:7px;height:7px;background:#00f0ff;border-radius:50%;box-shadow:0 0 14px #00f0ff,0 0 28px rgba(0,240,255,0.6),0 0 42px rgba(0,240,255,0.2);transform:translateX(-50%)}
+.cr-ring-outer::after{content:'';position:absolute;bottom:-3px;left:50%;width:5px;height:5px;background:#9466ff;border-radius:50%;box-shadow:0 0 10px #9466ff,0 0 22px rgba(148,102,255,0.4);transform:translateX(-50%)}
+@keyframes crRingSpin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes crRingBreath{0%,100%{box-shadow:0 0 32px rgba(0,240,255,0.18),0 0 64px rgba(0,240,255,0.08),0 0 96px rgba(0,200,255,0.03),inset 0 0 32px rgba(0,240,255,0.08)}50%{box-shadow:0 0 48px rgba(0,240,255,0.3),0 0 80px rgba(0,240,255,0.14),0 0 110px rgba(0,200,255,0.06),inset 0 0 40px rgba(0,240,255,0.14)}}
+/* 核心内环 */
+.cr-ring-inner{position:absolute;width:118px;height:118px;border-radius:50%;border:1px dashed rgba(148,102,255,0.2);top:50%;left:50%;transform:translate(-50%,-50%);animation:crRingSpin 12s linear infinite reverse;box-shadow:0 0 18px rgba(148,102,255,0.06),inset 0 0 14px rgba(148,102,255,0.04)}
+.cr-ring-inner::before{content:'';position:absolute;bottom:-3px;left:50%;width:5px;height:5px;background:#9466ff;border-radius:50%;box-shadow:0 0 10px #9466ff,0 0 22px rgba(148,102,255,0.5);transform:translateX(-50%)}
+/* 核心辉光底层 */
+.cr-core-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(0,240,255,0.14) 0%,rgba(0,180,255,0.07) 30%,rgba(0,120,200,0.03) 55%,transparent 75%);animation:crCoreGlow 3.5s ease-in-out infinite;pointer-events:none}
+@keyframes crCoreGlow{0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+/* 核心能量雾 */
+.cr-core-fog{position:absolute;width:260px;height:160px;top:50%;left:50%;transform:translate(-50%,-42%);background:radial-gradient(ellipse,rgba(0,200,255,0.06) 0%,rgba(0,140,220,0.03) 40%,transparent 70%);filter:blur(8px);animation:crFog 5s ease-in-out infinite;pointer-events:none}
+@keyframes crFog{0%,100%{opacity:0.5;transform:translate(-50%,-42%) scaleX(1)}50%{opacity:0.8;transform:translate(-50%,-42%) scaleX(1.06)}}
+
+/* 晶块 */
+.cr-block{position:absolute;transform-style:preserve-3d;animation:crBlockFloat 5s ease-in-out infinite;z-index:8}
+.cr-block:nth-child(2){animation-delay:-1.6s}
+.cr-block:nth-child(3){animation-delay:-3.2s}
+@keyframes crBlockFloat{0%,100%{transform:translateY(0) rotateX(0) rotateY(0)}25%{transform:translateY(-8px) rotateX(2deg) rotateY(3deg)}50%{transform:translateY(-4px) rotateX(-1deg) rotateY(-2deg)}75%{transform:translateY(-10px) rotateX(1deg) rotateY(2deg)}}
+.cr-block-inner{position:relative;width:132px;padding:11px 12px 10px;border-radius:5px;text-align:center;backdrop-filter:blur(12px);transition:transform 0.4s,box-shadow 0.4s}
+.cr-block-inner:hover{transform:scale(1.06)}
+/* 颜色变体 + 描边呼吸 */
+.cr-block.c-cyan .cr-block-inner{background:linear-gradient(135deg,rgba(0,240,255,0.16) 0%,rgba(0,120,200,0.07) 100%);border:1px solid rgba(0,240,255,0.5);box-shadow:0 0 26px rgba(0,240,255,0.2),0 0 52px rgba(0,240,255,0.06),0 0 80px rgba(0,240,255,0.02),inset 0 1px 0 rgba(0,240,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2);animation:crEdgeCyan 4.5s ease-in-out infinite}
+@keyframes crEdgeCyan{0%,100%{border-color:rgba(0,240,255,0.5);box-shadow:0 0 26px rgba(0,240,255,0.2),0 0 52px rgba(0,240,255,0.06),0 0 80px rgba(0,240,255,0.02),inset 0 1px 0 rgba(0,240,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(0,240,255,0.75);box-shadow:0 0 36px rgba(0,240,255,0.32),0 0 65px rgba(0,240,255,0.1),0 0 90px rgba(0,240,255,0.04),inset 0 1px 0 rgba(0,240,255,0.45),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+.cr-block.c-blue .cr-block-inner{background:linear-gradient(135deg,rgba(0,116,255,0.16) 0%,rgba(0,60,180,0.07) 100%);border:1px solid rgba(0,116,255,0.5);box-shadow:0 0 26px rgba(0,116,255,0.2),0 0 52px rgba(0,116,255,0.06),0 0 80px rgba(0,116,255,0.02),inset 0 1px 0 rgba(0,116,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2);animation:crEdgeBlue 4.5s ease-in-out infinite 0.8s}
+@keyframes crEdgeBlue{0%,100%{border-color:rgba(0,116,255,0.5);box-shadow:0 0 26px rgba(0,116,255,0.2),0 0 52px rgba(0,116,255,0.06),0 0 80px rgba(0,116,255,0.02),inset 0 1px 0 rgba(0,116,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(0,116,255,0.75);box-shadow:0 0 36px rgba(0,116,255,0.32),0 0 65px rgba(0,116,255,0.1),0 0 90px rgba(0,116,255,0.04),inset 0 1px 0 rgba(0,116,255,0.45),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+.cr-block.c-purple .cr-block-inner{background:linear-gradient(135deg,rgba(148,102,255,0.16) 0%,rgba(100,60,200,0.07) 100%);border:1px solid rgba(148,102,255,0.5);box-shadow:0 0 26px rgba(148,102,255,0.2),0 0 52px rgba(148,102,255,0.06),0 0 80px rgba(148,102,255,0.02),inset 0 1px 0 rgba(148,102,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2);animation:crEdgePurple 4.5s ease-in-out infinite 1.6s}
+@keyframes crEdgePurple{0%,100%{border-color:rgba(148,102,255,0.5);box-shadow:0 0 26px rgba(148,102,255,0.2),0 0 52px rgba(148,102,255,0.06),0 0 80px rgba(148,102,255,0.02),inset 0 1px 0 rgba(148,102,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(148,102,255,0.75);box-shadow:0 0 36px rgba(148,102,255,0.32),0 0 65px rgba(148,102,255,0.1),0 0 90px rgba(148,102,255,0.04),inset 0 1px 0 rgba(148,102,255,0.45),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+/* 晶块内文 — 可读性强化 */
+.cr-lbl{font-size:12px;font-weight:700;letter-spacing:2.5px;font-family:var(--font-display);margin-bottom:4px;color:var(--text-primary);opacity:1;text-shadow:0 1px 2px rgba(0,0,0,0.6)}
+.cr-val{font-family:var(--font-display);font-size:32px;font-weight:900;line-height:1;margin-bottom:3px;-webkit-text-stroke:0.5px rgba(255,255,255,0.1)}
+.cr-block.c-cyan .cr-val{color:#00f0ff;text-shadow:0 0 10px rgba(0,240,255,0.7),0 0 24px rgba(0,240,255,0.25),0 1px 2px rgba(0,0,0,0.5)}
+.cr-block.c-blue .cr-val{color:#6db8ff;text-shadow:0 0 10px rgba(0,116,255,0.7),0 0 24px rgba(0,116,255,0.25),0 1px 2px rgba(0,0,0,0.5)}
+.cr-block.c-purple .cr-val{color:#c4a8ff;text-shadow:0 0 10px rgba(148,102,255,0.7),0 0 24px rgba(148,102,255,0.25),0 1px 2px rgba(0,0,0,0.5)}
+.cr-time{font-size:11px;font-weight:500;color:rgba(200,218,240,0.75);letter-spacing:1px;text-shadow:0 1px 2px rgba(0,0,0,0.5)}
+.cr-bar{width:100%;height:3px;border-radius:2px;margin-top:6px;background:rgba(255,255,255,0.06);overflow:hidden;position:relative}
+.cr-bar-fill{height:100%;border-radius:2px;position:relative}
+.cr-bar-fill::after{content:'';position:absolute;top:0;right:0;width:6px;height:100%;border-radius:50%;filter:blur(1px)}
+.cr-block.c-cyan .cr-bar-fill{background:linear-gradient(90deg,rgba(0,240,255,0.3),rgba(0,240,255,0.9));box-shadow:0 0 10px rgba(0,240,255,0.6),0 0 20px rgba(0,240,255,0.15)}
+.cr-block.c-cyan .cr-bar-fill::after{background:#00f0ff;box-shadow:0 0 6px #00f0ff}
+.cr-block.c-blue .cr-bar-fill{background:linear-gradient(90deg,rgba(0,116,255,0.3),rgba(0,116,255,0.9));box-shadow:0 0 10px rgba(0,116,255,0.6),0 0 20px rgba(0,116,255,0.15)}
+.cr-block.c-blue .cr-bar-fill::after{background:#0074ff;box-shadow:0 0 6px #0074ff}
+.cr-block.c-purple .cr-bar-fill{background:linear-gradient(90deg,rgba(148,102,255,0.3),rgba(148,102,255,0.9));box-shadow:0 0 10px rgba(148,102,255,0.6),0 0 20px rgba(148,102,255,0.15)}
+.cr-block.c-purple .cr-bar-fill::after{background:#9466ff;box-shadow:0 0 6px #9466ff}
+/* 模块标题加强 */
+.panel-title[data-module="SYS-02"]{font-size:17px;font-weight:700;letter-spacing:2px}
+/* 拖动交互 */
+.cr-block[data-drag]{cursor:grab;user-select:none;-webkit-user-select:none}
+.cr-block[data-drag]:active{cursor:grabbing}
+.cr-block.cr-dragging{cursor:grabbing;z-index:20!important;animation:none!important;transition:none!important}
+.cr-block.cr-dragging .cr-block-inner{transition:none!important;transform:scale(1.06)}
+.cr-block.cr-drop{transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+/* 连接线 */
+.cr-links{position:absolute;inset:0;pointer-events:none;z-index:5}
+/* 粒子层 */
+.cr-dust{position:absolute;border-radius:50%;pointer-events:none;animation:crDust var(--d,10s) ease-in-out infinite var(--dl,0s)}
+@keyframes crDust{0%{opacity:var(--a1,0.12);transform:translate(0,0)}33%{opacity:var(--a2,0.24);transform:translate(var(--x1,3px),var(--y1,-4px))}66%{opacity:var(--a1,0.12);transform:translate(var(--x2,-2px),var(--y2,3px))}100%{opacity:var(--a2,0.24);transform:translate(0,0)}}
+.cr-firefly{position:absolute;border-radius:50%;pointer-events:none;animation:crFlyMove var(--d,7s) ease-in-out infinite var(--dl,0s),crFlyBlink var(--bl,3s) ease-in-out infinite var(--bld,0s)}
+@keyframes crFlyMove{0%{transform:translate(0,0)}25%{transform:translate(var(--x1,8px),var(--y1,-12px))}50%{transform:translate(var(--x2,-5px),var(--y2,6px))}75%{transform:translate(var(--x3,10px),var(--y3,4px))}100%{transform:translate(0,0)}}
+@keyframes crFlyBlink{0%,100%{opacity:var(--fa,0.2)}40%{opacity:var(--fb,0.75)}60%{opacity:var(--fc,0.5)}}
+.cr-node{position:absolute;border-radius:50%;pointer-events:none;animation:crNodePulse var(--d,3s) ease-in-out infinite var(--dl,0s)}
+@keyframes crNodePulse{0%,100%{opacity:0.35;transform:scale(0.8);box-shadow:0 0 var(--s1,5px) var(--nc,rgba(0,240,255,0.5))}50%{opacity:1;transform:scale(1.4);box-shadow:0 0 var(--s2,14px) var(--nc,rgba(0,240,255,0.5))}}
+.cr-flow{position:absolute;border-radius:50%;pointer-events:none;offset-rotate:0deg;animation:crFlowMove var(--d,3s) linear infinite var(--dl,0s)}
+@keyframes crFlowMove{0%{offset-distance:0%;opacity:0}15%{opacity:0.9}85%{opacity:0.7}100%{offset-distance:100%;opacity:0}}
+
+/* ══════════════════════════════════════
+   Gate Portal — 周回复量
+   ══════════════════════════════════════ */
+.gate-scene{position:relative;width:100%;flex:1;min-height:0;overflow:hidden}
+@keyframes gtSpin{to{transform:rotate(360deg)}}
+@keyframes gtSpinR{to{transform:rotate(-360deg)}}
+
+/* ══════════════════════════════════════
+   Ops Tanks — 营运数据
+   ══════════════════════════════════════ */
+.ops-tanks{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:4px 0;min-height:0}
+
+/* ══════════════════════════════════════
    Charts
    ══════════════════════════════════════ */
 .charts-row { display:grid; grid-template-columns:3fr 2fr; gap:10px; flex:1; min-height:0; }
@@ -311,7 +515,6 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .panel:hover { border-color:rgba(0,240,255,0.45); box-shadow:0 6px 24px var(--glow-med),0 1px 2px var(--glow-strong),inset 0 -20px 40px rgba(0,200,255,0.03); transform:translateY(-1px); }
 .chart-container { position:relative; width:100%; flex:1; min-height:0; overflow:hidden; }
 .chart-container::after { content:''; position:absolute; bottom:0; left:10%; right:10%; height:1px; background:linear-gradient(90deg,transparent,rgba(0,240,255,0.18),rgba(148,102,255,0.12),transparent); box-shadow:0 0 10px rgba(0,200,255,0.12); pointer-events:none; }
-/* (chart-totem CSS removed — vitruvian now drawn directly on canvas) */
 .panel-title {
   font-size:17px; font-weight:700; color:var(--accent-cyan);
   letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;
@@ -2203,7 +2406,23 @@ select.cyber-input {
 <div class="page active" id="page-overview">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">客服指挥中心</span><span class="ht-sub">CUSTOMER SERVICE COMMAND CENTER</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock">--:--:--</div><div class="header-date" id="date-display">----/--/--</div></div>
+  <div class="header-right">
+    <span class="hr-corner-cut"></span>
+    <span class="hr-deco-line"></span>
+    <div class="header-status-group">
+      <div class="header-status"><span class="header-status-dot"></span>SYSTEM ONLINE</div>
+      <div class="header-status-label">ALL SERVICES NOMINAL</div>
+    </div>
+    <div class="header-clock-group">
+      <div class="header-clock-label">REALTIME</div>
+      <div class="header-clock" id="clock" data-time="--:--:--">--:--:--</div>
+    </div>
+    <div class="header-date-group">
+      <div class="header-date" id="date-display">----/--/--</div>
+      <div class="header-weekday" id="weekday-display">---</div>
+      <div class="header-uptime" id="uptime-display">UPTIME 00:00:00</div>
+    </div>
+  </div>
 </header>
 <div class="dashboard">
   <section class="hero-counter" id="hero-counter">
@@ -2223,43 +2442,65 @@ select.cyber-input {
   </section>
   <section class="charts-row">
     <div class="panel"><div class="panel-title" data-module="SYS-01">每日进线量 vs 实际回复单量（近 14 天）</div><div class="chart-container"><canvas id="chart-trend" width="920" height="280"></canvas></div></div>
-    <div class="panel"><div class="panel-title" data-module="SYS-02">各班别回复量</div><div class="chart-container"><div style="display:none"><!-- totem now on canvas --><svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-<!-- Outer rotating calibration ring -->
-<g class="ct-ring-outer"><circle cx="110" cy="110" r="105" stroke="rgba(0,240,255,0.2)" stroke-width="0.5" stroke-dasharray="2 4"/><g stroke="rgba(0,240,255,0.15)" stroke-width="0.4"><line x1="110" y1="5" x2="110" y2="12"/><line x1="162" y1="15" x2="159" y2="21"/><line x1="205" y1="58" x2="199" y2="62"/><line x1="215" y1="110" x2="208" y2="110"/><line x1="205" y1="162" x2="199" y2="158"/><line x1="162" y1="205" x2="159" y2="199"/><line x1="110" y1="215" x2="110" y2="208"/><line x1="58" y1="205" x2="61" y2="199"/><line x1="15" y1="162" x2="21" y2="158"/><line x1="5" y1="110" x2="12" y2="110"/><line x1="15" y1="58" x2="21" y2="62"/><line x1="58" y1="15" x2="61" y2="21"/></g></g>
-<!-- Inner rotating ring -->
-<g class="ct-ring-inner"><circle cx="110" cy="110" r="88" stroke="rgba(148,102,255,0.15)" stroke-width="0.4" stroke-dasharray="1.5 3"/></g>
-<!-- Static structure ring -->
-<circle cx="110" cy="110" r="76" stroke="rgba(0,240,255,0.12)" stroke-width="0.3"/>
-<!-- Crosshair -->
-<g stroke="rgba(0,240,255,0.1)" stroke-width="0.3"><line x1="110" y1="30" x2="110" y2="50"/><line x1="110" y1="170" x2="110" y2="190"/><line x1="30" y1="110" x2="50" y2="110"/><line x1="170" y1="110" x2="190" y2="110"/></g>
-<!-- Mech torso — upper body only -->
-<path d="M110 68 L118 80 L122 92 L120 104 L116 112 L110 116 L104 112 L100 104 L98 92 L102 80 Z" stroke="rgba(0,240,255,0.3)" stroke-width="0.7" fill="none"/>
-<!-- Head -->
-<circle cx="110" cy="62" r="8" stroke="rgba(0,240,255,0.25)" stroke-width="0.6" fill="none"/>
-<circle cx="110" cy="62" r="3.5" stroke="rgba(148,102,255,0.2)" stroke-width="0.4" fill="none"/>
-<!-- Core energy — breathing -->
-<g class="ct-core-pulse"><circle cx="110" cy="96" r="7" stroke="rgba(255,128,64,0.35)" stroke-width="0.5" fill="none"/><circle cx="110" cy="96" r="11" stroke="rgba(255,128,64,0.15)" stroke-width="0.3" fill="none"/></g>
-<circle cx="110" cy="96" r="3" fill="rgba(255,128,64,0.2)" class="ct-breath"/>
-<!-- Arms — horizontal -->
-<path d="M98 82 L72 74 L50 84 L36 80" stroke="rgba(0,240,255,0.2)" stroke-width="0.5" fill="none" stroke-linecap="round"/>
-<path d="M122 82 L148 74 L170 84 L184 80" stroke="rgba(0,240,255,0.2)" stroke-width="0.5" fill="none" stroke-linecap="round"/>
-<!-- Arms — raised -->
-<path d="M100 78 L82 56 L70 38" stroke="rgba(148,102,255,0.12)" stroke-width="0.4" fill="none" stroke-linecap="round"/>
-<path d="M120 78 L138 56 L150 38" stroke="rgba(148,102,255,0.12)" stroke-width="0.4" fill="none" stroke-linecap="round"/>
-<!-- Legs -->
-<path d="M106 114 L100 142 L98 162" stroke="rgba(0,240,255,0.18)" stroke-width="0.5" fill="none" stroke-linecap="round"/>
-<path d="M114 114 L120 142 L122 162" stroke="rgba(0,240,255,0.18)" stroke-width="0.5" fill="none" stroke-linecap="round"/>
-<!-- Legs — spread -->
-<path d="M104 112 L86 148 L74 172" stroke="rgba(148,102,255,0.1)" stroke-width="0.3" fill="none" stroke-linecap="round"/>
-<path d="M116 112 L134 148 L146 172" stroke="rgba(148,102,255,0.1)" stroke-width="0.3" fill="none" stroke-linecap="round"/>
-<!-- Joint nodes -->
-<circle cx="72" cy="74" r="2" fill="rgba(0,240,255,0.15)"/><circle cx="148" cy="74" r="2" fill="rgba(0,240,255,0.15)"/>
-<circle cx="100" cy="142" r="1.5" fill="rgba(0,240,255,0.12)"/><circle cx="120" cy="142" r="1.5" fill="rgba(0,240,255,0.12)"/>
-</svg></div><canvas id="chart-channel" width="600" height="280"></canvas></div></div>
+    <div class="panel"><div class="panel-title" data-module="SYS-02">各班别回复量</div>
+    <div class="crystal-scene" id="crystal-scene">
+      <!-- SVG 连接线 — 动态更新 -->
+      <svg class="cr-links" id="cr-svg" width="100%" height="100%">
+        <defs>
+          <linearGradient id="crL1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00f0ff" stop-opacity="0.6"/><stop offset="100%" stop-color="#00f0ff" stop-opacity="0.02"/></linearGradient>
+          <linearGradient id="crL2" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#0074ff" stop-opacity="0.6"/><stop offset="100%" stop-color="#0074ff" stop-opacity="0.02"/></linearGradient>
+          <linearGradient id="crL3" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="#9466ff" stop-opacity="0.6"/><stop offset="100%" stop-color="#9466ff" stop-opacity="0.02"/></linearGradient>
+          <filter id="crGlow"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="crBeamGlow"><feGaussianBlur stdDeviation="4" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- 宽光带 -->
+        <line id="crB0" stroke="rgba(0,240,255,0.08)" stroke-width="14" filter="url(#crBeamGlow)"/>
+        <line id="crB1" stroke="rgba(0,116,255,0.08)" stroke-width="14" filter="url(#crBeamGlow)"/>
+        <line id="crB2" stroke="rgba(148,102,255,0.08)" stroke-width="14" filter="url(#crBeamGlow)"/>
+        <!-- 细连接线 -->
+        <line id="crD0" stroke="rgba(0,240,255,0.35)" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+        <line id="crD1" stroke="rgba(0,116,255,0.35)" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+        <line id="crD2" stroke="rgba(148,102,255,0.35)" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.8"/>
+        <!-- 端点 — 晶块侧 -->
+        <circle id="crP0" r="4" fill="#00f0ff" opacity="0.4" filter="url(#crGlow)"><animate attributeName="opacity" values="0.25;0.6;0.25" dur="2.5s" repeatCount="indefinite"/></circle>
+        <circle id="crP1" r="4" fill="#0074ff" opacity="0.4" filter="url(#crGlow)"><animate attributeName="opacity" values="0.25;0.6;0.25" dur="2.5s" begin="0.8s" repeatCount="indefinite"/></circle>
+        <circle id="crP2" r="4" fill="#9466ff" opacity="0.4" filter="url(#crGlow)"><animate attributeName="opacity" values="0.25;0.6;0.25" dur="2.5s" begin="1.6s" repeatCount="indefinite"/></circle>
+        <!-- 端点 — 核心侧 -->
+        <circle id="crC0" r="3.5" fill="#00f0ff" opacity="0.7" filter="url(#crGlow)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/><animate attributeName="r" values="2.5;4;2.5" dur="2s" repeatCount="indefinite"/></circle>
+        <circle id="crC1" r="3.5" fill="#0074ff" opacity="0.7" filter="url(#crGlow)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2s" begin="0.6s" repeatCount="indefinite"/><animate attributeName="r" values="2.5;4;2.5" dur="2s" begin="0.6s" repeatCount="indefinite"/></circle>
+        <circle id="crC2" r="3.5" fill="#9466ff" opacity="0.7" filter="url(#crGlow)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="r" values="2.5;4;2.5" dur="2s" begin="1.2s" repeatCount="indefinite"/></circle>
+      </svg>
+      <!-- 中央核心 -->
+      <div class="cr-core" id="cr-core-el">
+        <div class="cr-core-fog"></div>
+        <div class="cr-core-glow"></div>
+        <div class="cr-ring-outer"></div>
+        <div class="cr-ring-inner"></div>
+        <div class="cr-core-num">1,284</div>
+        <div class="cr-core-label">TOTAL REPLIES</div>
+      </div>
+      <!-- 早班 — 左上 -->
+      <div class="cr-block c-cyan" id="crBlk0" data-drag="1" style="left:3%;top:12%">
+        <div class="cr-block-inner"><div class="cr-lbl">早班</div><div class="cr-val">520</div><div class="cr-time">08:00 — 16:00</div><div class="cr-bar"><div class="cr-bar-fill" style="width:40.5%"></div></div></div>
+      </div>
+      <!-- 中班 — 右上 -->
+      <div class="cr-block c-blue" id="crBlk1" data-drag="1" style="left:calc(97% - 132px);top:4%">
+        <div class="cr-block-inner"><div class="cr-lbl">中班</div><div class="cr-val">485</div><div class="cr-time">16:00 — 00:00</div><div class="cr-bar"><div class="cr-bar-fill" style="width:37.8%"></div></div></div>
+      </div>
+      <!-- 晚班 — 右下 -->
+      <div class="cr-block c-purple" id="crBlk2" data-drag="1" style="left:calc(94% - 132px);top:calc(96% - 105px)">
+        <div class="cr-block-inner"><div class="cr-lbl">晚班</div><div class="cr-val">279</div><div class="cr-time">00:00 — 08:00</div><div class="cr-bar"><div class="cr-bar-fill" style="width:21.7%"></div></div></div>
+      </div>
+    </div>
+    </div>
   </section>
   <section class="charts-row">
-    <div class="panel"><div class="panel-title" data-module="SYS-03">周回复量统计（近 6 周）</div><div class="chart-container"><canvas id="chart-weekly" width="920" height="280"></canvas></div></div>
-    <div class="panel"><div class="panel-title" data-module="SYS-04">营运数据总览</div><div class="chart-container"><canvas id="chart-category" width="600" height="280"></canvas></div></div>
+    <div class="panel"><div class="panel-title" data-module="SYS-03">周回复量统计（近 4 周）</div>
+      <div class="gate-scene" id="gate-scene"></div>
+    </div>
+    <div class="panel"><div class="panel-title" data-module="SYS-04">营运数据总览</div>
+      <div class="ops-tanks" id="ops-tanks"></div>
+    </div>
   </section>
   <section class="marquee-group">
     <div class="marquee-bar good"><span class="marquee-badge">MK-01 ✦ GOOD</span><div class="marquee-content"><div class="marquee-track" id="marquee-good"></div></div></div>
@@ -4569,7 +4810,30 @@ document.querySelectorAll('.nav-item').forEach(btn=>{
   });
 });
 // ── Clock ──
-function updateClock(){const now=new Date(),time=now.toLocaleTimeString('zh-TW',{hour12:false}),date=now.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'long'});document.querySelectorAll('[id^="clock"]').forEach(el=>el.textContent=time);const dd=document.getElementById('date-display');if(dd)dd.textContent=date;}
+var _clockStartTime=Date.now();
+function updateClock(){
+  var now=new Date();
+  var time=now.toLocaleTimeString('zh-TW',{hour12:false});
+  var dateStr=now.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  var weekdays=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  var weekday=weekdays[now.getDay()];
+  document.querySelectorAll('[id^="clock"]').forEach(function(el){
+    el.textContent=time;
+    if(el.hasAttribute('data-time')) el.setAttribute('data-time',time);
+  });
+  var dd=document.getElementById('date-display');
+  if(dd) dd.textContent=dateStr;
+  var wd=document.getElementById('weekday-display');
+  if(wd) wd.textContent=weekday;
+  var ut=document.getElementById('uptime-display');
+  if(ut){
+    var diff=Math.floor((Date.now()-_clockStartTime)/1000);
+    var h=String(Math.floor(diff/3600)).padStart(2,'0');
+    var m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    var s=String(diff%60).padStart(2,'0');
+    ut.textContent='UPTIME '+h+':'+m+':'+s;
+  }
+}
 setInterval(updateClock,1000);updateClock();
 // ── Flip Counter ──
 const MONTHLY_TOTAL=38472;let currentFlipValue=0;const flipContainer=document.getElementById('flip-digits');
@@ -4724,22 +4988,422 @@ const trendChart=new Chart(document.getElementById('chart-trend'),{type:'line',d
   interaction:{intersect:false,mode:'index'}}});
 setInterval(()=>{const d0=trendChart.data.datasets[0].data,d1=trendChart.data.datasets[1].data;d0[13]=Math.max(1,Math.round(DAILY_IN[13]+(Math.random()-0.5)*30));d1[13]=Math.max(1,Math.round(DAILY_RE[13]+(Math.random()-0.5)*25));trendChart.update('none')},5000);
 
-// Doughnut
-const doughnutChart=new Chart(document.getElementById('chart-channel'),{type:'doughnut',data:{labels:SHIFT.labels,datasets:[{data:SHIFT.values,backgroundColor:SHIFT.colors,borderColor:'rgba(5,9,16,0.9)',borderWidth:3,hoverOffset:10,hoverBorderColor:'rgba(0,240,255,0.5)',hoverBorderWidth:2}]},options:{responsive:false,cutout:'62%',animation:{animateRotate:true,animateScale:false},plugins:{legend:{position:'right',labels:{padding:14,usePointStyle:true,pointStyle:'rectRounded',font:{size:14,weight:600}}},tooltip:TT}}});
+// Crystal Matrix — 粒子系统 v2.0
+(function(){
+  var sc=document.getElementById('crystal-scene');
+  if(!sc) return;
+  var C=[{r:0,g:240,b:255},{r:0,g:116,b:255},{r:148,g:102,b:255}];
+  function rg(c,a){return 'rgba('+c.r+','+c.g+','+c.b+','+a+')'}
+  function rn(a,b){return Math.random()*(b-a)+a}
 
-// Weekly Bar
-const weeklyChart=new Chart(document.getElementById('chart-weekly'),{type:'bar',data:{labels:WEEKLY.labels,datasets:[{label:'周回复量',data:WEEKLY.values,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,ctx.chart.height,0,0);g.addColorStop(0,'rgba(0,70,220,0.45)');g.addColorStop(0.4,'rgba(0,200,255,0.6)');g.addColorStop(0.8,'rgba(80,215,255,0.55)');g.addColorStop(1,'rgba(148,102,255,0.45)');return g},hoverBackgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,ctx.chart.height,0,0);g.addColorStop(0,'rgba(0,90,240,0.65)');g.addColorStop(0.4,'rgba(0,220,255,0.8)');g.addColorStop(0.8,'rgba(100,230,255,0.75)');g.addColorStop(1,'rgba(160,120,255,0.6)');return g},borderColor:'rgba(0,240,255,0.3)',borderWidth:1,borderRadius:4,barThickness:34}]},options:{responsive:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:GRID},ticks:{font:{size:12,weight:500},color:TICK}},y:{grid:{color:GRID},beginAtZero:true,ticks:{font:{size:12,weight:500},color:TICK}}}}});
+  // L1: 背景微尘 — 65颗，更密
+  for(var i=0;i<65;i++){var c=C[i%3],el=document.createElement('div');el.className='cr-dust';var sz=rn(1,1.8);el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+rn(1,97)+'%;top:'+rn(1,97)+'%;background:'+rg(c,rn(0.18,0.35))+';box-shadow:0 0 '+rn(2,5)+'px '+rg(c,0.15)+';z-index:1;--d:'+rn(8,14)+'s;--dl:'+(-rn(0,12))+'s;--a1:'+rn(0.1,0.2)+';--a2:'+rn(0.25,0.4)+';--x1:'+rn(-7,7)+'px;--y1:'+rn(-7,7)+'px;--x2:'+rn(-6,6)+'px;--y2:'+rn(-6,6)+'px';sc.appendChild(el)}
 
-// 4. Ops Horizontal Bar — enhanced 3D via plugin + brighter gradients
-const opsChart=new Chart(document.getElementById('chart-category'),{type:'bar',data:{labels:OPS.labels,datasets:[{
-  data:OPS.values,
-  backgroundColor:['rgba(255,140,60,0.7)','rgba(0,220,255,0.6)','rgba(150,110,255,0.6)','rgba(0,240,130,0.6)'],
-  hoverBackgroundColor:['rgba(255,160,80,0.88)','rgba(0,240,255,0.82)','rgba(170,130,255,0.82)','rgba(0,255,150,0.82)'],
-  borderColor:['rgba(255,180,120,0.4)','rgba(120,248,255,0.4)','rgba(180,150,255,0.4)','rgba(120,255,180,0.4)'],
-  borderWidth:1,borderRadius:3,barThickness:24
-}]},options:{responsive:false,indexAxis:'y',
-  plugins:{legend:{display:false},tooltip:TT},
-  scales:{x:{grid:{color:GRID},beginAtZero:true,ticks:{font:{size:12,weight:500},color:TICK}},y:{grid:{display:false},ticks:{font:{size:14,weight:600},color:'#d8ecff',padding:12}}}}});
+  // L2: 萤火星光 — 36颗，更亮
+  for(var i=0;i<36;i++){var c=C[i%3],el=document.createElement('div');el.className='cr-firefly';var sz=rn(1.5,3.5);el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+rn(3,94)+'%;top:'+rn(3,94)+'%;background:'+rg(c,rn(0.45,0.7))+';box-shadow:0 0 '+rn(6,12)+'px '+rg(c,0.4)+';z-index:2;--d:'+rn(5,9)+'s;--dl:'+(-rn(0,8))+'s;--bl:'+rn(2,4)+'s;--bld:'+(-rn(0,4))+'s;--x1:'+rn(-16,16)+'px;--y1:'+rn(-18,18)+'px;--x2:'+rn(-12,12)+'px;--y2:'+rn(-10,10)+'px;--x3:'+rn(-14,14)+'px;--y3:'+rn(-12,12)+'px;--fa:'+rn(0.15,0.3)+';--fb:'+rn(0.65,0.95)+';--fc:'+rn(0.4,0.6);sc.appendChild(el)}
+
+  // L3: 核心亮点 — 18颗 (核心10 + 连线8)，更亮更大
+  var hots=[
+    {x:48,y:47},{x:52,y:50},{x:46,y:52},{x:54,y:44},{x:50,y:55},{x:49,y:42},{x:51,y:48},{x:47,y:50},{x:53,y:53},{x:48,y:44},
+    {x:30,y:43},{x:70,y:38},{x:67,y:69},{x:42,y:49},{x:36,y:40},{x:62,y:52},{x:55,y:62},{x:44,y:45}
+  ];
+  for(var i=0;i<hots.length;i++){var c=C[i%3],el=document.createElement('div');el.className='cr-node';var sz=rn(3,5);el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(hots[i].x+rn(-2,2))+'%;top:'+(hots[i].y+rn(-2,2))+'%;background:'+rg(c,0.9)+';z-index:6;--nc:'+rg(c,0.7)+';--s1:'+rn(7,12)+'px;--s2:'+rn(16,26)+'px;--d:'+rn(2,3.5)+'s;--dl:'+(-rn(0,3))+'s';sc.appendChild(el)}
+
+  // L4: 连线流动粒子 — 每条7颗，更亮
+  var paths=[{x1:18,y1:38,x2:48,y2:49,c:C[0]},{x1:82,y1:30,x2:54,y2:47,c:C[1]},{x1:78,y1:82,x2:54,y2:55,c:C[2]}];
+  paths.forEach(function(p,pi){for(var j=0;j<7;j++){var el=document.createElement('div');el.className='cr-flow';var sz=rn(2.5,4);var mx=(p.x1+p.x2)/2+rn(-4,4),my=(p.y1+p.y2)/2+rn(-3,3);el.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+rg(p.c,rn(0.7,1))+';box-shadow:0 0 '+rn(8,14)+'px '+rg(p.c,0.7)+';z-index:6;offset-path:path("M '+(p.x1*6)+' '+(p.y1*3.3)+' Q '+(mx*6)+' '+(my*3.3)+' '+(p.x2*6)+' '+(p.y2*3.3)+'");--d:'+rn(2,3.5)+'s;--dl:'+(-j*rn(0.4,0.7)-pi*0.25)+'s';sc.appendChild(el)}});
+
+  // 核心环绕 — 14颗紧贴核心，更亮
+  for(var i=0;i<14;i++){var a=(i/14)*Math.PI*2,r=rn(52,82),cx=50+Math.cos(a)*(r/6),cy=49+Math.sin(a)*(r/3.3),c=C[i%3],el=document.createElement('div');el.className='cr-firefly';el.style.cssText='width:3px;height:3px;left:'+cx+'%;top:'+cy+'%;background:'+rg(c,0.6)+';box-shadow:0 0 9px '+rg(c,0.5)+';z-index:3;--d:'+rn(4,7)+'s;--dl:'+(-rn(0,6))+'s;--bl:'+rn(2,3.5)+'s;--bld:'+(-rn(0,3))+'s;--x1:'+rn(-10,10)+'px;--y1:'+rn(-10,10)+'px;--x2:'+rn(-8,8)+'px;--y2:'+rn(-8,8)+'px;--x3:'+rn(-12,12)+'px;--y3:'+rn(-12,12)+'px;--fa:0.2;--fb:0.75;--fc:0.45';sc.appendChild(el)}
+
+  // 连线走廊萤火 — 每条走廊6颗，集中在连接区域
+  var corridors=[
+    {x1:20,y1:38,x2:40,y2:48,c:C[0]},
+    {x1:80,y1:30,x2:58,y2:46,c:C[1]},
+    {x1:76,y1:80,x2:56,y2:56,c:C[2]}
+  ];
+  corridors.forEach(function(co){
+    for(var k=0;k<6;k++){
+      var t=rn(0.1,0.9);
+      var px=co.x1+(co.x2-co.x1)*t+rn(-4,4);
+      var py=co.y1+(co.y2-co.y1)*t+rn(-4,4);
+      var el=document.createElement('div');el.className='cr-firefly';
+      var sz=rn(1.8,2.8);
+      el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+px+'%;top:'+py+'%;background:'+rg(co.c,rn(0.4,0.65))+';box-shadow:0 0 '+rn(5,10)+'px '+rg(co.c,0.35)+';z-index:4;--d:'+rn(5,8)+'s;--dl:'+(-rn(0,7))+'s;--bl:'+rn(2,4)+'s;--bld:'+(-rn(0,3))+'s;--x1:'+rn(-8,8)+'px;--y1:'+rn(-8,8)+'px;--x2:'+rn(-6,6)+'px;--y2:'+rn(-6,6)+'px;--x3:'+rn(-8,8)+'px;--y3:'+rn(-8,8)+'px;--fa:'+rn(0.15,0.25)+';--fb:'+rn(0.55,0.8)+';--fc:'+rn(0.35,0.55);
+      sc.appendChild(el);
+    }
+  });
+})();
+
+// Crystal Matrix — 拖动 + 连线联动
+(function(){
+  var scene=document.getElementById('crystal-scene');
+  var svg=document.getElementById('cr-svg');
+  var coreEl=document.getElementById('cr-core-el');
+  if(!scene||!svg||!coreEl) return;
+  var blocks=[
+    document.getElementById('crBlk0'),
+    document.getElementById('crBlk1'),
+    document.getElementById('crBlk2')
+  ];
+  // SVG line/circle elements per block: beam, dash, block-dot, core-dot
+  var svgEls=[];
+  for(var i=0;i<3;i++){
+    svgEls.push({
+      beam:document.getElementById('crB'+i),
+      dash:document.getElementById('crD'+i),
+      bDot:document.getElementById('crP'+i),
+      cDot:document.getElementById('crC'+i)
+    });
+  }
+
+  // 获取元素中心点（相对于 scene，unscaled px）
+  function center(el){
+    var scale=getScale();
+    var sr=scene.getBoundingClientRect();
+    var er=el.getBoundingClientRect();
+    return {x:(er.left+er.width/2-sr.left)/scale, y:(er.top+er.height/2-sr.top)/scale};
+  }
+
+  function coreCenter(){return center(coreEl)}
+
+  // 更新所有连接线
+  function syncLines(){
+    var sw=scene.offsetWidth, sh=scene.offsetHeight;
+    if(!sw||!sh) return;
+    var cc=coreCenter();
+    for(var i=0;i<3;i++){
+      var bc=center(blocks[i]);
+      var el=svgEls[i];
+      // 计算核心侧端点 — 从核心中心朝block方向偏移30px
+      var dx=bc.x-cc.x, dy=bc.y-cc.y;
+      var dist=Math.sqrt(dx*dx+dy*dy)||1;
+      var cEx=cc.x+dx/dist*30, cEy=cc.y+dy/dist*30;
+      // 设置线条坐标（px值）
+      el.beam.setAttribute('x1',bc.x);el.beam.setAttribute('y1',bc.y);
+      el.beam.setAttribute('x2',cEx);el.beam.setAttribute('y2',cEy);
+      el.dash.setAttribute('x1',bc.x);el.dash.setAttribute('y1',bc.y);
+      el.dash.setAttribute('x2',cEx);el.dash.setAttribute('y2',cEy);
+      el.bDot.setAttribute('cx',bc.x);el.bDot.setAttribute('cy',bc.y);
+      el.cDot.setAttribute('cx',cEx);el.cDot.setAttribute('cy',cEy);
+    }
+  }
+
+  // 初始化连线
+  setTimeout(syncLines,100);
+  window.addEventListener('resize',function(){setTimeout(syncLines,50)});
+
+  // 获取 app-layout 的缩放比例
+  function getScale(){
+    var layout=document.querySelector('.app-layout');
+    if(!layout) return 1;
+    var sr=layout.getBoundingClientRect();
+    return sr.width/layout.offsetWidth||1;
+  }
+
+  // 拖动逻辑
+  var dragging=null, dragOff={x:0,y:0};
+
+  function onDown(e){
+    var blk=e.target.closest('.cr-block[data-drag]');
+    if(!blk) return;
+    e.preventDefault();
+    dragging=blk;
+    var pt=e.touches?e.touches[0]:e;
+    var scale=getScale();
+    var sr=scene.getBoundingClientRect();
+    var br=blk.getBoundingClientRect();
+    dragOff.x=(pt.clientX-br.left)/scale;
+    dragOff.y=(pt.clientY-br.top)/scale;
+    // 转为绝对 left/top (unscaled px)
+    blk.style.left=((br.left-sr.left)/scale)+'px';
+    blk.style.top=((br.top-sr.top)/scale)+'px';
+    blk.style.right='auto';
+    blk.style.bottom='auto';
+    blk.classList.add('cr-dragging');
+    blk.classList.remove('cr-drop');
+  }
+
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    var pt=e.touches?e.touches[0]:e;
+    var scale=getScale();
+    var sr=scene.getBoundingClientRect();
+    var bw=dragging.offsetWidth, bh=dragging.offsetHeight;
+    var sw=scene.offsetWidth, sh=scene.offsetHeight;
+    var nx=(pt.clientX-sr.left)/scale-dragOff.x;
+    var ny=(pt.clientY-sr.top)/scale-dragOff.y;
+    // 限制在容器内
+    nx=Math.max(0,Math.min(nx,sw-bw));
+    ny=Math.max(0,Math.min(ny,sh-bh));
+    dragging.style.left=nx+'px';
+    dragging.style.top=ny+'px';
+    syncLines();
+  }
+
+  function onUp(){
+    if(!dragging) return;
+    dragging.classList.remove('cr-dragging');
+    dragging.classList.add('cr-drop');
+    dragging=null;
+    syncLines();
+  }
+
+  scene.addEventListener('mousedown',onDown);
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+  scene.addEventListener('touchstart',onDown,{passive:false});
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onUp);
+})();
+
+// Gate Portal — 周回复量 (取最近4周)
+(function(){
+  var sc=document.getElementById('gate-scene');
+  if(!sc) return;
+  var wLabels=WEEKLY.labels.slice(-4);
+  var wValues=WEEKLY.values.slice(-4);
+  var wMax=Math.max.apply(null,wValues);
+  var wPeakI=wValues.indexOf(wMax);
+  function wPct(v){return Math.round(v/wMax*100)}
+  function wFmt(v){return v.toLocaleString()}
+  function wRn(a,b){return Math.random()*(b-a)+a}
+  var GC=['#00f0ff','#00c8ff','#0080ff','#9466ff'];
+  var GC2=['#9466ff','#7050ff','#9466ff','#00f0ff'];
+  function gPc(el,w,h){el.style.position='absolute';el.style.width=w+'px';el.style.height=h+'px';el.style.left='50%';el.style.top='50%';el.style.marginLeft=(-w/2)+'px';el.style.marginTop=(-h/2)+'px'}
+  var gCSS='';
+
+  // 背景扭曲
+  var warp=document.createElement('div');
+  warp.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden';
+  warp.innerHTML='<div style="position:absolute;left:50%;top:50%;width:900px;height:500px;margin-left:-450px;margin-top:-250px;border-radius:50%;background:radial-gradient(ellipse,rgba(148,102,255,0.05),transparent 55%);animation:gtWarp 5s ease-in-out infinite"></div>';
+  gCSS+='@keyframes gtWarp{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.12);opacity:0.85}}';
+  sc.appendChild(warp);
+  // 底部场域
+  var gfl=document.createElement('div');
+  gfl.style.cssText='position:absolute;bottom:0;left:0;right:0;height:50px;pointer-events:none;z-index:1';
+  gfl.innerHTML='<div style="position:absolute;bottom:4px;left:3%;right:3%;height:2px;background:linear-gradient(90deg,transparent,rgba(148,102,255,0.35),rgba(0,240,255,0.2),rgba(148,102,255,0.35),transparent);box-shadow:0 0 16px rgba(148,102,255,0.12),0 0 32px rgba(148,102,255,0.04);animation:gtFlP 2.5s ease-in-out infinite"></div>';
+  gCSS+='@keyframes gtFlP{0%,100%{opacity:0.4}50%{opacity:1}}';
+  sc.appendChild(gfl);
+  // 共振波 x3
+  for(var r=0;r<3;r++){var rip=document.createElement('div');rip.style.cssText='position:absolute;bottom:4px;left:50%;height:1px;width:30px;margin-left:-15px;border-radius:50%;background:rgba(148,102,255,0.2);pointer-events:none;animation:gtRip '+(3+r*0.5)+'s ease-out infinite '+(-r*1)+'s;z-index:1';sc.appendChild(rip)}
+  gCSS+='@keyframes gtRip{0%{transform:scaleX(1);opacity:0.5}100%{transform:scaleX(28);opacity:0}}';
+
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:center;justify-content:center;gap:40px;height:100%;padding:6px 8px 22px;position:relative;z-index:3';
+
+  var gCfg=[
+    {phase:'高能',beamW:5,beamH:32,sparkN:8,archSp:[6,4,3,2.2],vDur:2.2,fogOp:0.45},
+    {phase:'全开',beamW:8,beamH:45,sparkN:12,archSp:[4.5,3,2.2,1.6],vDur:1.5,fogOp:0.68},
+    {phase:'充能',beamW:4,beamH:28,sparkN:7,archSp:[7,4.5,3.2,2.5],vDur:2.5,fogOp:0.36},
+    {phase:'不稳',beamW:3,beamH:20,sparkN:5,archSp:[8,5.5,4,3],vDur:3,fogOp:0.22}
+  ];
+
+  wValues.forEach(function(v,i){
+    var p=wPct(v)/100;var cfg=gCfg[i];var boxSz=Math.round(105+50*p);var c=GC[i],c2=GC2[i];var isOpen=(i===wPeakI);
+    var unit=document.createElement('div');unit.style.cssText='display:flex;flex-direction:column;align-items:center;position:relative';
+    var box=document.createElement('div');box.style.cssText='position:relative;width:'+boxSz+'px;height:'+boxSz+'px';
+
+    // 4层拱
+    var a1=boxSz+10;var arch1=document.createElement('div');gPc(arch1,a1,a1);
+    arch1.style.cssText+='border-radius:50%;border:'+(isOpen?'3.5':'2.5')+'px solid '+c+';border-bottom-color:transparent;box-shadow:0 0 '+(isOpen?16:9)+'px '+c+'2a;animation:gtSpin '+cfg.archSp[0]+'s linear infinite,gtA1G'+i+' 2.5s ease-in-out infinite';
+    arch1.innerHTML='<div style="position:absolute;top:-5px;left:50%;margin-left:-5px;width:10px;height:10px;border-radius:50%;background:'+c+';box-shadow:0 0 14px '+c+',0 0 30px '+c+'aa"></div><div style="position:absolute;bottom:-4px;left:50%;margin-left:-4px;width:8px;height:8px;border-radius:50%;background:'+c2+';box-shadow:0 0 10px '+c2+',0 0 20px '+c2+'88"></div>';
+    box.appendChild(arch1);
+    gCSS+='@keyframes gtA1G'+i+'{0%,100%{box-shadow:0 0 '+(isOpen?16:9)+'px '+c+'2a}50%{box-shadow:0 0 '+(isOpen?26:16)+'px '+c+'48}}';
+    var a2=boxSz+2;var arch2=document.createElement('div');gPc(arch2,a2,a2);arch2.style.cssText+='border-radius:50%;border:1.5px dashed '+c+'44;border-bottom-color:transparent;animation:gtSpinR '+cfg.archSp[1]+'s linear infinite';arch2.innerHTML='<div style="position:absolute;top:-2px;left:50%;margin-left:-2px;width:4px;height:4px;border-radius:50%;background:'+c+'88;box-shadow:0 0 6px '+c+'"></div>';box.appendChild(arch2);
+    var a3=boxSz-14;var arch3=document.createElement('div');gPc(arch3,a3,a3);arch3.style.cssText+='border-radius:50%;border:1px dotted '+c+'33;animation:gtSpin '+cfg.archSp[2]+'s linear infinite';box.appendChild(arch3);
+    var a4=boxSz-24;var arch4=document.createElement('div');gPc(arch4,a4,a4);arch4.style.cssText+='border-radius:50%;border:0.5px solid '+c+'22;animation:gtSpinR '+cfg.archSp[3]+'s linear infinite';box.appendChild(arch4);
+
+    // 漩涡
+    var vSz=Math.round(boxSz*0.52);var vortex=document.createElement('div');gPc(vortex,vSz,vSz);
+    vortex.style.cssText+='border-radius:50%;overflow:hidden;z-index:3;background:radial-gradient(circle,'+c+(isOpen?'3a':'24')+','+c+'15 30%,'+c+'08 55%,rgba(5,9,16,0.9) 78%,rgba(3,5,10,0.95) 100%);box-shadow:0 0 18px '+c+'26,0 0 32px '+c+'0c,inset 0 0 18px '+c+'15,inset 0 0 38px rgba(0,0,0,0.5);animation:gtV'+i+' '+cfg.vDur+'s ease-in-out infinite '+(-i*0.4)+'s';
+    vortex.innerHTML='<div style="position:absolute;inset:12%;border-radius:50%;border:1.5px dashed '+c+'44;animation:gtSpinR '+(cfg.vDur*0.8)+'s linear infinite"></div><div style="position:absolute;inset:26%;border-radius:50%;border:1px solid '+c+'33;box-shadow:0 0 10px '+c+'22;animation:gtSpin '+(cfg.vDur*0.6)+'s linear infinite"></div><div style="position:absolute;inset:40%;border-radius:50%;border:0.5px dashed '+c+'22;animation:gtSpinR '+(cfg.vDur*0.4)+'s linear infinite"></div><div style="position:absolute;inset:38%;border-radius:50%;background:radial-gradient(circle,rgba(0,0,0,0.7),rgba(0,0,0,0.3) 50%,transparent 75%)"></div>';
+    box.appendChild(vortex);
+    gCSS+='@keyframes gtV'+i+'{0%,100%{transform:scale(1);box-shadow:0 0 18px '+c+'26,0 0 32px '+c+'0c,inset 0 0 18px '+c+'15,inset 0 0 38px rgba(0,0,0,0.5)}35%{transform:scale('+(isOpen?1.1:1.05)+');box-shadow:0 0 26px '+c+'3a,0 0 42px '+c+'14,inset 0 0 24px '+c+'1e,inset 0 0 42px rgba(0,0,0,0.4)}70%{transform:scale('+(isOpen?0.95:0.97)+');box-shadow:0 0 20px '+c+'1e,0 0 34px '+c+'0a,inset 0 0 20px '+c+'12,inset 0 0 40px rgba(0,0,0,0.5)}}';
+
+    // 雾
+    var fogSz=vSz+12;var fog=document.createElement('div');gPc(fog,fogSz,fogSz);fog.style.cssText+='border-radius:50%;background:radial-gradient(circle,'+c+(isOpen?'2a':'15')+','+c+'06 40%,transparent 60%);filter:blur(6px);pointer-events:none;z-index:2;animation:gtFog'+i+' 3.5s ease-in-out infinite '+(-i*0.5)+'s';box.appendChild(fog);
+    gCSS+='@keyframes gtFog'+i+'{0%,100%{opacity:'+cfg.fogOp+';transform:scale(1)}50%{opacity:'+(cfg.fogOp+0.3)+';transform:scale(1.1)}}';
+
+    // 降束上
+    var beam=document.createElement('div');beam.style.cssText='position:absolute;left:50%;margin-left:-'+(cfg.beamW/2)+'px;top:'+(-cfg.beamH-8)+'px;width:'+cfg.beamW+'px;height:'+cfg.beamH+'px;border-radius:2px;background:linear-gradient(180deg,'+c+','+c2+'88,transparent);box-shadow:0 0 '+(cfg.beamW*1.4)+'px '+c+'55,0 0 '+(cfg.beamW*2.2)+'px '+c+'1a;z-index:4;animation:gtBm'+i+' '+(isOpen?1.5:2.2)+'s ease-in-out infinite '+(-i*0.3)+'s';
+    beam.innerHTML='<div style="position:absolute;top:-8px;left:50%;margin-left:-8px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,'+c+','+c+'55 40%,transparent 70%);box-shadow:0 0 14px '+c+',0 0 28px '+c+'88;animation:gtBmSk '+(isOpen?1.2:1.8)+'s ease-in-out infinite '+(-i*0.3)+'s"></div>';
+    box.appendChild(beam);
+    gCSS+='@keyframes gtBm'+i+'{0%,100%{opacity:'+(isOpen?0.7:0.4)+';height:'+cfg.beamH+'px;width:'+cfg.beamW+'px}50%{opacity:1;height:'+(cfg.beamH+14)+'px;width:'+(cfg.beamW+3)+'px}}';
+    // 降束下
+    var bBh=Math.round(cfg.beamH*0.6);var beamB=document.createElement('div');beamB.style.cssText='position:absolute;left:50%;margin-left:-'+Math.max(cfg.beamW-1,2)/2+'px;bottom:'+(-bBh-4)+'px;width:'+Math.max(cfg.beamW-1,2)+'px;height:'+bBh+'px;border-radius:2px;background:linear-gradient(0deg,'+c2+'88,'+c+'44,transparent);box-shadow:0 0 '+cfg.beamW+'px '+c2+'55;z-index:4;animation:gtBmB'+i+' 2.5s ease-in-out infinite '+(-i*0.4)+'s';box.appendChild(beamB);
+    gCSS+='@keyframes gtBmB'+i+'{0%,100%{opacity:0.3;height:'+bBh+'px}50%{opacity:0.7;height:'+(bBh+8)+'px}}';
+
+    // 门柱
+    var pilH=Math.round(boxSz*0.7);
+    [[-boxSz/2-7,c,c2],[boxSz/2+2,c2,c]].forEach(function(pd,pi){
+      var pil=document.createElement('div');pil.style.cssText='position:absolute;width:4px;height:'+pilH+'px;left:calc(50% + '+pd[0]+'px);top:calc(50% - '+pilH/2+'px);border-radius:2px;background:linear-gradient(180deg,'+pd[1]+',transparent 35%,transparent 65%,'+pd[2]+');box-shadow:0 0 5px '+c+'33;z-index:5';
+      pil.innerHTML='<div style="position:absolute;top:-4px;left:-3px;width:10px;height:10px;border-radius:50%;background:'+pd[1]+';box-shadow:0 0 8px '+pd[1]+',0 0 14px '+pd[1]+'88;animation:gtPDot '+(isOpen?1.2:1.8)+'s ease-in-out infinite '+(-i*0.4-pi*0.6)+'s"></div><div style="position:absolute;bottom:-4px;left:-2px;width:8px;height:8px;border-radius:50%;background:'+pd[2]+';box-shadow:0 0 6px '+pd[2]+',0 0 10px '+pd[2]+'66;animation:gtPDot '+(isOpen?1.2:1.8)+'s ease-in-out infinite '+(-i*0.4-pi*0.6-0.9)+'s"></div>';
+      var sweep=document.createElement('div');sweep.style.cssText='position:absolute;left:0;width:100%;height:4px;background:'+c+';box-shadow:0 0 6px '+c+';border-radius:2px;animation:gtPSweep '+(2+i*0.3)+'s ease-in-out infinite '+(-pi)+'s';pil.appendChild(sweep);box.appendChild(pil);
+    });
+    // 吸入粒子
+    for(var k=0;k<cfg.sparkN;k++){var angle=wRn(0,Math.PI*2);var dist=wRn(35,55);var sk=document.createElement('div');var skSz=wRn(1.5,3);sk.style.cssText='position:absolute;width:'+skSz+'px;height:'+skSz+'px;border-radius:50%;left:50%;top:50%;margin-left:-1px;margin-top:-1px;pointer-events:none;z-index:4';sk.innerHTML='<div style="width:100%;height:100%;border-radius:50%;background:'+c+';box-shadow:0 0 '+(skSz*2)+'px '+c+',0 0 '+(skSz*4)+'px '+c+'55;animation:gtSuck '+(1+wRn(0,1.5))+'s ease-in infinite '+(-wRn(0,3))+'s;--sx:'+(Math.cos(angle)*dist)+'px;--sy:'+(Math.sin(angle)*dist)+'px"></div>';box.appendChild(sk)}
+
+    // W14 不稳定 — 破碎感强化
+    if(i===3){
+      // 整体微颤 — 更不规则
+      box.style.animation='gtW14Shake 3s ease-in-out infinite';
+      gCSS+='@keyframes gtW14Shake{0%,100%{transform:translate(0,0)}8%{transform:translate(-1.5px,1px)}18%{transform:translate(1px,-1px)}28%{transform:translate(-0.5px,-1.5px)}40%{transform:translate(1.5px,0.5px)}52%{transform:translate(-1px,1.5px)}65%{transform:translate(0.5px,-0.5px)}78%{transform:translate(-1.5px,-0.5px)}90%{transform:translate(1px,0.5px)}}';
+      // 碎裂粒子 x10 — 从门外沿向外逸散
+      for(var f=0;f<10;f++){
+        var frag=document.createElement('div');
+        var fA=wRn(0,Math.PI*2);
+        var fD=wRn(boxSz*0.4,boxSz*0.7);
+        var fSz=wRn(1.5,5);
+        frag.style.cssText='position:absolute;left:calc(50% + '+(Math.cos(fA)*fD)+'px);top:calc(50% + '+(Math.sin(fA)*fD)+'px);width:'+fSz+'px;height:'+wRn(1,2.5)+'px;background:'+c+';box-shadow:0 0 '+(fSz+2)+'px '+c+',0 0 '+(fSz+6)+'px '+c+'55;border-radius:1px;transform:rotate('+wRn(0,360)+'deg);pointer-events:none;animation:gtW14Frag '+(0.5+wRn(0,1))+'s ease-in-out infinite alternate '+(-wRn(0,3))+'s';
+        box.appendChild(frag);
+      }
+      gCSS+='@keyframes gtW14Frag{0%{opacity:0;transform:scale(0.4)}35%{opacity:0.85}65%{opacity:0.35}100%{opacity:0;transform:scale(1.3)}}';
+      // 逸散光点 x8 — 紫色向外飘散
+      for(var g=0;g<8;g++){
+        var glow=document.createElement('div');
+        var gA=wRn(0,Math.PI*2);
+        var gR=wRn(boxSz*0.32,boxSz*0.58);
+        glow.style.cssText='position:absolute;width:'+wRn(2,4)+'px;height:'+wRn(2,4)+'px;border-radius:50%;left:calc(50% + '+(Math.cos(gA)*gR)+'px);top:calc(50% + '+(Math.sin(gA)*gR)+'px);background:'+c+';box-shadow:0 0 6px '+c+',0 0 14px '+c+'66;pointer-events:none;animation:gtW14Glow '+(1.2+wRn(0,1.8))+'s ease-in-out infinite '+(-wRn(0,3))+'s';
+        box.appendChild(glow);
+      }
+      gCSS+='@keyframes gtW14Glow{0%,100%{opacity:0;transform:scale(0.4)}25%{opacity:0.75;transform:scale(1.3)}55%{opacity:0.25}85%{opacity:0;transform:scale(0.7)}}';
+      // 门拱断裂 — 外环+中环都断裂
+      arch1.style.borderStyle='dashed';
+      arch2.style.borderStyle='dotted';
+      arch2.style.borderColor=c+'55';
+      // 边缘扰动环 — 不规则闪烁的虚线外圈
+      var distRing=document.createElement('div');
+      var drSz=boxSz+22;
+      gPc(distRing,drSz,drSz);
+      distRing.style.cssText+='border-radius:50%;border:1px dashed '+c+'22;animation:gtSpin 3s linear infinite,gtW14DistRing 1.5s ease-in-out infinite;pointer-events:none';
+      box.appendChild(distRing);
+      gCSS+='@keyframes gtW14DistRing{0%,100%{opacity:0.15;border-color:'+c+'22}30%{opacity:0.5;border-color:'+c+'44}60%{opacity:0.1;border-color:'+c+'18}85%{opacity:0.4;border-color:'+c+'33}}';
+      // 漩涡不规则闪烁覆盖 — 更强
+      var flicker=document.createElement('div');
+      flicker.style.cssText='position:absolute;inset:0;border-radius:50%;background:'+c+'15;animation:gtW14Flicker 0.25s steps(3) infinite;pointer-events:none;z-index:4';
+      vortex.appendChild(flicker);
+      gCSS+='@keyframes gtW14Flicker{0%{opacity:0}20%{opacity:0.45}40%{opacity:0}60%{opacity:0.3}80%{opacity:0}100%{opacity:0.2}}';
+      // 内圈第二层闪烁
+      var flicker2=document.createElement('div');
+      flicker2.style.cssText='position:absolute;inset:20%;border-radius:50%;border:1px solid '+c+'18;animation:gtW14Fl2 0.8s ease-in-out infinite;pointer-events:none;z-index:4';
+      vortex.appendChild(flicker2);
+      gCSS+='@keyframes gtW14Fl2{0%,100%{opacity:0.1;border-color:'+c+'18}50%{opacity:0.5;border-color:'+c+'44}}';
+    }
+
+    // 数字
+    var num=document.createElement('div');num.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10';var fs=Math.round(15+p*6);num.innerHTML='<span style="font-family:Orbitron,monospace;font-size:'+fs+'px;font-weight:900;color:#fff;text-shadow:0 0 12px '+c+',0 0 28px '+c+'55,0 2px 3px rgba(0,0,0,0.8);-webkit-text-stroke:0.3px rgba(255,255,255,0.1)">'+wFmt(v)+'</span>';box.appendChild(num);
+    unit.appendChild(box);
+    // 符文
+    var rune=document.createElement('div');rune.style.cssText='width:110%;height:8px;position:relative;margin-top:2px';rune.innerHTML='<div style="position:absolute;inset:0;background:radial-gradient(ellipse,'+c+(isOpen?'55':'33')+',transparent 70%);animation:gtRuneG 2.5s ease-in-out infinite '+(-i*0.5)+'s"></div>';unit.appendChild(rune);
+    // 标签
+    var lbl=document.createElement('div');lbl.style.cssText='text-align:center;margin-top:5px;min-width:105px';lbl.innerHTML='<div style="font-family:Orbitron,monospace;font-size:16px;font-weight:700;color:'+c+';text-shadow:0 0 6px '+c+'55;letter-spacing:2px;line-height:1">'+wFmt(v)+'</div><div style="font-family:Orbitron,monospace;font-size:10px;color:#94a8c0;letter-spacing:1.5px;margin-top:4px;line-height:1">'+wLabels[i].split(' ')[0]+'</div><div style="font-family:\'Noto Sans TC\',sans-serif;font-size:10px;font-weight:500;color:'+c+'99;letter-spacing:3px;margin-top:3px;line-height:1">'+cfg.phase+'</div>';
+    unit.appendChild(lbl);
+    row.appendChild(unit);
+  });
+  sc.appendChild(row);
+  // 共享keyframes（只注入一次）
+  gCSS+='@keyframes gtPDot{0%,100%{opacity:0.3;transform:scale(0.75)}50%{opacity:1;transform:scale(1.4)}}';
+  gCSS+='@keyframes gtPSweep{0%{top:0;opacity:0}15%{opacity:0.6}85%{opacity:0.4}100%{top:calc(100% - 4px);opacity:0}}';
+  gCSS+='@keyframes gtSuck{0%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(1.5)}25%{opacity:0.9}100%{opacity:0;transform:translate(0,0) scale(0)}}';
+  gCSS+='@keyframes gtBmSk{0%,100%{opacity:0.5;transform:scale(0.8)}50%{opacity:1;transform:scale(1.4)}}';
+  gCSS+='@keyframes gtRuneG{0%,100%{opacity:0.25;transform:scaleX(1)}50%{opacity:0.7;transform:scaleX(1.12)}}';
+  // 粒子 30颗
+  for(var i=0;i<30;i++){var c=GC[i%4];var pt=document.createElement('div');pt.style.cssText='position:absolute;width:'+(1+wRn(0,2))+'px;height:'+(1+wRn(0,2))+'px;border-radius:50%;left:'+wRn(2,96)+'%;top:'+wRn(2,96)+'%;background:'+c+';box-shadow:0 0 '+(3+wRn(0,5))+'px '+c+';pointer-events:none;z-index:1;animation:gtScP '+(3+wRn(0,4))+'s ease-in-out infinite '+(-wRn(0,5))+'s';sc.appendChild(pt)}
+  gCSS+='@keyframes gtScP{0%,100%{opacity:0.06}30%{opacity:0.4}60%{opacity:0.1}85%{opacity:0.35}}';
+  var gSt=document.createElement('style');gSt.textContent=gCSS;document.head.appendChild(gSt);
+})();
+
+// 4. Ops Tanks — 机械能量槽 v2
+(function(){
+  var ctn=document.getElementById('ops-tanks');
+  if(!ctn) return;
+  var oMax=Math.max.apply(null,OPS.values);
+  var tankCfg=[
+    {color:'#ff8040',label:'提交查询处理单量',tag:'QRY-01',glow:0.7},
+    {color:'#00f0ff',label:'产品总数量',tag:'PRD-02',glow:0.85},
+    {color:'#9466ff',label:'交接数量',tag:'HND-03',glow:0.6},
+    {color:'#00ff88',label:'周回复量',tag:'RPL-04',glow:0.75}
+  ];
+  var oCSS='';
+  function hex(a){var h=Math.round(Math.min(1,Math.max(0,a))*255).toString(16);return h.length<2?'0'+h:h}
+
+  OPS.values.forEach(function(v,i){
+    var pct=Math.round(v/oMax*100);
+    var tc=tankCfg[i];
+    var c=tc.color;
+    var glowMul=tc.glow; // 控制每槽视觉权重
+
+    var tank=document.createElement('div');
+    tank.style.cssText='display:flex;align-items:center;gap:8px;position:relative';
+
+    // ── 左侧标签区 ──
+    var info=document.createElement('div');
+    info.style.cssText='width:120px;flex-shrink:0;text-align:right;padding-right:10px;border-right:2px solid '+c+'28;position:relative';
+    info.innerHTML=
+      '<div style="font-family:\'Noto Sans TC\',sans-serif;font-size:13px;font-weight:700;color:#dce8f4;line-height:1.2;margin-bottom:3px;text-shadow:0 1px 2px rgba(0,0,0,0.4)">'+tc.label+'</div>'+
+      '<div style="font-family:Orbitron,monospace;font-size:8px;color:'+c+'77;letter-spacing:2px">'+tc.tag+'</div>'+
+      // 边线上的微型指示灯
+      '<div style="position:absolute;right:-4px;top:50%;margin-top:-3px;width:6px;height:6px;border-radius:50%;background:'+c+';box-shadow:0 0 4px '+c+';animation:otLed 2.5s ease-in-out infinite '+(-i*0.5)+'s"></div>';
+    tank.appendChild(info);
+
+    // ── 槽体起始装置头 ──
+    var head=document.createElement('div');
+    head.style.cssText='width:8px;height:32px;flex-shrink:0;position:relative;border-radius:2px 0 0 2px;background:linear-gradient(180deg,'+c+'33,'+c+'18 40%,'+c+'22 60%,'+c+'33);border:1px solid '+c+'22;border-right:none;box-shadow:inset 0 1px 0 '+c+'22';
+    // 装置头上两个小圆孔
+    head.innerHTML='<div style="position:absolute;top:6px;left:2px;width:3px;height:3px;border-radius:50%;border:0.5px solid '+c+'33;background:rgba(0,0,0,0.3)"></div><div style="position:absolute;bottom:6px;left:2px;width:3px;height:3px;border-radius:50%;border:0.5px solid '+c+'33;background:rgba(0,0,0,0.3)"></div>';
+    tank.appendChild(head);
+
+    // ── 储槽外壳 ──
+    var shell=document.createElement('div');
+    shell.style.cssText='flex:1;height:32px;position:relative;border:1px solid '+c+'2a;border-left:none;border-radius:0 3px 3px 0;background:linear-gradient(180deg,rgba(10,18,35,0.8),rgba(0,0,0,0.3));overflow:hidden;box-shadow:inset 0 1px 0 '+c+'12,inset 0 -1px 0 rgba(0,0,0,0.25)';
+
+    // 刻度纹理 — 每 24px 一条主刻度 + 每 12px 一条副刻度
+    var ticksHTML=
+      '<div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 23px,'+c+'0a 23px,'+c+'0a 24px);pointer-events:none;z-index:1"></div>'+
+      '<div style="position:absolute;top:0;bottom:50%;background:repeating-linear-gradient(90deg,transparent,transparent 11px,'+c+'05 11px,'+c+'05 12px);pointer-events:none;z-index:1;left:0;right:0"></div>'+
+      // 顶部高光
+      '<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,'+c+'18,'+c+'0c 30%,transparent 80%);z-index:2"></div>';
+
+    // 液位填充 — glow 受权重控制
+    var fillGlow=Math.round(10*glowMul);
+    ticksHTML+=
+      '<div style="position:absolute;top:2px;bottom:2px;left:0;width:'+pct+'%;border-radius:0 2px 2px 0;background:linear-gradient(180deg,'+c+hex(0.3*glowMul)+','+c+hex(0.12*glowMul)+' 40%,'+c+hex(0.18*glowMul)+' 60%,'+c+hex(0.25*glowMul)+');box-shadow:0 0 '+fillGlow+'px '+c+hex(0.12*glowMul)+';animation:otFill'+i+' 1.5s ease-out forwards;z-index:1;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.06),transparent 35%,transparent 75%,rgba(0,0,0,0.08))"></div></div>';
+
+    // 液面前端亮条
+    ticksHTML+=
+      '<div style="position:absolute;top:3px;bottom:3px;left:'+pct+'%;margin-left:-2px;width:3px;border-radius:1px;background:'+c+';box-shadow:0 0 6px '+c+',0 0 '+Math.round(12*glowMul)+'px '+c+'44;z-index:2;animation:otFill'+i+' 1.5s ease-out forwards,otEdge 2.5s ease-in-out infinite '+(-i*0.6)+'s"></div>';
+
+    // 右侧状态灯
+    ticksHTML+=
+      '<div style="position:absolute;top:50%;right:8px;margin-top:-2.5px;width:5px;height:5px;border-radius:50%;background:'+c+';box-shadow:0 0 3px '+c+',0 0 6px '+c+'66;z-index:3;animation:otLed 2.5s ease-in-out infinite '+(-i*0.4)+'s"></div>';
+
+    shell.innerHTML=ticksHTML;
+    tank.appendChild(shell);
+
+    // ── 槽体末端盖 ──
+    var cap=document.createElement('div');
+    cap.style.cssText='width:4px;height:32px;flex-shrink:0;border-radius:0 2px 2px 0;background:linear-gradient(180deg,'+c+'22,'+c+'11 40%,'+c+'18);border:1px solid '+c+'1a;border-left:none';
+    tank.appendChild(cap);
+
+    // ── 右侧数值 ──
+    var val=document.createElement('div');
+    val.style.cssText='width:72px;flex-shrink:0;text-align:right;padding-left:6px';
+    val.innerHTML=
+      '<div style="font-family:Orbitron,monospace;font-size:17px;font-weight:900;color:'+c+';text-shadow:0 0 5px '+c+'44;letter-spacing:1px;line-height:1">'+v.toLocaleString()+'</div>'+
+      '<div style="font-family:Orbitron,monospace;font-size:9px;color:#8aa0c0;letter-spacing:1px;margin-top:2px">'+pct+'%</div>';
+    tank.appendChild(val);
+
+    ctn.appendChild(tank);
+    oCSS+='@keyframes otFill'+i+'{from{width:0}to{width:'+pct+'%}}';
+  });
+
+  // hex helper — 已在 forEach 外部定义
+  oCSS+='@keyframes otEdge{0%,100%{opacity:0.55}50%{opacity:1}}';
+  oCSS+='@keyframes otLed{0%,100%{opacity:0.35}50%{opacity:1}}';
+  var oSt=document.createElement('style');oSt.textContent=oCSS;document.head.appendChild(oSt);
+})();
 
 // ── Marquee ──
 const gT=document.getElementById('marquee-good'),bT=document.getElementById('marquee-bad');
