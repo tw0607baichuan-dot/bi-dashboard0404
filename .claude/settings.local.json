@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ':*)",
+      "Bash(start \"\" demo-01-rift.html)",
+      "Bash(start \"\" demo-02-entangle.html)",
+      "Bash(start \"\" demo-03-orbit.html)",
+      "Bash(start \"\" demo-04-fountain.html)",
+      "Bash(start \"\" demo-05-waterfall.html)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const h=fs.readFileSync\\('index.html','utf8'\\);const s=h.indexOf\\('<script>'\\)+8;const e=h.indexOf\\('</script>',s\\);try{new Function\\(h.substring\\(s,e\\)\\);console.log\\('OK'\\)}catch\\(e\\){console.log\\('ERROR: '+e.message\\)}\")"
+    ]
+  }
+}

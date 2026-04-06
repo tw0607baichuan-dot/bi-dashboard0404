@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Demo 03 — 偏心引力井</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;overflow:hidden;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{width:960px;height:600px;position:relative;overflow:hidden}
+.label{position:absolute;top:12px;left:16px;font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,240,255,0.4);letter-spacing:3px;z-index:20}
+.card{position:absolute;top:50%;width:340px;height:320px;border:1.5px solid rgba(0,195,255,0.25);border-radius:8px;background:rgba(6,12,28,0.92);backdrop-filter:blur(8px);z-index:10;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:2px;color:rgba(0,240,255,0.3)}
+.card.l{left:80px;transform:translateY(-50%)}
+.card.r{right:80px;transform:translateY(-50%);border-color:rgba(148,102,255,0.25);color:rgba(148,102,255,0.3)}
+.orbit-svg{position:absolute;inset:0;pointer-events:none;z-index:3}
+/* 引力涟漪 */
+.grav-ripple{position:absolute;border-radius:50%;pointer-events:none;border:1px solid}
+@keyframes gravRipple{0%{transform:scale(0.5);opacity:0.3}100%{transform:scale(2.5);opacity:0}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="label">03 — GRAVITY WELL ORBIT</div>
+  <div class="card l">LOCAL COMMAND</div>
+  <div class="card r">REMOTE LINK</div>
+  <svg class="orbit-svg" viewBox="0 0 960 600" id="osvg">
+    <defs><filter id="ogl"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  </svg>
+</div>
+<script>
+var svg=document.getElementById('osvg');
+var stage=document.getElementById('stage');
+var cx=480,cy=340;
+// 椭圆轨道 — 3条
+var orbits=[
+  {rx:380,ry:150,rot:-8,c:'rgba(0,195,255,',w:1.5,dash:'8 6',dur:16,dir:1},
+  {rx:310,ry:120,rot:-8,c:'rgba(0,240,255,',w:1,dash:'5 5',dur:12,dir:-1},
+  {rx:430,ry:170,rot:-8,c:'rgba(148,102,255,',w:1,dash:'10 8',dur:22,dir:1}
+];
+orbits.forEach(function(o,oi){
+  var el=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  el.setAttribute('cx',cx);el.setAttribute('cy',cy);el.setAttribute('rx',o.rx);el.setAttribute('ry',o.ry);
+  el.setAttribute('fill','none');el.setAttribute('stroke',o.c+'0.1)');el.setAttribute('stroke-width',o.w);
+  el.setAttribute('stroke-dasharray',o.dash);el.setAttribute('transform','rotate('+o.rot+' '+cx+' '+cy+')');
+  svg.appendChild(el);
+  // 轨道上的运行光点
+  var nDots=oi===2?2:3;
+  for(var d=0;d<nDots;d++){
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    var sz=oi===0?4:oi===1?3:2.5;
+    dot.setAttribute('r',sz);dot.setAttribute('fill',o.c+'0.7)');dot.setAttribute('filter','url(#ogl)');
+    var path='M'+(cx-o.rx)+','+cy+' A '+o.rx+' '+o.ry+' '+o.rot+' 1 '+(o.dir>0?'1':'0')+' '+(cx-o.rx)+','+cy;
+    // 用椭圆path
+    var ePath='M'+(cx+o.rx*Math.cos(o.rot*Math.PI/180))+','+(cy+o.rx*Math.sin(o.rot*Math.PI/180));
+    // 简化：用animateMotion沿ellipse
+    var am=document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
+    am.setAttribute('dur',o.dur+'s');am.setAttribute('repeatCount','indefinite');
+    // 直接用mpath引用ellipse太复杂，用近似path
+    var pts=[];
+    for(var t=0;t<=72;t++){
+      var a=t/72*Math.PI*2;
+      var px=cx+o.rx*Math.cos(a);
+      var py=cy+o.ry*Math.sin(a);
+      // 旋转
+      var rad=o.rot*Math.PI/180;
+      var rpx=cx+(px-cx)*Math.cos(rad)-(py-cy)*Math.sin(rad);
+      var rpy=cy+(px-cx)*Math.sin(rad)+(py-cy)*Math.cos(rad);
+      pts.push((t===0?'M':'L')+Math.round(rpx)+','+Math.round(rpy));
+    }
+    pts.push('Z');
+    am.setAttribute('path',pts.join(' '));
+    am.setAttribute('begin',(-d*(o.dur/nDots))+'s');
+    if(o.dir<0){am.setAttribute('keyPoints','1;0');am.setAttribute('keyTimes','0;1')}
+    dot.appendChild(am);svg.appendChild(dot);
+  }
+});
+// 焦点涟漪
+var focii=[{x:250,y:300,c:'rgba(0,240,255,'},{x:710,y:300,c:'rgba(148,102,255,'}];
+focii.forEach(function(f){
+  for(var r=0;r<2;r++){
+    var rip=document.createElement('div');rip.className='grav-ripple';
+    rip.style.cssText='left:'+(f.x-30)+'px;top:'+(f.y-30)+'px;width:60px;height:60px;border-color:'+f.c+'0.2);animation:gravRipple 3.5s ease-out infinite '+(-r*1.75)+'s';
+    stage.appendChild(rip);
+  }
+});
+</script>
+</body>
+</html>

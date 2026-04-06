@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Demo 02 — 双核心纠缠场</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;overflow:hidden;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{width:960px;height:600px;position:relative;overflow:hidden}
+.label{position:absolute;top:12px;left:16px;font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,240,255,0.4);letter-spacing:3px;z-index:20}
+.card{position:absolute;top:50%;width:340px;height:320px;border:1.5px solid rgba(0,195,255,0.25);border-radius:8px;background:rgba(6,12,28,0.92);backdrop-filter:blur(8px);z-index:10;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:2px;color:rgba(0,240,255,0.3)}
+.card.l{left:80px;transform:translateY(-50%)}
+.card.r{right:80px;transform:translateY(-50%);border-color:rgba(148,102,255,0.25);color:rgba(148,102,255,0.3)}
+/* 能量雾体 */
+.nebula{position:absolute;border-radius:50%;pointer-events:none}
+@keyframes nebMorph{0%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.06) rotate(3deg)}50%{transform:scale(0.95) rotate(-2deg)}75%{transform:scale(1.04) rotate(2deg)}100%{transform:scale(1) rotate(0deg)}}
+/* 丝线SVG */
+.tangle-svg{position:absolute;inset:0;pointer-events:none;z-index:4}
+/* 脱落粒子 */
+.neb-pt{position:absolute;border-radius:50%;pointer-events:none}
+@keyframes nebPtDrift{0%{opacity:0.4;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="label">02 — ENTANGLEMENT FIELD</div>
+  <div class="card l">LOCAL COMMAND</div>
+  <div class="card r">REMOTE LINK</div>
+  <svg class="tangle-svg" viewBox="0 0 960 600" id="tsvg">
+    <defs><filter id="tgl"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  </svg>
+</div>
+<script>
+var stage=document.getElementById('stage');
+var svg=document.getElementById('tsvg');
+// 左侧星云(4个椭圆叠加)
+var leftNeb=[
+  {w:280,h:220,x:210,y:280,o:0.08,c:'0,180,255',dur:7,del:0},
+  {w:220,h:180,x:230,y:260,o:0.06,c:'0,240,255',dur:8.5,del:-2},
+  {w:160,h:250,x:250,y:300,o:0.05,c:'0,200,255',dur:6,del:-4},
+  {w:300,h:160,x:200,y:310,o:0.04,c:'0,160,240',dur:9,del:-1}
+];
+leftNeb.forEach(function(n){
+  var el=document.createElement('div');el.className='nebula';
+  el.style.cssText='width:'+n.w+'px;height:'+n.h+'px;left:'+(n.x-n.w/2)+'px;top:'+(n.y-n.h/2)+'px;background:radial-gradient(ellipse,rgba('+n.c+','+n.o+'),transparent 65%);animation:nebMorph '+n.dur+'s ease-in-out infinite '+n.del+'s';
+  stage.appendChild(el);
+});
+// 右侧星云
+var rightNeb=[
+  {w:260,h:210,x:750,y:290,o:0.07,c:'148,102,255',dur:8,del:0},
+  {w:200,h:170,x:730,y:270,o:0.055,c:'120,80,220',dur:7.5,del:-2.5},
+  {w:150,h:230,x:770,y:310,o:0.045,c:'148,102,255',dur:6.5,del:-3.5},
+  {w:280,h:150,x:760,y:320,o:0.035,c:'100,60,200',dur:9.5,del:-1.5}
+];
+rightNeb.forEach(function(n){
+  var el=document.createElement('div');el.className='nebula';
+  el.style.cssText='width:'+n.w+'px;height:'+n.h+'px;left:'+(n.x-n.w/2)+'px;top:'+(n.y-n.h/2)+'px;background:radial-gradient(ellipse,rgba('+n.c+','+n.o+'),transparent 65%);animation:nebMorph '+n.dur+'s ease-in-out infinite '+n.del+'s';
+  stage.appendChild(el);
+});
+// 纠缠丝线(SVG贝塞尔)
+var paths=[
+  {d:'M270,240 C380,200 580,350 690,260',c:'#00f0ff',w:1.5,dur:3},
+  {d:'M260,310 C400,380 560,220 700,300',c:'#9466ff',w:1,dur:3.5},
+  {d:'M255,360 C370,300 590,340 705,340',c:'#0074ff',w:1.2,dur:4}
+];
+paths.forEach(function(p){
+  // 光带
+  var gl=document.createElementNS('http://www.w3.org/2000/svg','path');
+  gl.setAttribute('d',p.d);gl.setAttribute('fill','none');gl.setAttribute('stroke',p.c);gl.setAttribute('stroke-width','8');gl.setAttribute('opacity','0.04');gl.setAttribute('filter','url(#tgl)');
+  svg.appendChild(gl);
+  // 虚线
+  var ln=document.createElementNS('http://www.w3.org/2000/svg','path');
+  ln.setAttribute('d',p.d);ln.setAttribute('fill','none');ln.setAttribute('stroke',p.c);ln.setAttribute('stroke-width',p.w);ln.setAttribute('opacity','0.2');ln.setAttribute('stroke-dasharray','6 5');
+  var anim=document.createElementNS('http://www.w3.org/2000/svg','animate');
+  anim.setAttribute('attributeName','stroke-dashoffset');anim.setAttribute('from','0');anim.setAttribute('to','-22');anim.setAttribute('dur',p.dur+'s');anim.setAttribute('repeatCount','indefinite');
+  ln.appendChild(anim);svg.appendChild(ln);
+  // 穿梭光点
+  for(var i=0;i<2;i++){
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('r','2.5');dot.setAttribute('fill',p.c);dot.setAttribute('opacity','0.6');dot.setAttribute('filter','url(#tgl)');
+    var am=document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
+    am.setAttribute('dur',(2.5+i*1.5)+'s');am.setAttribute('repeatCount','indefinite');am.setAttribute('path',p.d);
+    if(i===1){am.setAttribute('keyPoints','1;0');am.setAttribute('keyTimes','0;1')}
+    dot.appendChild(am);svg.appendChild(dot);
+  }
+});
+// 脱落粒子
+for(var i=0;i<20;i++){
+  var isLeft=i<10;
+  var pt=document.createElement('div');pt.className='neb-pt';
+  var cx=isLeft?210+Math.random()*80:720+Math.random()*80;
+  var cy=240+Math.random()*120;
+  var sz=1+Math.random()*2;
+  var c=isLeft?'rgba(0,240,255,':'rgba(148,102,255,';
+  pt.style.cssText='left:'+cx+'px;top:'+cy+'px;width:'+sz+'px;height:'+sz+'px;background:'+c+'0.5);box-shadow:0 0 4px '+c+'0.3);animation:nebPtDrift '+(6+Math.random()*8)+'s ease-out infinite '+(-Math.random()*8)+'s;--dx:'+(Math.random()*60-30)+'px;--dy:'+(Math.random()*40-20)+'px';
+  stage.appendChild(pt);
+}
+</script>
+</body>
+</html>

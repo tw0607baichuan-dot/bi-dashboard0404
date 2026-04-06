@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>方案5 — 机械天平 / 平衡臂结构</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Noto Sans TC',sans-serif;color:#f4f9ff;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+
+.panel{
+  width:580px;height:360px;position:relative;
+  background:linear-gradient(160deg,rgba(0,100,255,0.04) 0%,transparent 40%,rgba(148,102,255,0.02) 100%),rgba(6,12,28,0.94);
+  border:1px solid rgba(0,195,255,0.32);border-radius:4px;padding:14px 18px;
+  backdrop-filter:blur(16px);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.panel::before{content:'';position:absolute;inset:3px;border:1px solid rgba(0,180,255,0.05);border-radius:2px;pointer-events:none}
+.panel::after{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#00f0ff,#9466ff,transparent);opacity:0.4}
+.panel-title{font-size:17px;font-weight:700;color:#00f0ff;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:8px;font-family:'Orbitron',monospace}
+.panel-title::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,#00f0ff,#9466ff);border-radius:2px;box-shadow:0 0 6px rgba(0,240,255,0.5)}
+.panel-title .mod{font-size:10px;color:rgba(0,240,255,0.4);letter-spacing:1px;margin-left:auto}
+
+.balance-scene{flex:1;position:relative;display:flex;align-items:center;justify-content:center}
+
+/* ── 中央主轴枢纽 ── */
+.pivot{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  z-index:10;text-align:center;
+}
+/* 枢纽外环 */
+.pivot-ring{
+  width:100px;height:100px;border-radius:50%;position:relative;margin:0 auto;
+  border:2px solid rgba(0,240,255,0.2);
+  background:radial-gradient(circle at 40% 35%,rgba(0,120,200,0.12),rgba(6,12,28,0.9) 70%);
+  box-shadow:0 0 24px rgba(0,240,255,0.1),0 0 50px rgba(0,180,255,0.04),inset 0 0 20px rgba(0,240,255,0.06);
+}
+/* 枢纽内齿轮 */
+.pivot-gear{
+  position:absolute;inset:12px;border-radius:50%;
+  border:1.5px dashed rgba(0,240,255,0.18);
+  animation:gearSpin 10s linear infinite;
+}
+@keyframes gearSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.pivot-gear::before{content:'';position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(148,102,255,0.12);animation:gearSpin 7s linear infinite reverse}
+/* 枢纽数据 */
+.pivot-data{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;
+}
+.pivot-val{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;color:#fff;text-shadow:0 0 8px rgba(0,240,255,0.5),0 0 20px rgba(0,240,255,0.15);letter-spacing:2px;line-height:1}
+.pivot-lbl{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:rgba(0,240,255,0.45);margin-top:3px}
+/* 枢纽下方支柱 */
+.pivot-shaft{
+  width:2px;height:30px;margin:0 auto;
+  background:linear-gradient(180deg,rgba(0,240,255,0.3),rgba(0,240,255,0.05));
+  box-shadow:0 0 6px rgba(0,240,255,0.15);
+}
+.pivot-base{
+  width:40px;height:4px;margin:0 auto;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,240,255,0.25),transparent);
+  box-shadow:0 0 8px rgba(0,240,255,0.1);
+}
+
+/* ── 机械臂 ── */
+.mech-arm{position:absolute;z-index:5}
+
+/* 臂杆 SVG */
+.arm-beam{position:absolute;pointer-events:none}
+
+/* 负载模块（数据晶块） */
+.load-module{
+  width:140px;padding:14px 12px;border-radius:5px;
+  backdrop-filter:blur(10px);text-align:center;position:relative;
+  transition:transform 0.3s,box-shadow 0.3s;
+}
+.load-module:hover{transform:translateY(-3px)}
+
+/* 负载体量条 — 侧面高度指示 */
+.load-bar{
+  position:absolute;right:-10px;bottom:0;width:5px;border-radius:3px;
+  background:var(--lb-c,rgba(0,240,255,0.2));
+  box-shadow:0 0 8px var(--lb-g,rgba(0,240,255,0.15));
+  transition:height 0.5s;
+}
+
+.lm-label{font-size:11px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:5px;opacity:0.7}
+.lm-val{font-family:'Orbitron',monospace;font-size:30px;font-weight:900;line-height:1;margin-bottom:3px}
+.lm-time{font-size:9px;color:rgba(180,200,228,0.45);letter-spacing:1px}
+.lm-weight{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;margin-top:8px;
+  padding:2px 10px;border-radius:2px;display:inline-block;
+}
+
+/* 早班 — 左臂 */
+.arm-left{left:16px;top:22px}
+.arm-left .load-module{
+  background:linear-gradient(135deg,rgba(0,240,255,0.08),rgba(0,120,200,0.03));
+  border:1px solid rgba(0,240,255,0.3);
+  box-shadow:0 0 14px rgba(0,240,255,0.08),inset 0 1px 0 rgba(0,240,255,0.15),inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+.arm-left .lm-val{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,0.5)}
+.arm-left .lm-weight{color:#00f0ff;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.2)}
+.arm-left .load-bar{--lb-c:rgba(0,240,255,0.3);--lb-g:rgba(0,240,255,0.2)}
+
+/* 中班 — 右臂 */
+.arm-right{right:16px;top:22px}
+.arm-right .load-module{
+  background:linear-gradient(135deg,rgba(0,116,255,0.08),rgba(0,60,180,0.03));
+  border:1px solid rgba(0,116,255,0.3);
+  box-shadow:0 0 14px rgba(0,116,255,0.08),inset 0 1px 0 rgba(0,116,255,0.15),inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+.arm-right .lm-val{color:#0074ff;text-shadow:0 0 8px rgba(0,116,255,0.5)}
+.arm-right .lm-weight{color:#0074ff;background:rgba(0,116,255,0.06);border:1px solid rgba(0,116,255,0.2)}
+.arm-right .load-bar{--lb-c:rgba(0,116,255,0.3);--lb-g:rgba(0,116,255,0.2)}
+
+/* 晚班 — 下臂 */
+.arm-bottom{left:50%;bottom:8px;transform:translateX(-50%)}
+.arm-bottom .load-module{
+  background:linear-gradient(135deg,rgba(148,102,255,0.08),rgba(100,60,200,0.03));
+  border:1px solid rgba(148,102,255,0.3);
+  box-shadow:0 0 14px rgba(148,102,255,0.08),inset 0 1px 0 rgba(148,102,255,0.15),inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+.arm-bottom .lm-val{color:#9466ff;text-shadow:0 0 8px rgba(148,102,255,0.5)}
+.arm-bottom .lm-weight{color:#9466ff;background:rgba(148,102,255,0.06);border:1px solid rgba(148,102,255,0.2)}
+.arm-bottom .load-bar{--lb-c:rgba(148,102,255,0.3);--lb-g:rgba(148,102,255,0.2)}
+
+/* ── 铰接关节装饰 ── */
+.joint{
+  position:absolute;width:10px;height:10px;border-radius:50%;
+  border:1.5px solid rgba(0,240,255,0.25);
+  background:rgba(0,240,255,0.06);
+  box-shadow:0 0 8px rgba(0,240,255,0.1);
+  z-index:6;
+}
+.joint::after{content:'';position:absolute;inset:2px;border-radius:50%;background:rgba(0,240,255,0.15)}
+.joint.j-cyan{border-color:rgba(0,240,255,0.3)}
+.joint.j-blue{border-color:rgba(0,116,255,0.3);background:rgba(0,116,255,0.06);box-shadow:0 0 8px rgba(0,116,255,0.1)}
+.joint.j-blue::after{background:rgba(0,116,255,0.15)}
+.joint.j-purple{border-color:rgba(148,102,255,0.3);background:rgba(148,102,255,0.06);box-shadow:0 0 8px rgba(148,102,255,0.1)}
+.joint.j-purple::after{background:rgba(148,102,255,0.15)}
+
+/* 刻度尺装饰 */
+.scale-ticks{
+  position:absolute;bottom:4px;left:12%;right:12%;height:12px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  opacity:0.2;pointer-events:none;
+}
+.scale-ticks span{width:1px;background:rgba(0,240,255,0.5)}
+.scale-ticks span:nth-child(5n+1){height:10px}
+.scale-ticks span:nth-child(5n+2),.scale-ticks span:nth-child(5n+3),.scale-ticks span:nth-child(5n+4),.scale-ticks span:nth-child(5n){height:5px}
+
+/* 方案标识 */
+.scheme-tag{position:absolute;top:12px;right:16px;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,240,255,0.3);z-index:20}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="panel-title"><span>各班别回复量</span><span class="mod">SYS-02</span></div>
+  <span class="scheme-tag">SCHEME 5 — BALANCE ARM</span>
+
+  <div class="balance-scene" id="scene">
+    <!-- 机械臂 SVG -->
+    <svg class="arm-beam" width="100%" height="100%" style="position:absolute;inset:0;z-index:4">
+      <defs>
+        <linearGradient id="arm1" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.5"/>
+          <stop offset="40%" stop-color="#00f0ff" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="arm2" x1="100%" y1="0%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#0074ff" stop-opacity="0.5"/>
+          <stop offset="40%" stop-color="#0074ff" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#0074ff" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="arm3" x1="50%" y1="100%" x2="50%" y2="0%">
+          <stop offset="0%" stop-color="#9466ff" stop-opacity="0.5"/>
+          <stop offset="40%" stop-color="#9466ff" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#9466ff" stop-opacity="0.05"/>
+        </linearGradient>
+        <filter id="armGlow"><feGaussianBlur stdDeviation="1.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- 左臂：早班→枢纽 -->
+      <line x1="26%" y1="34%" x2="44%" y2="40%" stroke="url(#arm1)" stroke-width="3" filter="url(#armGlow)"/>
+      <line x1="26%" y1="34%" x2="44%" y2="40%" stroke="rgba(0,240,255,0.1)" stroke-width="8"/>
+      <!-- 右臂：中班→枢纽 -->
+      <line x1="74%" y1="34%" x2="56%" y2="40%" stroke="url(#arm2)" stroke-width="3" filter="url(#armGlow)"/>
+      <line x1="74%" y1="34%" x2="56%" y2="40%" stroke="rgba(0,116,255,0.1)" stroke-width="8"/>
+      <!-- 下臂：晚班→枢纽 -->
+      <line x1="50%" y1="76%" x2="50%" y2="52%" stroke="url(#arm3)" stroke-width="3" filter="url(#armGlow)"/>
+      <line x1="50%" y1="76%" x2="50%" y2="52%" stroke="rgba(148,102,255,0.1)" stroke-width="8"/>
+      <!-- 臂上刻度 -->
+      <g stroke="rgba(0,240,255,0.12)" stroke-width="0.5">
+        <line x1="30%" y1="33%" x2="30%" y2="37%"/><line x1="34%" y1="34%" x2="34%" y2="38%"/><line x1="38%" y1="36%" x2="38%" y2="40%"/>
+      </g>
+      <g stroke="rgba(0,116,255,0.12)" stroke-width="0.5">
+        <line x1="70%" y1="33%" x2="70%" y2="37%"/><line x1="66%" y1="34%" x2="66%" y2="38%"/><line x1="62%" y1="36%" x2="62%" y2="40%"/>
+      </g>
+      <g stroke="rgba(148,102,255,0.12)" stroke-width="0.5">
+        <line x1="48.5%" y1="60%" x2="51.5%" y2="60%"/><line x1="48.5%" y1="66%" x2="51.5%" y2="66%"/><line x1="48.5%" y1="72%" x2="51.5%" y2="72%"/>
+      </g>
+    </svg>
+
+    <!-- 铰接关节 -->
+    <div class="joint j-cyan" style="left:28%;top:33%;transform:translate(-50%,-50%)"></div>
+    <div class="joint j-blue" style="left:72%;top:33%;transform:translate(-50%,-50%)"></div>
+    <div class="joint j-purple" style="left:50%;top:74%;transform:translate(-50%,-50%)"></div>
+
+    <!-- 中央枢纽 -->
+    <div class="pivot">
+      <div class="pivot-ring">
+        <div class="pivot-gear"></div>
+        <div class="pivot-data">
+          <div class="pivot-val">1,284</div>
+          <div class="pivot-lbl">LOAD TOTAL</div>
+        </div>
+      </div>
+      <div class="pivot-shaft"></div>
+      <div class="pivot-base"></div>
+    </div>
+
+    <!-- 早班 — 左臂负载 -->
+    <div class="mech-arm arm-left">
+      <div class="load-module">
+        <div class="load-bar" style="height:70px"></div>
+        <div class="lm-label">早班</div>
+        <div class="lm-val">520</div>
+        <div class="lm-time">08:00 — 16:00</div>
+        <div class="lm-weight">LOAD 40.5%</div>
+      </div>
+    </div>
+
+    <!-- 中班 — 右臂负载 -->
+    <div class="mech-arm arm-right">
+      <div class="load-module">
+        <div class="load-bar" style="height:65px"></div>
+        <div class="lm-label">中班</div>
+        <div class="lm-val">485</div>
+        <div class="lm-time">16:00 — 00:00</div>
+        <div class="lm-weight">LOAD 37.8%</div>
+      </div>
+    </div>
+
+    <!-- 晚班 — 下臂负载 -->
+    <div class="mech-arm arm-bottom">
+      <div class="load-module">
+        <div class="load-bar" style="height:38px;right:auto;left:-10px"></div>
+        <div class="lm-label">晚班</div>
+        <div class="lm-val">279</div>
+        <div class="lm-time">00:00 — 08:00</div>
+        <div class="lm-weight">LOAD 21.7%</div>
+      </div>
+    </div>
+
+    <!-- 底部刻度尺 -->
+    <div class="scale-ticks" id="ticks"></div>
+  </div>
+</div>
+
+<script>
+// 生成底部刻度
+(function(){
+  var t=document.getElementById('ticks');
+  for(var i=0;i<41;i++){var s=document.createElement('span');t.appendChild(s)}
+})();
+</script>
+</body>
+</html>

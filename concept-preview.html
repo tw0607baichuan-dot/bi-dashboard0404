@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>A vs C — 基礎可見版</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;font-family:'Noto Sans TC',sans-serif;color:#f4f9ff;padding:16px 24px 60px}
+h1{font-family:'Orbitron',monospace;font-size:13px;color:#00f0ff;letter-spacing:5px;text-align:center;margin-bottom:3px;text-shadow:0 0 8px rgba(0,240,255,0.4)}
+.sub{text-align:center;font-size:11px;color:#8aa0c0;margin-bottom:20px}
+.panel{width:960px;height:420px;position:relative;margin:0 auto 28px;background:rgba(6,12,28,0.94);border:1px solid rgba(0,195,255,0.28);border-radius:4px;padding:12px 18px;overflow:hidden;display:flex;flex-direction:column}
+.panel::after{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#00f0ff,#9466ff,transparent);opacity:0.35}
+.pt{font-size:15px;font-weight:700;color:#00f0ff;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:1px}
+.pt-sub{font-size:10px;color:#8aa0c0;letter-spacing:1.5px;font-family:'Orbitron',monospace;margin-bottom:6px}
+.scene{flex:1;position:relative;overflow:hidden}
+
+/* ═══ 共用动画 ═══ */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinR{to{transform:rotate(-360deg)}}
+@keyframes breathe{0%,100%{opacity:0.5}50%{opacity:1}}
+
+/* ═══════════════════════════════════
+   A. 反應爐
+   ═══════════════════════════════════ */
+.rx-row{
+  display:flex; align-items:center; justify-content:center;
+  gap:24px; height:100%; padding:10px 20px;
+}
+/* 单体 */
+.rx-unit{display:flex;flex-direction:column;align-items:center}
+/* 核心容器 — 这是所有环/球的定位参考 */
+.rx-box{position:relative;display:block}
+
+/* 环 — 全部用 margin 负值居中，不用 translate */
+.rx-ring{
+  position:absolute; border-radius:50%; pointer-events:none;
+  /* 居中公式: left = 50% - width/2, top = 50% - height/2 */
+}
+/* 核心球 */
+.rx-ball{position:absolute;border-radius:50%}
+/* 爆波 */
+.rx-wave{position:absolute;border-radius:50%;pointer-events:none}
+/* 数字 */
+.rx-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
+.rx-v{font-family:'Orbitron',monospace;font-weight:900;color:#fff;line-height:1}
+.rx-p{font-family:'Orbitron',monospace;font-size:9px;margin-top:2px}
+/* 标签 */
+.rx-lbl{text-align:center;margin-top:8px}
+.rx-lbl b{font-family:'Orbitron',monospace;font-size:17px;font-weight:700;display:block}
+.rx-lbl small{font-family:'Orbitron',monospace;font-size:10px;color:#8aa0c0}
+/* 串流svg */
+.rx-svg{position:absolute;inset:0;pointer-events:none;z-index:1}
+/* 背景震波 */
+.rx-bgwave{position:absolute;border-radius:50%;pointer-events:none;left:50%;top:50%}
+/* 粒子 */
+.rx-pt{position:absolute;border-radius:50%;pointer-events:none}
+
+/* ═══════════════════════════════════
+   C. 傳送門
+   ═══════════════════════════════════ */
+.gt-row{
+  display:flex; align-items:center; justify-content:center;
+  gap:20px; height:100%; padding:10px 16px 24px;
+}
+.gt-unit{display:flex;flex-direction:column;align-items:center}
+.gt-box{position:relative;display:block}
+/* 门拱 */
+.gt-arch{position:absolute;border-radius:50%;pointer-events:none}
+/* 漩涡 */
+.gt-vortex{position:absolute;border-radius:50%;overflow:hidden}
+/* 降束 */
+.gt-beam{position:absolute;border-radius:2px}
+/* 门柱 */
+.gt-pil{position:absolute;border-radius:2px}
+/* 吸入粒子 */
+.gt-sk{position:absolute;border-radius:50%;pointer-events:none}
+/* 标签 */
+.gt-lbl{text-align:center;margin-top:6px}
+.gt-lbl b{font-family:'Orbitron',monospace;font-size:17px;font-weight:700;display:block}
+.gt-lbl small{font-family:'Orbitron',monospace;font-size:10px;color:#8aa0c0}
+/* 底线 */
+.gt-floor{position:absolute;bottom:0;left:0;right:0;height:3px;pointer-events:none}
+/* 底部数字 */
+.gt-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10}
+.gt-v{font-family:'Orbitron',monospace;font-weight:900;color:#fff;line-height:1}
+/* 粒子 */
+.gt-pt{position:absolute;border-radius:50%;pointer-events:none}
+/* 底部共振波 */
+.gt-rip{position:absolute;bottom:0;height:1px;border-radius:50%;pointer-events:none;left:50%}
+</style>
+</head>
+<body>
+<h1>A vs C — 基礎可見版</h1>
+<div class="sub">修復確認 ・ 核心主體穩定顯示 ・ 再疊加強化</div>
+
+<div class="panel">
+  <div class="pt">A. 反應爐核心陣列</div>
+  <div class="pt-sub">REACTOR CORE ARRAY — BASE VISIBLE</div>
+  <div class="scene" id="sA"></div>
+</div>
+
+<div class="panel">
+  <div class="pt">C. 地下城傳送門列</div>
+  <div class="pt-sub">DUNGEON PORTAL ARRAY — BASE VISIBLE</div>
+  <div class="scene" id="sC"></div>
+</div>
+
+<script>
+var D={labels:['W11','W12','W13','W14'],values:[1980,2140,1930,1320]};
+var maxV=Math.max.apply(null,D.values);
+var peakI=D.values.indexOf(maxV);
+function fmt(v){return v.toLocaleString()}
+function pct(v){return Math.round(v/maxV*100)}
+function rn(a,b){return Math.random()*(b-a)+a}
+var svgNS='http://www.w3.org/2000/svg';
+var COLORS=['#00f0ff','#00c8ff','#0080ff','#9466ff'];
+
+// *** 居中定位helper — 用 left/top 百分比 + 负margin ***
+// parent 必须有 position:relative 和明确的 width/height
+function placeCenter(el, w, h){
+  el.style.width = w+'px';
+  el.style.height = h+'px';
+  el.style.left = '50%';
+  el.style.top = '50%';
+  el.style.marginLeft = (-w/2)+'px';
+  el.style.marginTop = (-h/2)+'px';
+}
+
+// ════════════════════════════════════
+// A. 反應爐 — 基础可见版
+// ════════════════════════════════════
+(function(){
+  var s = document.getElementById('sA');
+
+  // 背景震波 x2
+  var dynCSS = '';
+  for(var w=0;w<2;w++){
+    var bw = document.createElement('div');
+    bw.className = 'rx-bgwave';
+    bw.style.cssText = 'width:40px;height:40px;margin-left:-20px;margin-top:-20px;border:1px solid rgba(0,240,255,0.1);animation:rxBgW '+(3.5+w)+'s ease-out infinite '+(-w*1.5)+'s';
+    s.appendChild(bw);
+  }
+  dynCSS += '@keyframes rxBgW{0%{transform:scale(1);opacity:0.5;border-width:2px}100%{transform:scale(16);opacity:0;border-width:0.3px}}';
+
+  // SVG串流
+  var svg = document.createElementNS(svgNS,'svg');
+  svg.className = 'rx-svg';
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height','100%');
+  s.appendChild(svg);
+
+  // 核心行
+  var row = document.createElement('div');
+  row.className = 'rx-row';
+
+  var speeds = [[5,3.5,2],[4.5,3,1.8],[5.5,3.8,2.2],[6,4,2.5]];
+  var unitData = [];
+
+  D.values.forEach(function(v, i){
+    var p = pct(v)/100;
+    var boxSz = Math.round(110 + 60*p); // 110~170px
+    var c = COLORS[i];
+
+    var unit = document.createElement('div');
+    unit.className = 'rx-unit';
+
+    // 核心容器
+    var box = document.createElement('div');
+    box.className = 'rx-box';
+    box.style.width = boxSz+'px';
+    box.style.height = boxSz+'px';
+
+    // --- 环1: 外环，实线，正转 ---
+    var r1sz = boxSz + 10;
+    var ring1 = document.createElement('div');
+    ring1.className = 'rx-ring';
+    placeCenter(ring1, r1sz, r1sz);
+    ring1.style.border = '2px solid '+c;
+    ring1.style.boxShadow = '0 0 16px '+c+'33';
+    ring1.style.animation = 'spin '+speeds[i][0]+'s linear infinite';
+    // 追踪亮点
+    ring1.innerHTML = '<div style="position:absolute;top:-4px;left:50%;margin-left:-4px;width:8px;height:8px;border-radius:50%;background:'+c+';box-shadow:0 0 12px '+c+',0 0 24px '+c+'"></div>';
+    box.appendChild(ring1);
+
+    // --- 环2: 中环，虚线，反转 ---
+    var r2sz = boxSz - 8;
+    var ring2 = document.createElement('div');
+    ring2.className = 'rx-ring';
+    placeCenter(ring2, r2sz, r2sz);
+    ring2.style.border = '1.5px dashed '+c+'44';
+    ring2.style.animation = 'spinR '+speeds[i][1]+'s linear infinite';
+    box.appendChild(ring2);
+
+    // --- 环3: 内环，点线，正转 ---
+    var r3sz = boxSz - 24;
+    var ring3 = document.createElement('div');
+    ring3.className = 'rx-ring';
+    placeCenter(ring3, r3sz, r3sz);
+    ring3.style.border = '1px dotted '+c+'2a';
+    ring3.style.animation = 'spin '+speeds[i][2]+'s linear infinite';
+    box.appendChild(ring3);
+
+    // --- 核心球 ---
+    var ballSz = Math.round(boxSz * 0.42);
+    var ball = document.createElement('div');
+    ball.className = 'rx-ball';
+    placeCenter(ball, ballSz, ballSz);
+    ball.style.background = 'radial-gradient(circle at 36% 30%, '+c+'66, '+c+'22 50%, rgba(0,0,0,0.2) 75%)';
+    ball.style.border = '1.5px solid '+c+'88';
+    ball.style.boxShadow = '0 0 20px '+c+'33, 0 0 40px '+c+'18, inset 0 0 16px '+c+'1a';
+    ball.style.animation = 'rxBall'+i+' 2.5s ease-in-out infinite '+(-i*0.6)+'s';
+    box.appendChild(ball);
+
+    // 球脉冲动画 — 只用 scale，不用 translate
+    dynCSS += '@keyframes rxBall'+i+'{'+
+      '0%,100%{transform:scale(1);box-shadow:0 0 20px '+c+'33,0 0 40px '+c+'18,inset 0 0 16px '+c+'1a}'+
+      '50%{transform:scale(1.08);box-shadow:0 0 32px '+c+'55,0 0 56px '+c+'28,inset 0 0 24px '+c+'2a}}';
+
+    // --- 爆波 x2 ---
+    for(var pw=0;pw<2;pw++){
+      var wave = document.createElement('div');
+      wave.className = 'rx-wave';
+      placeCenter(wave, ballSz+8, ballSz+8);
+      wave.style.border = '1.5px solid '+c;
+      wave.style.animation = 'rxWave 3s ease-out infinite '+(-pw*1.5-i*0.3)+'s';
+      box.appendChild(wave);
+    }
+    dynCSS += '@keyframes rxWave{0%{transform:scale(0.5);opacity:0.6;border-width:2px}100%{transform:scale(2.5);opacity:0;border-width:0.3px}}';
+
+    // --- 数字 ---
+    var num = document.createElement('div');
+    num.className = 'rx-num';
+    var fs = Math.round(15 + p*5);
+    num.innerHTML = '<span class="rx-v" style="font-size:'+fs+'px;text-shadow:0 0 10px '+c+',0 0 24px '+c+'55">'+fmt(v)+'</span><span class="rx-p" style="color:'+c+'">'+pct(v)+'%</span>';
+    box.appendChild(num);
+
+    unit.appendChild(box);
+
+    // --- 底部标签 ---
+    var lbl = document.createElement('div');
+    lbl.className = 'rx-lbl';
+    lbl.innerHTML = '<b style="color:'+c+';text-shadow:0 0 6px '+c+'55">'+fmt(v)+'</b><small>'+D.labels[i]+'</small>';
+    unit.appendChild(lbl);
+
+    row.appendChild(unit);
+    unitData.push({box:box, color:c});
+  });
+
+  s.appendChild(row);
+
+  // 注入动画
+  var st = document.createElement('style');
+  st.textContent = dynCSS;
+  document.head.appendChild(st);
+
+  // 串流连线
+  setTimeout(function(){
+    var sr = s.getBoundingClientRect();
+    var pts = unitData.map(function(u){
+      var r = u.box.getBoundingClientRect();
+      return {x:r.left+r.width/2-sr.left, y:r.top+r.height/2-sr.top};
+    });
+    for(var i=0; i<pts.length-1; i++){
+      var a=pts[i], b=pts[i+1], c=unitData[i].color;
+      // 光带
+      var gl = document.createElementNS(svgNS,'line');
+      gl.setAttribute('x1',a.x);gl.setAttribute('y1',a.y);
+      gl.setAttribute('x2',b.x);gl.setAttribute('y2',b.y);
+      gl.setAttribute('stroke',c);gl.setAttribute('stroke-width','8');gl.setAttribute('opacity','0.06');
+      svg.appendChild(gl);
+      // 虚线
+      var ln = document.createElementNS(svgNS,'line');
+      ln.setAttribute('x1',a.x);ln.setAttribute('y1',a.y);
+      ln.setAttribute('x2',b.x);ln.setAttribute('y2',b.y);
+      ln.setAttribute('stroke',c);ln.setAttribute('stroke-width','1.2');ln.setAttribute('opacity','0.25');
+      ln.setAttribute('stroke-dasharray','6 4');
+      svg.appendChild(ln);
+      // 脉冲点 x2
+      for(var p=0;p<2;p++){
+        var dot = document.createElementNS(svgNS,'circle');
+        dot.setAttribute('r','2.5');dot.setAttribute('fill',c);dot.setAttribute('opacity','0.7');
+        var am = document.createElementNS(svgNS,'animateMotion');
+        am.setAttribute('dur',(1.5+p*0.8)+'s');am.setAttribute('repeatCount','indefinite');
+        am.setAttribute('path', p===0 ? 'M'+a.x+','+a.y+' L'+b.x+','+b.y : 'M'+b.x+','+b.y+' L'+a.x+','+a.y);
+        dot.appendChild(am);svg.appendChild(dot);
+      }
+    }
+  }, 200);
+
+  // 粒子 30颗
+  for(var i=0;i<30;i++){
+    var c = COLORS[i%4];
+    var pt = document.createElement('div');
+    pt.className = 'rx-pt';
+    pt.style.cssText = 'width:'+(1+rn(0,2))+'px;height:'+(1+rn(0,2))+'px;left:'+rn(3,95)+'%;top:'+rn(3,95)+'%;background:'+c+';box-shadow:0 0 '+(3+rn(0,4))+'px '+c+';animation:breathe '+(2+rn(0,4))+'s ease-in-out infinite '+(-rn(0,4))+'s';
+    s.appendChild(pt);
+  }
+})();
+
+
+// ════════════════════════════════════
+// C. 傳送門 — 基础可见版
+// ════════════════════════════════════
+(function(){
+  var s = document.getElementById('sC');
+
+  // 底部场域线
+  var fl = document.createElement('div');
+  fl.className = 'gt-floor';
+  fl.style.background = 'linear-gradient(90deg, transparent, rgba(148,102,255,0.25), rgba(0,240,255,0.18), rgba(148,102,255,0.25), transparent)';
+  fl.style.boxShadow = '0 0 12px rgba(148,102,255,0.1)';
+  fl.style.animation = 'breathe 3s ease-in-out infinite';
+  s.appendChild(fl);
+
+  // 共振波 x2
+  var dynCSS = '';
+  for(var r=0;r<2;r++){
+    var rip = document.createElement('div');
+    rip.className = 'gt-rip';
+    rip.style.cssText = 'width:30px;margin-left:-15px;background:rgba(148,102,255,0.2);animation:gtRip 3s ease-out infinite '+(-r*1.5)+'s';
+    s.appendChild(rip);
+  }
+  dynCSS += '@keyframes gtRip{0%{transform:scaleX(1);opacity:0.5}100%{transform:scaleX(25);opacity:0}}';
+
+  var row = document.createElement('div');
+  row.className = 'gt-row';
+
+  var gSpeeds = [[6,4,3],[5,3.5,2.5],[7,4.5,3.2],[6.5,4.2,2.8]];
+  var COLORS2 = ['#9466ff','#7050ff','#9466ff','#00f0ff'];
+
+  D.values.forEach(function(v, i){
+    var p = pct(v)/100;
+    var boxSz = Math.round(110 + 60*p);
+    var c = COLORS[i], c2 = COLORS2[i];
+    var isOpen = (i === peakI);
+
+    var unit = document.createElement('div');
+    unit.className = 'gt-unit';
+
+    var box = document.createElement('div');
+    box.className = 'gt-box';
+    box.style.width = boxSz+'px';
+    box.style.height = boxSz+'px';
+
+    // --- 门拱1: 外环，半圆，正转 ---
+    var a1sz = boxSz + 14;
+    var arch1 = document.createElement('div');
+    arch1.className = 'gt-arch';
+    placeCenter(arch1, a1sz, a1sz);
+    arch1.style.border = (isOpen?'3':'2.5')+'px solid '+c;
+    arch1.style.borderBottomColor = 'transparent';
+    arch1.style.boxShadow = '0 0 16px '+c+'33';
+    arch1.style.animation = 'spin '+gSpeeds[i][0]+'s linear infinite';
+    arch1.innerHTML = '<div style="position:absolute;top:-4px;left:50%;margin-left:-4px;width:8px;height:8px;border-radius:50%;background:'+c+';box-shadow:0 0 12px '+c+',0 0 24px '+c+'"></div><div style="position:absolute;bottom:-3px;left:50%;margin-left:-3px;width:6px;height:6px;border-radius:50%;background:'+c2+';box-shadow:0 0 8px '+c2+'"></div>';
+    box.appendChild(arch1);
+
+    // --- 门拱2: 虚线，反转 ---
+    var a2sz = boxSz;
+    var arch2 = document.createElement('div');
+    arch2.className = 'gt-arch';
+    placeCenter(arch2, a2sz, a2sz);
+    arch2.style.border = '1.5px dashed '+c+'44';
+    arch2.style.borderBottomColor = 'transparent';
+    arch2.style.animation = 'spinR '+gSpeeds[i][1]+'s linear infinite';
+    box.appendChild(arch2);
+
+    // --- 门拱3: 点线，正转 ---
+    var a3sz = boxSz - 16;
+    var arch3 = document.createElement('div');
+    arch3.className = 'gt-arch';
+    placeCenter(arch3, a3sz, a3sz);
+    arch3.style.border = '1px dotted '+c+'2a';
+    arch3.style.animation = 'spin '+gSpeeds[i][2]+'s linear infinite';
+    box.appendChild(arch3);
+
+    // --- 漩涡核心 ---
+    var vSz = Math.round(boxSz * 0.5);
+    var vortex = document.createElement('div');
+    vortex.className = 'gt-vortex';
+    placeCenter(vortex, vSz, vSz);
+    vortex.style.background = 'radial-gradient(circle, '+c+'33, '+c+'15 40%, '+c+'08 65%, transparent 82%)';
+    vortex.style.boxShadow = '0 0 24px '+c+'28, inset 0 0 20px '+c+'18';
+    vortex.style.animation = 'gtVort'+i+' '+(isOpen?1.8:2.5)+'s ease-in-out infinite '+(-i*0.4)+'s';
+    // 内圈
+    vortex.innerHTML = '<div style="position:absolute;inset:14%;border-radius:50%;border:1.5px dashed '+c+'33;animation:spinR 2.5s linear infinite"></div><div style="position:absolute;inset:28%;border-radius:50%;border:1px solid '+c+'22;box-shadow:0 0 8px '+c+'18;animation:spin 1.8s linear infinite"></div>';
+    box.appendChild(vortex);
+
+    // 漩涡脉冲 — 只用 scale
+    dynCSS += '@keyframes gtVort'+i+'{'+
+      '0%,100%{transform:scale(1);box-shadow:0 0 24px '+c+'28,inset 0 0 20px '+c+'18}'+
+      '50%{transform:scale('+(isOpen?1.1:1.06)+');box-shadow:0 0 40px '+c+'44,inset 0 0 32px '+c+'2a}}';
+
+    // --- 降束 ---
+    var beamH = isOpen ? 40 : 28;
+    var beam = document.createElement('div');
+    beam.className = 'gt-beam';
+    beam.style.cssText = 'left:50%;margin-left:-2px;top:'+(-beamH-6)+'px;width:4px;height:'+beamH+'px;background:linear-gradient(180deg,'+c+','+c2+',transparent);box-shadow:0 0 10px '+c+',0 0 22px '+c+'55;animation:gtBeam'+i+' 2s ease-in-out infinite '+(-i*0.5)+'s';
+    beam.innerHTML = '<div style="position:absolute;top:-6px;left:-5px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,'+c+',transparent 70%);box-shadow:0 0 12px '+c+';animation:breathe 1.5s ease-in-out infinite '+(-i*0.3)+'s"></div>';
+    box.appendChild(beam);
+    dynCSS += '@keyframes gtBeam'+i+'{0%,100%{opacity:0.5;height:'+beamH+'px;width:4px}50%{opacity:1;height:'+(beamH+12)+'px;width:'+(isOpen?7:5)+'px}}';
+
+    // --- 门柱 ---
+    var pilH = Math.round(boxSz*0.65);
+    [[-boxSz/2-8, c, c2], [boxSz/2+3, c2, c]].forEach(function(pd){
+      var pil = document.createElement('div');
+      pil.className = 'gt-pil';
+      pil.style.cssText = 'width:4px;height:'+pilH+'px;left:calc(50% + '+pd[0]+'px);top:calc(50% - '+pilH/2+'px);background:linear-gradient(180deg,'+pd[1]+',transparent 40%,transparent 60%,'+pd[2]+');box-shadow:0 0 6px '+c+'44';
+      // 柱顶亮点
+      pil.innerHTML = '<div style="position:absolute;top:-4px;left:-3px;width:10px;height:10px;border-radius:50%;background:'+pd[1]+';box-shadow:0 0 8px '+pd[1]+',0 0 16px '+pd[1]+'88;animation:breathe 1.8s ease-in-out infinite '+(-i*0.4)+'s"></div>';
+      box.appendChild(pil);
+    });
+
+    // --- 吸入粒子 x6 ---
+    for(var k=0;k<6;k++){
+      var angle = rn(0, Math.PI*2);
+      var dist = rn(45,65);
+      var sk = document.createElement('div');
+      sk.className = 'gt-sk';
+      var skSz = rn(1.5,2.5);
+      sk.style.cssText = 'width:'+skSz+'px;height:'+skSz+'px;left:50%;top:50%;margin-left:-1px;margin-top:-1px;background:'+c+';box-shadow:0 0 4px '+c+';animation:gtSk '+(1.5+rn(0,1.5))+'s ease-in infinite '+(-rn(0,3))+'s;--sx:'+(Math.cos(angle)*dist)+'px;--sy:'+(Math.sin(angle)*dist)+'px';
+      box.appendChild(sk);
+    }
+    dynCSS += '@keyframes gtSk{0%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(1.5)}30%{opacity:0.85}100%{opacity:0;transform:translate(0,0) scale(0)}}';
+
+    // --- 数字 ---
+    var num = document.createElement('div');
+    num.className = 'gt-num';
+    var fs = Math.round(14+p*6);
+    num.innerHTML = '<span class="gt-v" style="font-size:'+fs+'px;text-shadow:0 0 10px '+c+',0 0 24px '+c+'55,0 2px 3px rgba(0,0,0,0.7)">'+fmt(v)+'</span>';
+    box.appendChild(num);
+
+    unit.appendChild(box);
+
+    // 标签
+    var lbl = document.createElement('div');
+    lbl.className = 'gt-lbl';
+    lbl.innerHTML = '<b style="color:'+c+';text-shadow:0 0 6px '+c+'55">'+fmt(v)+'</b><small>'+D.labels[i]+'</small>';
+    unit.appendChild(lbl);
+
+    row.appendChild(unit);
+  });
+
+  s.appendChild(row);
+
+  // 注入动画
+  var st = document.createElement('style');
+  st.textContent = dynCSS;
+  document.head.appendChild(st);
+
+  // 粒子 25颗
+  for(var i=0;i<25;i++){
+    var c = COLORS[i%4];
+    var pt = document.createElement('div');
+    pt.className = 'gt-pt';
+    pt.style.cssText = 'width:'+(1+rn(0,1.5))+'px;height:'+(1+rn(0,1.5))+'px;left:'+rn(3,95)+'%;top:'+rn(3,95)+'%;background:'+c+';box-shadow:0 0 '+(3+rn(0,4))+'px '+c+';animation:breathe '+(2+rn(0,4))+'s ease-in-out infinite '+(-rn(0,4))+'s';
+    s.appendChild(pt);
+  }
+})();
+</script>
+</body>
+</html>

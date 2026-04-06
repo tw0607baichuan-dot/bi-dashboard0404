@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Demo 04 — 能量喷泉</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;overflow:hidden;height:100vh;display:flex;align-items:center;justify-content:center}
+.stage{width:960px;height:600px;position:relative;overflow:hidden}
+.label{position:absolute;top:12px;left:16px;font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,240,255,0.4);letter-spacing:3px;z-index:20}
+.card{position:absolute;top:50%;width:340px;height:320px;border:1.5px solid rgba(0,195,255,0.25);border-radius:8px;background:rgba(6,12,28,0.92);backdrop-filter:blur(8px);z-index:10;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:2px;color:rgba(0,240,255,0.3)}
+.card.l{left:80px;transform:translateY(-50%)}
+.card.r{right:80px;transform:translateY(-50%);border-color:rgba(148,102,255,0.25);color:rgba(148,102,255,0.3)}
+/* 底部能量源 */
+.source{position:absolute;bottom:30px;left:50%;width:400px;height:16px;margin-left:-200px;border-radius:50%;pointer-events:none;z-index:2}
+.source-core{position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse,rgba(0,240,255,0.25),rgba(0,180,255,0.08) 50%,transparent 80%);animation:srcPulse 2.5s ease-in-out infinite}
+@keyframes srcPulse{0%,100%{opacity:0.5;transform:scaleX(1)}50%{opacity:0.85;transform:scaleX(1.05)}}
+.source-glow{position:absolute;left:50%;bottom:28px;width:500px;height:60px;margin-left:-250px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,240,255,0.08),transparent 60%);filter:blur(12px);animation:srcPulse 2.5s ease-in-out infinite;pointer-events:none}
+/* 涟漪 */
+.ripple{position:absolute;bottom:34px;left:50%;height:2px;border-radius:50%;background:rgba(0,195,255,0.12);pointer-events:none}
+@keyframes rippleSpread{0%{width:30px;margin-left:-15px;opacity:0.4}100%{width:600px;margin-left:-300px;opacity:0}}
+/* 分流核心 */
+.split-node{position:absolute;left:50%;top:42%;width:12px;height:12px;margin-left:-6px;margin-top:-6px;border-radius:50%;background:rgba(255,255,255,0.15);box-shadow:0 0 12px rgba(0,240,255,0.3),0 0 24px rgba(148,102,255,0.15);pointer-events:none;z-index:5;animation:splitPulse 3s ease-in-out infinite}
+@keyframes splitPulse{0%,100%{box-shadow:0 0 12px rgba(0,240,255,0.3),0 0 24px rgba(148,102,255,0.15)}50%{box-shadow:0 0 20px rgba(0,240,255,0.5),0 0 36px rgba(148,102,255,0.25)}}
+/* 粒子 */
+.ftn-pt{position:absolute;border-radius:50%;pointer-events:none;z-index:3}
+/* 主流线粒子 — 上升+分流 */
+@keyframes ftnRiseL{0%{left:50%;bottom:40px;opacity:0}15%{opacity:0.8}55%{left:50%;bottom:55%;opacity:0.9}100%{left:22%;bottom:60%;opacity:0}}
+@keyframes ftnRiseR{0%{left:50%;bottom:40px;opacity:0}15%{opacity:0.8}55%{left:50%;bottom:55%;opacity:0.9}100%{left:78%;bottom:60%;opacity:0}}
+/* 雾流粒子 — 随机上升 */
+@keyframes ftnMist{0%{bottom:30px;opacity:0}10%{opacity:var(--mo,0.3)}80%{opacity:var(--mo2,0.15)}100%{bottom:var(--mh,85%);opacity:0}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="label">04 — ENERGY FOUNTAIN</div>
+  <div class="card l">LOCAL COMMAND</div>
+  <div class="card r">REMOTE LINK</div>
+  <div class="source"><div class="source-core"></div></div>
+  <div class="source-glow"></div>
+  <div class="split-node"></div>
+</div>
+<script>
+var stage=document.getElementById('stage');
+function rn(a,b){return Math.random()*(b-a)+a}
+// 涟漪 x3
+for(var r=0;r<3;r++){
+  var rip=document.createElement('div');rip.className='ripple';
+  rip.style.cssText='animation:rippleSpread '+(3+r*0.5)+'s ease-out infinite '+(-r*1)+'s';
+  stage.appendChild(rip);
+}
+// 主流线粒子 — 左路 x4
+for(var i=0;i<4;i++){
+  var pt=document.createElement('div');pt.className='ftn-pt';
+  var sz=3+rn(0,2);
+  pt.style.cssText='width:'+sz+'px;height:'+sz+'px;background:#00f0ff;box-shadow:0 0 8px #00f0ff,0 0 16px rgba(0,240,255,0.4);animation:ftnRiseL '+(4+rn(0,1.5))+'s ease-in-out infinite '+(-i*1.2)+'s';
+  stage.appendChild(pt);
+}
+// 主流线粒子 — 右路 x4
+for(var i=0;i<4;i++){
+  var pt=document.createElement('div');pt.className='ftn-pt';
+  var sz=3+rn(0,2);
+  pt.style.cssText='width:'+sz+'px;height:'+sz+'px;background:#9466ff;box-shadow:0 0 8px #9466ff,0 0 16px rgba(148,102,255,0.4);animation:ftnRiseR '+(4+rn(0,1.5))+'s ease-in-out infinite '+(-i*1.2-0.5)+'s';
+  stage.appendChild(pt);
+}
+// 背景雾流 x40
+for(var i=0;i<40;i++){
+  var pt=document.createElement('div');pt.className='ftn-pt';
+  var sz=rn(1,2);
+  var xOff=rn(-80,80);
+  var isLeft=xOff<0;
+  var c=isLeft?'rgba(0,240,255,':'rgba(148,102,255,';
+  pt.style.cssText='width:'+sz+'px;height:'+sz+'px;left:calc(50% + '+xOff+'px);background:'+c+'0.4);box-shadow:0 0 3px '+c+'0.3);animation:ftnMist '+(5+rn(0,6))+'s ease-out infinite '+(-rn(0,8))+'s;--mo:'+rn(0.15,0.35)+';--mo2:'+rn(0.05,0.15)+';--mh:'+(60+rn(0,30))+'%';
+  stage.appendChild(pt);
+}
+</script>
+</body>
+</html>

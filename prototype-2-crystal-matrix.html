@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>方案2 — 悬浮数据晶块矩阵（强化版）</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Noto Sans TC',sans-serif;color:#f4f9ff;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+
+.panel{
+  width:580px;height:360px;position:relative;
+  background:linear-gradient(160deg,rgba(0,100,255,0.04) 0%,transparent 40%,rgba(148,102,255,0.02) 100%),rgba(6,12,28,0.94);
+  border:1px solid rgba(0,195,255,0.32);border-radius:4px;padding:14px 18px;
+  backdrop-filter:blur(16px);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.panel::before{content:'';position:absolute;inset:3px;border:1px solid rgba(0,180,255,0.05);border-radius:2px;pointer-events:none}
+.panel::after{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#00f0ff,#9466ff,transparent);opacity:0.4}
+.panel-title{font-size:17px;font-weight:700;color:#00f0ff;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-family:'Orbitron',monospace}
+.panel-title::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,#00f0ff,#9466ff);border-radius:2px;box-shadow:0 0 6px rgba(0,240,255,0.5)}
+.panel-title .mod{font-size:10px;color:rgba(0,240,255,0.4);letter-spacing:1px;margin-left:auto}
+
+.crystal-scene{flex:1;position:relative;display:flex;align-items:center;justify-content:center;perspective:800px}
+
+/* ── 中央总量核心 ── */
+.core-total{
+  position:absolute;z-index:10;text-align:center;
+  animation:coreFloat 4s ease-in-out infinite;
+}
+@keyframes coreFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.core-total .core-num{
+  font-family:'Orbitron',monospace;font-size:52px;font-weight:900;
+  color:#fff;letter-spacing:4px;line-height:1;
+  text-shadow:0 0 12px rgba(0,240,255,0.6),0 0 30px rgba(0,240,255,0.2),0 2px 4px rgba(0,0,0,0.6);
+}
+.core-total .core-label{
+  font-size:11px;letter-spacing:3px;color:rgba(0,240,255,0.5);
+  font-family:'Orbitron',monospace;margin-top:4px;
+}
+
+/* 核心环 — 外环 */
+.core-ring{
+  position:absolute;width:130px;height:130px;border-radius:50%;
+  border:1px solid rgba(0,240,255,0.18);
+  box-shadow:0 0 24px rgba(0,240,255,0.1),0 0 48px rgba(0,240,255,0.04),inset 0 0 24px rgba(0,240,255,0.05);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:ringRotate 20s linear infinite,ringBreath 4s ease-in-out infinite;
+}
+.core-ring::before{
+  content:'';position:absolute;top:-2px;left:50%;width:5px;height:5px;
+  background:#00f0ff;border-radius:50%;box-shadow:0 0 10px #00f0ff,0 0 20px rgba(0,240,255,0.4);
+  transform:translateX(-50%);
+}
+@keyframes ringRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes ringBreath{0%,100%{box-shadow:0 0 24px rgba(0,240,255,0.1),0 0 48px rgba(0,240,255,0.04),inset 0 0 24px rgba(0,240,255,0.05)}50%{box-shadow:0 0 32px rgba(0,240,255,0.18),0 0 60px rgba(0,240,255,0.07),inset 0 0 30px rgba(0,240,255,0.08)}}
+
+/* 核心环 — 内环 */
+.core-ring-inner{
+  position:absolute;width:105px;height:105px;border-radius:50%;
+  border:1px dashed rgba(148,102,255,0.12);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:ringRotate 14s linear infinite reverse;
+}
+.core-ring-inner::before{
+  content:'';position:absolute;bottom:-2px;left:50%;width:3px;height:3px;
+  background:#9466ff;border-radius:50%;box-shadow:0 0 6px #9466ff;
+  transform:translateX(-50%);
+}
+
+/* ── 晶块 ── */
+.crystal-block{
+  position:absolute;
+  transform-style:preserve-3d;
+  animation:crystalFloat 5s ease-in-out infinite;
+}
+.crystal-block:nth-child(2){animation-delay:-1.6s}
+.crystal-block:nth-child(3){animation-delay:-3.2s}
+@keyframes crystalFloat{0%,100%{transform:translateY(0) rotateX(0deg) rotateY(0deg)}25%{transform:translateY(-8px) rotateX(2deg) rotateY(3deg)}50%{transform:translateY(-4px) rotateX(-1deg) rotateY(-2deg)}75%{transform:translateY(-10px) rotateX(1deg) rotateY(2deg)}}
+
+.crystal-inner{
+  position:relative;width:140px;padding:16px 14px;
+  border-radius:6px;text-align:center;
+  backdrop-filter:blur(12px);
+  transition:transform 0.4s,box-shadow 0.4s;
+}
+.crystal-inner:hover{transform:scale(1.05);box-shadow:0 0 30px var(--cg,rgba(0,240,255,0.3))!important}
+
+/* 晶块颜色变体 — 增强描边呼吸 */
+.crystal-block.cyan .crystal-inner{
+  background:linear-gradient(135deg,rgba(0,240,255,0.12) 0%,rgba(0,120,200,0.06) 100%);
+  border:1px solid rgba(0,240,255,0.35);
+  box-shadow:0 0 18px rgba(0,240,255,0.1),0 0 36px rgba(0,240,255,0.03),inset 0 1px 0 rgba(0,240,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2);
+  --cg:rgba(0,240,255,0.3);
+  animation:edgeBreathCyan 5s ease-in-out infinite;
+}
+@keyframes edgeBreathCyan{0%,100%{border-color:rgba(0,240,255,0.35);box-shadow:0 0 18px rgba(0,240,255,0.1),0 0 36px rgba(0,240,255,0.03),inset 0 1px 0 rgba(0,240,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(0,240,255,0.5);box-shadow:0 0 24px rgba(0,240,255,0.16),0 0 44px rgba(0,240,255,0.05),inset 0 1px 0 rgba(0,240,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+
+.crystal-block.blue .crystal-inner{
+  background:linear-gradient(135deg,rgba(0,116,255,0.12) 0%,rgba(0,60,180,0.06) 100%);
+  border:1px solid rgba(0,116,255,0.35);
+  box-shadow:0 0 18px rgba(0,116,255,0.1),0 0 36px rgba(0,116,255,0.03),inset 0 1px 0 rgba(0,116,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2);
+  --cg:rgba(0,116,255,0.3);
+  animation:edgeBreathBlue 5s ease-in-out infinite 0.8s;
+}
+@keyframes edgeBreathBlue{0%,100%{border-color:rgba(0,116,255,0.35);box-shadow:0 0 18px rgba(0,116,255,0.1),0 0 36px rgba(0,116,255,0.03),inset 0 1px 0 rgba(0,116,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(0,116,255,0.5);box-shadow:0 0 24px rgba(0,116,255,0.16),0 0 44px rgba(0,116,255,0.05),inset 0 1px 0 rgba(0,116,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+
+.crystal-block.purple .crystal-inner{
+  background:linear-gradient(135deg,rgba(148,102,255,0.12) 0%,rgba(100,60,200,0.06) 100%);
+  border:1px solid rgba(148,102,255,0.35);
+  box-shadow:0 0 18px rgba(148,102,255,0.1),0 0 36px rgba(148,102,255,0.03),inset 0 1px 0 rgba(148,102,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2);
+  --cg:rgba(148,102,255,0.3);
+  animation:edgeBreathPurple 5s ease-in-out infinite 1.6s;
+}
+@keyframes edgeBreathPurple{0%,100%{border-color:rgba(148,102,255,0.35);box-shadow:0 0 18px rgba(148,102,255,0.1),0 0 36px rgba(148,102,255,0.03),inset 0 1px 0 rgba(148,102,255,0.2),inset 0 -1px 0 rgba(0,0,0,0.2)}50%{border-color:rgba(148,102,255,0.5);box-shadow:0 0 24px rgba(148,102,255,0.16),0 0 44px rgba(148,102,255,0.05),inset 0 1px 0 rgba(148,102,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.2)}}
+
+/* 晶块内部元素 */
+.cb-label{font-size:11px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:6px;opacity:0.7}
+.cb-value{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;line-height:1;margin-bottom:4px}
+.crystal-block.cyan .cb-value{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,0.6)}
+.crystal-block.blue .cb-value{color:#0074ff;text-shadow:0 0 8px rgba(0,116,255,0.6)}
+.crystal-block.purple .cb-value{color:#9466ff;text-shadow:0 0 8px rgba(148,102,255,0.6)}
+.cb-time{font-size:10px;color:rgba(180,200,228,0.5);letter-spacing:1px}
+.cb-bar{width:100%;height:3px;border-radius:2px;margin-top:8px;background:rgba(255,255,255,0.05);overflow:hidden;position:relative}
+.cb-bar-fill{height:100%;border-radius:2px;position:relative}
+.crystal-block.cyan .cb-bar-fill{background:linear-gradient(90deg,rgba(0,240,255,0.3),rgba(0,240,255,0.7));box-shadow:0 0 6px rgba(0,240,255,0.4)}
+.crystal-block.blue .cb-bar-fill{background:linear-gradient(90deg,rgba(0,116,255,0.3),rgba(0,116,255,0.7));box-shadow:0 0 6px rgba(0,116,255,0.4)}
+.crystal-block.purple .cb-bar-fill{background:linear-gradient(90deg,rgba(148,102,255,0.3),rgba(148,102,255,0.7));box-shadow:0 0 6px rgba(148,102,255,0.4)}
+
+/* 连接线 */
+.crystal-link{position:absolute;pointer-events:none;z-index:5}
+
+/* ── 三层粒子系统 ── */
+
+/* Layer 1: 背景超淡微粒 — 极小、极淡、均匀呼吸 */
+.p-dust{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:dustDrift var(--dur,10s) ease-in-out infinite var(--del,0s);
+}
+@keyframes dustDrift{
+  0%{opacity:var(--o1,0.12);transform:translate(0,0)}
+  33%{opacity:var(--o2,0.22);transform:translate(var(--dx1,3px),var(--dy1,-4px))}
+  66%{opacity:var(--o1,0.12);transform:translate(var(--dx2,-2px),var(--dy2,3px))}
+  100%{opacity:var(--o2,0.22);transform:translate(0,0)}
+}
+
+/* Layer 2: 中层萤火星光 — 漂浮 + 闪烁 */
+.p-firefly{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:fireflyMove var(--dur,7s) ease-in-out infinite var(--del,0s),
+            fireflyBlink var(--blink,3s) ease-in-out infinite var(--bdel,0s);
+}
+@keyframes fireflyMove{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(var(--fx1,8px),var(--fy1,-12px))}
+  50%{transform:translate(var(--fx2,-5px),var(--fy2,6px))}
+  75%{transform:translate(var(--fx3,10px),var(--fy3,4px))}
+  100%{transform:translate(0,0)}
+}
+@keyframes fireflyBlink{
+  0%,100%{opacity:var(--fo1,0.2)}
+  40%{opacity:var(--fo2,0.7)}
+  60%{opacity:var(--fo3,0.5)}
+}
+
+/* Layer 3: 核心亮点 — 脉冲 */
+.p-node{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:nodePulse var(--dur,3s) ease-in-out infinite var(--del,0s);
+}
+@keyframes nodePulse{
+  0%,100%{opacity:0.3;transform:scale(0.8);box-shadow:0 0 var(--ns,4px) var(--nc,rgba(0,240,255,0.4))}
+  50%{opacity:0.9;transform:scale(1.3);box-shadow:0 0 var(--ns2,10px) var(--nc,rgba(0,240,255,0.4))}
+}
+
+/* 连线流动粒子 */
+.p-flow{
+  position:absolute;border-radius:50%;pointer-events:none;
+  offset-rotate:0deg;
+  animation:flowMove var(--dur,3s) linear infinite var(--del,0s);
+}
+@keyframes flowMove{
+  0%{offset-distance:0%;opacity:0}
+  15%{opacity:0.8}
+  85%{opacity:0.6}
+  100%{offset-distance:100%;opacity:0}
+}
+
+/* 方案标识 */
+.scheme-tag{position:absolute;top:12px;right:16px;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,240,255,0.3);z-index:20}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="panel-title"><span>各班别回复量</span><span class="mod">SYS-02</span></div>
+  <span class="scheme-tag">SCHEME 2 — CRYSTAL MATRIX</span>
+
+  <div class="crystal-scene" id="scene">
+    <!-- SVG连接线 -->
+    <svg class="crystal-link" width="100%" height="100%" style="position:absolute;inset:0">
+      <defs>
+        <linearGradient id="lk1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgba(0,240,255,0.4)"/><stop offset="100%" stop-color="rgba(0,240,255,0)"/></linearGradient>
+        <linearGradient id="lk2" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="rgba(0,116,255,0.4)"/><stop offset="100%" stop-color="rgba(0,116,255,0)"/></linearGradient>
+        <linearGradient id="lk3" x1="50%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stop-color="rgba(148,102,255,0.4)"/><stop offset="100%" stop-color="rgba(148,102,255,0)"/></linearGradient>
+        <filter id="softGlow"><feGaussianBlur stdDeviation="1.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- 连接线 — 增加第二条辅助宽光带 -->
+      <line x1="18%" y1="38%" x2="40%" y2="48%" stroke="rgba(0,240,255,0.04)" stroke-width="8"/>
+      <line x1="18%" y1="38%" x2="40%" y2="48%" stroke="url(#lk1)" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+      <line x1="82%" y1="30%" x2="60%" y2="46%" stroke="rgba(0,116,255,0.04)" stroke-width="8"/>
+      <line x1="82%" y1="30%" x2="60%" y2="46%" stroke="url(#lk2)" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+      <line x1="78%" y1="82%" x2="58%" y2="56%" stroke="rgba(148,102,255,0.04)" stroke-width="8"/>
+      <line x1="78%" y1="82%" x2="58%" y2="56%" stroke="url(#lk3)" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+      <!-- 节点闪烁 -->
+      <circle cx="40%" cy="48%" r="2.5" fill="#00f0ff" opacity="0.5" filter="url(#softGlow)"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="60%" cy="46%" r="2.5" fill="#0074ff" opacity="0.5" filter="url(#softGlow)"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" begin="0.6s" repeatCount="indefinite"/></circle>
+      <circle cx="58%" cy="56%" r="2.5" fill="#9466ff" opacity="0.5" filter="url(#softGlow)"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" begin="1.2s" repeatCount="indefinite"/></circle>
+    </svg>
+
+    <!-- 中央总量 -->
+    <div class="core-total">
+      <div class="core-ring"></div>
+      <div class="core-ring-inner"></div>
+      <div class="core-num">1,284</div>
+      <div class="core-label">TOTAL REPLIES</div>
+    </div>
+
+    <!-- 早班晶块 — 左上 -->
+    <div class="crystal-block cyan" style="left:4%;top:14%">
+      <div class="crystal-inner">
+        <div class="cb-label">早班</div>
+        <div class="cb-value">520</div>
+        <div class="cb-time">08:00 — 16:00</div>
+        <div class="cb-bar"><div class="cb-bar-fill" style="width:40.5%"></div></div>
+      </div>
+    </div>
+
+    <!-- 中班晶块 — 右上 -->
+    <div class="crystal-block blue" style="right:4%;top:6%">
+      <div class="crystal-inner">
+        <div class="cb-label">中班</div>
+        <div class="cb-value">485</div>
+        <div class="cb-time">16:00 — 00:00</div>
+        <div class="cb-bar"><div class="cb-bar-fill" style="width:37.8%"></div></div>
+      </div>
+    </div>
+
+    <!-- 晚班晶块 — 右下 -->
+    <div class="crystal-block purple" style="right:8%;bottom:4%">
+      <div class="crystal-inner">
+        <div class="cb-label">晚班</div>
+        <div class="cb-value">279</div>
+        <div class="cb-time">00:00 — 08:00</div>
+        <div class="cb-bar"><div class="cb-bar-fill" style="width:21.7%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var scene = document.getElementById('scene');
+  var W = 580, H = 330; // scene approx dimensions
+  var colors = [
+    {r:0,g:240,b:255},  // cyan
+    {r:0,g:116,b:255},  // blue
+    {r:148,g:102,b:255}  // purple
+  ];
+
+  function rgba(c, a){ return 'rgba('+c.r+','+c.g+','+c.b+','+a+')'; }
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  // ═══════════════════════════════════════
+  // Layer 1: 背景超淡微尘 — 40颗, 1~1.5px, 很淡
+  // ═══════════════════════════════════════
+  for(var i=0;i<40;i++){
+    var c = colors[i % 3];
+    var el = document.createElement('div');
+    el.className = 'p-dust';
+    var size = rand(1, 1.5);
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = rand(2,96)+'%';
+    el.style.top = rand(2,96)+'%';
+    el.style.background = rgba(c, rand(0.15, 0.25));
+    el.style.boxShadow = '0 0 '+rand(2,3)+'px '+rgba(c, 0.1);
+    el.style.setProperty('--dur', rand(8,14)+'s');
+    el.style.setProperty('--del', -rand(0,12)+'s');
+    el.style.setProperty('--o1', rand(0.08, 0.15));
+    el.style.setProperty('--o2', rand(0.18, 0.28));
+    el.style.setProperty('--dx1', rand(-6,6)+'px');
+    el.style.setProperty('--dy1', rand(-6,6)+'px');
+    el.style.setProperty('--dx2', rand(-5,5)+'px');
+    el.style.setProperty('--dy2', rand(-5,5)+'px');
+    el.style.zIndex = '1';
+    scene.appendChild(el);
+  }
+
+  // ═══════════════════════════════════════
+  // Layer 2: 中层萤火星光 — 22颗, 2~3px, 漂浮+闪烁
+  // ═══════════════════════════════════════
+  for(var i=0;i<22;i++){
+    var c = colors[i % 3];
+    var el = document.createElement('div');
+    el.className = 'p-firefly';
+    var size = rand(1.5, 3);
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = rand(5,92)+'%';
+    el.style.top = rand(5,92)+'%';
+    el.style.background = rgba(c, rand(0.35, 0.55));
+    el.style.boxShadow = '0 0 '+rand(4,7)+'px '+rgba(c, 0.3);
+    el.style.setProperty('--dur', rand(6,10)+'s');
+    el.style.setProperty('--del', -rand(0,8)+'s');
+    el.style.setProperty('--blink', rand(2.5,4.5)+'s');
+    el.style.setProperty('--bdel', -rand(0,4)+'s');
+    el.style.setProperty('--fx1', rand(-14,14)+'px');
+    el.style.setProperty('--fy1', rand(-16,16)+'px');
+    el.style.setProperty('--fx2', rand(-10,10)+'px');
+    el.style.setProperty('--fy2', rand(-8,8)+'px');
+    el.style.setProperty('--fx3', rand(-12,12)+'px');
+    el.style.setProperty('--fy3', rand(-10,10)+'px');
+    el.style.setProperty('--fo1', rand(0.15, 0.3));
+    el.style.setProperty('--fo2', rand(0.55, 0.8));
+    el.style.setProperty('--fo3', rand(0.35, 0.55));
+    el.style.zIndex = '2';
+    scene.appendChild(el);
+  }
+
+  // ═════════════════════════════════════��═
+  // Layer 3: 核心亮点 — 10颗, 集中核心 + 连线附近
+  // ═══════════════════════════════════════
+  // 核心区域热点坐标 (% based)
+  var hotspots = [
+    // 中心区 (6颗)
+    {x:48,y:47},{x:52,y:50},{x:46,y:52},{x:54,y:45},{x:50,y:55},{x:49,y:43},
+    // 连线中段 (4颗)
+    {x:30,y:42},{x:70,y:38},{x:66,y:68},{x:42,y:50}
+  ];
+  for(var i=0;i<hotspots.length;i++){
+    var c = colors[i % 3];
+    var el = document.createElement('div');
+    el.className = 'p-node';
+    var size = rand(2.5, 4);
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = (hotspots[i].x + rand(-3,3))+'%';
+    el.style.top = (hotspots[i].y + rand(-3,3))+'%';
+    el.style.background = rgba(c, 0.7);
+    el.style.setProperty('--nc', rgba(c, 0.5));
+    el.style.setProperty('--ns', rand(5,8)+'px');
+    el.style.setProperty('--ns2', rand(12,18)+'px');
+    el.style.setProperty('--dur', rand(2.5,4)+'s');
+    el.style.setProperty('--del', -rand(0,3)+'s');
+    el.style.zIndex = '6';
+    scene.appendChild(el);
+  }
+
+  // ═══════════════════════════════════════
+  // Layer 4: 连线流动粒子 — 沿三条连接线运动
+  // ═══════════════════════════════════════
+  var paths = [
+    // cyan: 左上晶块 → 核心
+    {x1:18, y1:38, x2:48, y2:49, color:colors[0]},
+    // blue: 右上晶块 → 核心
+    {x1:82, y1:30, x2:54, y2:47, color:colors[1]},
+    // purple: 右下晶块 → 核心
+    {x1:78, y1:82, x2:54, y2:55, color:colors[2]}
+  ];
+
+  paths.forEach(function(path, pi){
+    for(var j=0;j<4;j++){
+      var el = document.createElement('div');
+      el.className = 'p-flow';
+      var size = rand(2, 3.5);
+      el.style.width = size+'px';
+      el.style.height = size+'px';
+      el.style.background = rgba(path.color, rand(0.5, 0.8));
+      el.style.boxShadow = '0 0 '+rand(4,8)+'px '+rgba(path.color, 0.5);
+      el.style.zIndex = '6';
+      // CSS offset-path for smooth path following
+      var mx = (path.x1+path.x2)/2 + rand(-4,4);
+      var my = (path.y1+path.y2)/2 + rand(-3,3);
+      el.style.offsetPath = 'path("M '+path.x1*5.8+' '+path.y1*3.3+' Q '+mx*5.8+' '+my*3.3+' '+path.x2*5.8+' '+path.y2*3.3+'")';
+      el.style.setProperty('--dur', rand(2.5,4)+'s');
+      el.style.setProperty('--del', -(j * rand(0.6,1.0) + pi*0.3)+'s');
+      scene.appendChild(el);
+    }
+  });
+
+  // ═══════════════════════════════════════
+  // 核心周围环绕微尘 — 额外8颗紧贴核心环
+  // ═══════════════════════════════════════
+  for(var i=0;i<8;i++){
+    var angle = (i/8)*Math.PI*2;
+    var radius = rand(55,75); // px from center
+    var cx = 50 + Math.cos(angle) * (radius/5.8) * 1; // convert to %
+    var cy = 49 + Math.sin(angle) * (radius/3.3) * 1;
+    var c = colors[i % 3];
+    var el = document.createElement('div');
+    el.className = 'p-firefly';
+    el.style.width = '2px';
+    el.style.height = '2px';
+    el.style.left = cx+'%';
+    el.style.top = cy+'%';
+    el.style.background = rgba(c, 0.4);
+    el.style.boxShadow = '0 0 5px '+rgba(c, 0.3);
+    el.style.setProperty('--dur', rand(5,8)+'s');
+    el.style.setProperty('--del', -rand(0,6)+'s');
+    el.style.setProperty('--blink', rand(2,3.5)+'s');
+    el.style.setProperty('--bdel', -rand(0,3)+'s');
+    el.style.setProperty('--fx1', rand(-8,8)+'px');
+    el.style.setProperty('--fy1', rand(-8,8)+'px');
+    el.style.setProperty('--fx2', rand(-6,6)+'px');
+    el.style.setProperty('--fy2', rand(-6,6)+'px');
+    el.style.setProperty('--fx3', rand(-10,10)+'px');
+    el.style.setProperty('--fy3', rand(-10,10)+'px');
+    el.style.setProperty('--fo1', 0.15);
+    el.style.setProperty('--fo2', 0.6);
+    el.style.setProperty('--fo3', 0.35);
+    el.style.zIndex = '3';
+    scene.appendChild(el);
+  }
+
+})();
+</script>
+</body>
+</html>

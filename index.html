@@ -327,6 +327,126 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
   border-radius:2px 0 0 0;
 }
 
+/* ── Sub-page Header Right (02-06) — 系统状态舱 ── */
+.header-right-sub {
+  position:relative; display:flex; align-items:center; gap:0;
+  padding:0;
+  background:
+    linear-gradient(135deg, rgba(0,55,130,0.14) 0%, rgba(0,28,70,0.08) 40%, rgba(6,12,28,0.94) 100%),
+    linear-gradient(180deg, rgba(0,180,255,0.05) 0%, transparent 50%);
+  border:1px solid rgba(0,195,255,0.22);
+  border-radius:5px;
+  box-shadow:
+    0 0 14px rgba(0,180,255,0.06),
+    inset 0 1px 0 rgba(0,240,255,0.1),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+  overflow:hidden;
+}
+/* 内嵌框 */
+.header-right-sub>*:first-child::before {
+  content:''; position:absolute; top:3px; bottom:3px; left:3px; right:0;
+  border-left:1px solid rgba(0,180,255,0.06);
+  border-top:1px solid rgba(0,180,255,0.04);
+  border-bottom:1px solid rgba(0,180,255,0.04);
+  border-radius:3px 0 0 3px; pointer-events:none;
+}
+.header-right-sub>*:last-child::after {
+  content:''; position:absolute; top:3px; bottom:3px; right:3px; left:0;
+  border-right:1px solid rgba(0,180,255,0.06);
+  border-top:1px solid rgba(0,180,255,0.04);
+  border-bottom:1px solid rgba(0,180,255,0.04);
+  border-radius:0 3px 3px 0; pointer-events:none;
+}
+/* 顶部高光 */
+.header-right-sub::before {
+  content:''; position:absolute; top:0; left:6%; right:6%; height:1px; z-index:2;
+  background:linear-gradient(90deg, transparent, rgba(0,240,255,0.45), rgba(148,102,255,0.22), transparent);
+  box-shadow:0 0 6px rgba(0,240,255,0.15);
+}
+/* 底部扫光 */
+.header-right-sub::after {
+  content:''; position:absolute; bottom:0; left:0; width:50%; height:1px; z-index:2;
+  background:linear-gradient(90deg, transparent, rgba(0,240,255,0.25), transparent);
+  animation:hrSubSweep 5s ease-in-out infinite; opacity:0.4;
+}
+@keyframes hrSubSweep{0%{left:-50%}100%{left:100%}}
+
+/* 左区：状态 */
+.hrs-left {
+  display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+  padding:8px 18px 8px 20px;
+  position:relative;
+}
+/* 右侧分隔线 — 双层 */
+.hrs-left::after {
+  content:''; position:absolute; right:0; top:15%; bottom:15%; width:1px;
+  background:linear-gradient(180deg, transparent, rgba(0,240,255,0.18), transparent);
+  box-shadow:1px 0 0 rgba(0,0,0,0.2);
+}
+.header-right-sub .hrs-status {
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--font-display); font-size:13px; font-weight:700;
+  letter-spacing:2.5px; color:var(--accent-green);
+  text-shadow:0 0 4px rgba(0,255,136,0.5);
+  animation:statusPulse 3s ease-in-out infinite;
+}
+.header-right-sub .hrs-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--accent-green);
+  box-shadow:0 0 5px rgba(0,255,136,0.7), 0 0 12px rgba(0,255,136,0.2);
+  animation:dotBlink 2s ease-in-out infinite;
+}
+.header-right-sub .hrs-sub-label {
+  font-family:var(--font-display); font-size:9px; letter-spacing:1.5px;
+  color:var(--text-dim); opacity:0.55;
+}
+
+/* 中区：时钟核心 */
+.hrs-center {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:6px 28px;
+  position:relative;
+}
+.header-right-sub .hrs-clock-label {
+  font-family:var(--font-display); font-size:8px; letter-spacing:3px;
+  color:rgba(0,240,255,0.4);
+}
+.header-right-sub .hrs-clock {
+  font-family:var(--font-display); font-size:36px; font-weight:900;
+  color:var(--accent-cyan); letter-spacing:4px; line-height:1;
+  text-shadow:
+    0 0 8px rgba(0,240,255,0.65),
+    0 0 20px rgba(0,240,255,0.22),
+    0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* 右区：日期与 UPTIME */
+.hrs-right {
+  display:flex; flex-direction:column; align-items:flex-end; gap:3px;
+  padding:8px 20px 8px 18px;
+  position:relative;
+}
+/* 左侧分隔线 — 双层 */
+.hrs-right::before {
+  content:''; position:absolute; left:0; top:15%; bottom:15%; width:1px;
+  background:linear-gradient(180deg, transparent, rgba(0,240,255,0.18), transparent);
+  box-shadow:-1px 0 0 rgba(0,0,0,0.2);
+}
+.header-right-sub .hrs-date {
+  font-family:var(--font-display); font-size:15px; font-weight:700;
+  color:var(--text-primary); letter-spacing:2px;
+  text-shadow:0 0 3px rgba(0,240,255,0.2), 0 1px 2px rgba(0,0,0,0.4);
+}
+.header-right-sub .hrs-week {
+  font-family:var(--font-display); font-size:11px; letter-spacing:2px;
+  color:var(--accent-purple); opacity:0.75;
+  text-shadow:0 0 3px rgba(148,102,255,0.3);
+}
+.header-right-sub .hrs-up {
+  font-family:var(--font-display); font-size:9px; letter-spacing:1.5px;
+  color:var(--text-dim); opacity:0.55;
+}
+
 /* ══════════════════════════════════════
    Dashboard
    ══════════════════════════════════════ */
@@ -1027,7 +1147,7 @@ select.cyber-input {
 .mem-kpi-val.purple { color:var(--accent-purple); text-shadow:0 0 3px rgba(148,102,255,0.5); }
 
 /* Members Charts Row */
-.mem-charts-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; min-height:180px; }
+.mem-charts-row { display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:10px; min-height:200px; }
 .mem-panel {
   background:linear-gradient(160deg,rgba(0,100,255,0.04) 0%,transparent 40%,rgba(148,102,255,0.02) 100%),var(--bg-card);
   border:1px solid var(--border-mech); border-radius:4px; padding:12px 16px;
@@ -1046,23 +1166,165 @@ select.cyber-input {
 .mem-panel-title::before { content:''; width:3px; height:14px; background:linear-gradient(180deg,var(--accent-cyan),var(--accent-purple)); border-radius:2px; box-shadow:0 0 6px rgba(0,240,255,0.5); }
 .mem-chart-wrap { flex:1; min-height:0; position:relative; }
 
-/* Group sections */
-.mem-group-section { margin-top:2px; }
+/* ══ Cosmic Stage — 宇宙战术舞台 ══ */
+.mem-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;gap:32px;min-height:0;overflow:hidden}
+/* ═══ 舞台背景 — 双传送门 ═══ */
+.stg-3d{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+/* 传送门 */
+.portal-bg{position:absolute;top:50%;border-radius:50%;pointer-events:none}
+/* 层层凹陷 */
+.portal-ring{position:absolute;border-radius:50%;left:50%;top:50%;pointer-events:none}
+/* 粒子溢出 */
+.portal-particle{position:absolute;border-radius:50%;pointer-events:none}
+@keyframes portalFloat{0%{opacity:0;transform:translate(0,0) scale(0.5)}30%{opacity:var(--po,0.6)}100%{opacity:0;transform:translate(var(--px,0),var(--py,-40px)) scale(1.2)}}
+@keyframes portalRingSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes portalPulse{0%,100%{box-shadow:0 0 var(--ps1,20px) var(--pc1),inset 0 0 var(--ps2,30px) var(--pc2)}50%{box-shadow:0 0 var(--ps3,32px) var(--pc3),inset 0 0 var(--ps4,42px) var(--pc4)}}
+@keyframes portalBurst{0%{opacity:0.2;transform:scale(0.95)}15%{opacity:var(--bo,0.7);transform:scale(1.02)}30%{opacity:0.3}50%{opacity:var(--bo,0.7);transform:scale(1)}70%{opacity:0.25}85%{opacity:var(--bo,0.7);transform:scale(1.01)}100%{opacity:0.2;transform:scale(0.95)}}
+@keyframes portalShard{0%{opacity:0;transform:translate(0,0) scale(1)}20%{opacity:0.9}100%{opacity:0;transform:translate(var(--shx,80px),var(--shy,-60px)) scale(0.3)}}
+@keyframes portalCoreChurn{0%,100%{transform:scale(1) rotate(0deg);opacity:var(--co1,0.5)}25%{transform:scale(1.08) rotate(3deg);opacity:var(--co2,0.7)}50%{transform:scale(0.95) rotate(-2deg);opacity:var(--co1,0.5)}75%{transform:scale(1.05) rotate(2deg);opacity:var(--co2,0.7)}}
+/* 底座 */
+
+/* ── 连接线SVG ── */
+.mem-link-svg{position:absolute;inset:0;pointer-events:none;z-index:1}
+.mem-stg-pt{position:absolute;border-radius:50%;pointer-events:none}
+
+/* 悬浮卡 — 共用 */
+/* 主卡 — 加大加强 */
+.mh-card{position:relative;width:440px;border:1.5px solid rgba(0,195,255,0.25);border-radius:8px;padding:28px 32px 20px;cursor:pointer;z-index:2;transition:border-color 0.3s,box-shadow 0.4s,transform 0.3s;background:linear-gradient(160deg,rgba(0,60,160,0.08) 0%,rgba(6,12,28,0.95) 50%,rgba(148,102,255,0.03) 100%);backdrop-filter:blur(12px)}
+/* 双层内框 */
+.mh-card>*:first-child~.mh-inner-frame{position:absolute;inset:5px;border:1px solid rgba(0,195,255,0.06);border-radius:5px;pointer-events:none}
+.mh-card.mh-local{border-color:rgba(0,195,255,0.38);box-shadow:0 0 20px rgba(0,240,255,0.07),inset 0 1px 0 rgba(0,240,255,0.06)}
+.mh-card.mh-remote{border-color:rgba(148,102,255,0.28);box-shadow:0 0 16px rgba(148,102,255,0.05),inset 0 1px 0 rgba(148,102,255,0.04)}
+.mh-card:hover{border-color:rgba(0,240,255,0.55);box-shadow:0 0 32px rgba(0,240,255,0.14),0 8px 44px rgba(0,180,255,0.08);transform:translateY(-4px)}
+.mh-card.mh-remote:hover{border-color:rgba(148,102,255,0.55);box-shadow:0 0 32px rgba(148,102,255,0.14),0 8px 44px rgba(148,102,255,0.08)}
+/* 顶部高光 */
+.mh-card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--accent-cyan),var(--accent-purple),transparent);opacity:0.35}
+/* 底部光线 */
+.mh-card::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,240,255,0.12),transparent)}
+/* 角标 */
+.mh-corner{position:absolute;width:14px;height:14px;border-color:rgba(0,240,255,0.35);border-style:solid;opacity:0.6}
+.mh-corner.tl{top:3px;left:3px;border-width:2px 0 0 2px}
+.mh-corner.tr{top:3px;right:3px;border-width:2px 2px 0 0}
+.mh-corner.bl{bottom:3px;left:3px;border-width:0 0 2px 2px}
+.mh-corner.br{bottom:3px;right:3px;border-width:0 2px 2px 0}
+.mh-card.mh-remote .mh-corner{border-color:rgba(148,102,255,0.3)}
+/* 外环光圈 */
+.mh-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,240,255,0.1);pointer-events:none;left:50%;top:50%;animation:mhRingSpin 22s linear infinite;box-shadow:0 0 24px rgba(0,240,255,0.04)}
+.mh-ring.r2{border-style:dashed;border-color:rgba(0,240,255,0.05);animation-direction:reverse;animation-duration:16s}
+.mh-card.mh-remote .mh-ring{border-color:rgba(148,102,255,0.08);box-shadow:0 0 20px rgba(148,102,255,0.03);animation-direction:reverse}
+.mh-card.mh-remote .mh-ring.r2{border-color:rgba(148,102,255,0.04);animation-direction:normal}
+@keyframes mhRingSpin{to{transform:rotate(360deg)}}
+/* 标签 */
+.mh-tag{font-family:var(--font-display);font-size:10px;letter-spacing:3.5px;color:rgba(0,240,255,0.5);margin-bottom:8px;font-weight:600}
+.mh-card.mh-remote .mh-tag{color:rgba(148,102,255,0.5)}
+.mh-name{font-family:'Noto Sans TC',sans-serif;font-size:34px;font-weight:800;color:#fff;text-shadow:0 0 6px rgba(0,240,255,0.3),0 1px 2px rgba(0,0,0,0.5);line-height:1.2;display:flex;align-items:baseline;gap:10px}
+.mh-card.mh-remote .mh-name{text-shadow:0 0 6px rgba(148,102,255,0.3),0 1px 2px rgba(0,0,0,0.5)}
+.mh-role{font-family:var(--font-display);font-size:11px;letter-spacing:1.5px;color:rgba(255,110,180,0.8);border:1px solid rgba(255,110,180,0.25);padding:3px 10px;border-radius:2px;font-weight:700}
+.mh-status{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--accent-green);margin-top:6px;font-weight:600}
+.mh-dot{width:6px;height:6px;border-radius:50%;box-shadow:0 0 4px currentColor}
+.mh-dot.on{background:var(--accent-green);color:var(--accent-green);animation:statusPulse 3s ease-in-out infinite}
+/* 指标 */
+.mh-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 14px;padding:14px 0;border-top:1px solid rgba(0,195,255,0.08);border-bottom:1px solid rgba(0,195,255,0.08)}
+.mh-metric{text-align:center}
+.mh-m-val{font-family:var(--font-display);font-size:34px;font-weight:900;line-height:1;-webkit-text-stroke:0.3px rgba(255,255,255,0.08)}
+.mh-m-val.cyan{color:var(--accent-cyan);text-shadow:0 0 5px rgba(0,240,255,0.35)}
+.mh-m-val.green{color:var(--accent-green);text-shadow:0 0 5px rgba(0,255,136,0.25)}
+.mh-m-val.purple{color:var(--accent-purple);text-shadow:0 0 5px rgba(148,102,255,0.35)}
+.mh-m-lbl{font-size:12px;color:#94a8c0;margin-top:4px;letter-spacing:0.5px;font-weight:500}
+/* 班别 */
+.mh-shifts{display:flex;gap:12px;flex-wrap:wrap}
+.mh-shift{font-size:15px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;font-weight:500}
+.mh-shift b{color:var(--text-primary);font-weight:700}
+.mh-sh-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+/* 按钮 */
+.mh-action{margin-top:14px;padding:12px 0;border-top:1px solid rgba(0,195,255,0.08);border-bottom:1px solid rgba(0,195,255,0.04);font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:2.5px;color:var(--accent-cyan);text-align:center;transition:color 0.2s,text-shadow 0.2s,background 0.2s;border-radius:3px;background:rgba(0,240,255,0.02)}
+.mh-card:hover .mh-action{background:rgba(0,240,255,0.06)}
+.mh-card:hover .mh-action{color:#fff;text-shadow:0 0 8px rgba(0,240,255,0.5)}
+.mh-card.mh-remote .mh-action{color:var(--accent-purple)}
+.mh-card.mh-remote:hover .mh-action{color:#fff;text-shadow:0 0 8px rgba(148,102,255,0.5)}
+/* 舞台粒子 */
+.mem-stg-pt{position:absolute;border-radius:50%;pointer-events:none}
+
+/* ══ 班组弹窗 ══ */
+.mh-modal-overlay{display:none;position:fixed;inset:0;z-index:10001;background:rgba(2,4,10,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.mh-modal-overlay.active{display:flex}
+.mh-modal{position:relative;width:1500px;max-height:92vh;overflow-y:auto;background:linear-gradient(160deg,rgba(0,80,200,0.06),rgba(6,12,28,0.98) 40%,rgba(148,102,255,0.03) 100%);border:1px solid rgba(0,195,255,0.25);border-radius:6px;padding:36px 48px;box-shadow:0 0 50px rgba(0,180,255,0.1),0 0 100px rgba(0,120,200,0.04)}
+.mh-modal::after{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#00f0ff,#9466ff,transparent);opacity:0.3}
+.mh-modal::-webkit-scrollbar{width:4px}
+.mh-modal::-webkit-scrollbar-thumb{background:rgba(0,195,255,0.2);border-radius:2px}
+.mh-modal-close{position:absolute;top:14px;right:16px;background:none;border:1px solid rgba(0,195,255,0.2);color:var(--text-dim);font-size:22px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:all 0.2s;z-index:2}
+.mh-modal-close:hover{color:var(--accent-cyan);border-color:var(--accent-cyan);box-shadow:0 0 10px rgba(0,240,255,0.2)}
+.mh-modal h3{font-size:38px;font-weight:800;margin-bottom:6px;color:#fff}
+.mh-modal .mh-modal-sub{font-family:var(--font-display);font-size:15px;color:#a0b8d4;letter-spacing:3px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(0,195,255,0.08);font-weight:600}
+.mh-shift-section{margin-bottom:16px}
+.mh-shift-title{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:2px;color:var(--accent-cyan);padding:10px 14px;border-left:3px solid var(--accent-cyan);background:linear-gradient(90deg,rgba(0,240,255,0.06),transparent 60%);margin-bottom:14px;border-radius:2px}
+.mh-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+/* 班组总览摘要 */
+.mh-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;padding:12px 0;border-bottom:1px solid rgba(0,195,255,0.08)}
+.mh-summary-item{text-align:center}
+.mh-summary-val{font-family:var(--font-display);font-size:38px;font-weight:900;line-height:1}
+.mh-summary-lbl{font-size:14px;color:#a0b8d4;margin-top:5px;font-weight:600}
+/* 班组状态卡行 */
+.mh-shift-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.mh-shift-tab{border:1px solid rgba(0,195,255,0.15);border-radius:5px;padding:18px 22px;cursor:pointer;position:relative;background:var(--bg-card);transition:border-color 0.25s,box-shadow 0.25s,transform 0.2s}
+.mh-shift-tab:hover{border-color:rgba(0,195,255,0.3);transform:translateY(-1px)}
+.mh-shift-tab.active{border-color:var(--tab-c,var(--accent-cyan));box-shadow:0 0 16px var(--tab-g,rgba(0,240,255,0.12)),inset 0 0 20px var(--tab-g2,rgba(0,240,255,0.04))}
+.mh-shift-tab::before{content:'';position:absolute;top:0;left:12%;right:12%;height:2px;border-radius:1px;background:var(--tab-c,var(--accent-cyan));opacity:0;transition:opacity 0.25s}
+.mh-shift-tab.active::before{opacity:0.6}
+.mh-tab-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mh-tab-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.mh-tab-name{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:2px}
+.mh-tab-badge{margin-left:auto;font-family:var(--font-display);font-size:12px;letter-spacing:1px;padding:4px 12px;border-radius:2px;border:1px solid rgba(0,195,255,0.15);font-weight:700}
+.mh-tab-badge.ok{color:var(--accent-green);border-color:rgba(0,255,136,0.2);background:rgba(0,255,136,0.04)}
+.mh-tab-badge.warn{color:var(--accent-orange);border-color:rgba(255,128,64,0.2);background:rgba(255,128,64,0.04)}
+.mh-tab-badge.alert{color:var(--accent-red);border-color:rgba(255,68,102,0.2);background:rgba(255,68,102,0.04)}
+.mh-tab-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mh-tab-stat{text-align:center}
+.mh-tab-stat-val{font-family:var(--font-display);font-size:32px;font-weight:900;line-height:1}
+.mh-tab-stat-lbl{font-size:13px;color:#a0b8d4;margin-top:5px;font-weight:600}
+/* 当前班组成员区 */
+.mh-members-area{min-height:120px}
+.mh-members-label{font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:2px;color:#b0c8e4;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.mh-members-label::before{content:'';width:3px;height:12px;border-radius:2px}
+
+/* 团队战力总览 */
+.mem-readiness-body{display:flex;flex-direction:column;gap:10px;flex:1;justify-content:center;padding:4px 0}
+.mem-rdy-row{display:flex;align-items:center;gap:10px}
+.mem-rdy-label{width:70px;flex-shrink:0;text-align:right;font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--text-secondary)}
+.mem-rdy-bar{flex:1;height:20px;position:relative;border:1px solid rgba(0,195,255,0.15);border-radius:3px;background:rgba(0,0,0,0.2);overflow:hidden}
+.mem-rdy-fill{position:absolute;top:2px;bottom:2px;left:2px;border-radius:2px;transition:width 1s ease-out}
+.mem-rdy-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.08),transparent 40%,transparent 70%,rgba(0,0,0,0.06))}
+.mem-rdy-val{width:50px;flex-shrink:0;font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;text-align:right}
+
+/* Group sections — 面板化 */
+.mem-group-section {
+  margin-top:4px; padding:10px 14px 12px;
+  border:1px solid rgba(0,195,255,0.1); border-radius:4px;
+  background:linear-gradient(160deg,rgba(0,60,140,0.03),transparent 40%,rgba(148,102,255,0.015) 100%),rgba(6,12,28,0.5);
+  position:relative;
+}
+.mem-group-section::after {
+  content:''; position:absolute; top:0; left:14px; right:14px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,240,255,0.12),rgba(148,102,255,0.08),transparent); pointer-events:none;
+}
 .mem-group-header {
   font-family:var(--font-display); font-size:14px; font-weight:700;
-  letter-spacing:3px; color:var(--accent-cyan); padding:8px 12px;
+  letter-spacing:3px; color:var(--accent-cyan); padding:6px 10px;
   border-left:3px solid var(--accent-cyan);
   background:linear-gradient(90deg,rgba(0,240,255,0.06),transparent 60%);
-  margin-bottom:8px; display:flex; align-items:center; gap:10px;
+  margin-bottom:10px; display:flex; align-items:center; gap:10px;
   text-shadow:0 0 3px rgba(0,240,255,0.4);
   transition:background 0.3s,box-shadow 0.3s,border-color 0.3s;
+  border-radius:2px;
 }
 .mem-group-header:hover { background:linear-gradient(90deg,rgba(0,240,255,0.16),rgba(0,200,255,0.04) 50%,transparent 75%); border-left-color:#00f0ff; border-left-width:4px; box-shadow:0 3px 24px rgba(0,240,255,0.16),0 0 50px rgba(0,200,255,0.06); text-shadow:0 0 6px rgba(0,240,255,0.7),0 0 14px rgba(0,240,255,0.15); }
 .mem-group-header .gh-count {
   font-size:11px; color:var(--text-dim); letter-spacing:1px; font-weight:400;
   margin-left:auto; font-family:var(--font-body);
+  padding:2px 8px; border:1px solid rgba(0,195,255,0.1); border-radius:2px;
+  background:rgba(0,195,255,0.03);
 }
-.mem-group-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; margin-bottom:12px; }
+.mem-group-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:8px; }
 
 /* Member Card */
 .mem-card {
@@ -1094,15 +1356,15 @@ select.cyber-input {
 
 /* Card inner */
 .mem-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-.mem-card-name { font-size:16px; font-weight:700; letter-spacing:1px; }
+.mem-card-name { font-size:22px; font-weight:800; letter-spacing:1px; }
 .mem-card.role-supervisor .mem-card-name { color:#ff6eb4; text-shadow:0 0 6px rgba(255,110,180,0.6),0 0 14px rgba(255,221,0,0.2); }
 .mem-card.role-leader .mem-card-name { color:#ffdd00; text-shadow:0 0 5px rgba(255,221,0,0.5); }
 .mem-card.role-member .mem-card-name { color:var(--accent-green); text-shadow:0 0 3px rgba(0,255,136,0.35); }
 .mem-card.role-remote .mem-card-name { color:rgba(0,255,136,0.75); text-shadow:0 0 2px rgba(0,255,136,0.25); }
 
 .mem-card-role {
-  font-family:var(--font-display); font-size:9px; letter-spacing:2px;
-  padding:2px 7px; border-radius:2px; font-weight:700;
+  font-family:var(--font-display); font-size:11px; letter-spacing:2px;
+  padding:3px 9px; border-radius:2px; font-weight:700;
 }
 .mem-card.role-supervisor .mem-card-role { color:#ffdd00; border:1px solid rgba(255,221,0,0.3); background:rgba(255,221,0,0.08); }
 .mem-card.role-leader .mem-card-role { color:#ffdd00; border:1px solid rgba(255,221,0,0.25); background:rgba(255,221,0,0.06); }
@@ -1110,9 +1372,9 @@ select.cyber-input {
 .mem-card.role-remote .mem-card-role { color:rgba(0,255,136,0.7); border:1px solid rgba(0,255,136,0.15); background:rgba(0,255,136,0.04); }
 
 /* Status dot */
-.mem-status-dot { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; margin-bottom:5px; }
+.mem-status-dot { display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:700; margin-bottom:6px; }
 .mem-status-dot::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.mem-status-dot.s-active { color:var(--text-secondary); }
+.mem-status-dot.s-active { color:var(--text-primary); }
 .mem-status-dot.s-active::before { background:currentColor; }
 .mem-status-dot.s-leave { color:var(--accent-red); }
 .mem-status-dot.s-leave::before { background:var(--accent-red); box-shadow:0 0 4px rgba(255,68,102,0.6); }
@@ -1122,14 +1384,14 @@ select.cyber-input {
 .mem-status-dot.s-abnormal::before { background:var(--accent-red); box-shadow:0 0 6px rgba(255,68,102,0.8); animation:statusPulse 2s ease-in-out infinite; }
 
 /* Card stats grid */
-.mem-card-stats { display:grid; grid-template-columns:1fr 1fr; gap:3px 8px; }
-.mem-stat { display:flex; justify-content:space-between; font-size:11px; }
-.mem-stat-label { color:var(--text-dim); }
-.mem-stat-val { color:var(--text-secondary); font-weight:600; font-family:var(--font-display); font-size:10px; letter-spacing:0.5px; }
+.mem-card-stats { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; }
+.mem-stat { display:flex; justify-content:space-between; font-size:15px; }
+.mem-stat-label { color:#a0b8d4; font-weight:500; }
+.mem-stat-val { color:#f0f6ff; font-weight:800; font-family:var(--font-display); font-size:14px; letter-spacing:0.5px; }
 .mem-card-note { font-size:10px; color:var(--text-dim); margin-top:5px; opacity:0.6; border-top:1px solid rgba(0,195,255,0.06); padding-top:4px; }
 
 /* AI status badge */
-.ai-badge { font-size:9px; font-weight:700; padding:1px 5px; border-radius:2px; letter-spacing:0.5px; font-family:var(--font-display); }
+.ai-badge { font-size:12px; font-weight:700; padding:3px 8px; border-radius:2px; letter-spacing:0.5px; font-family:var(--font-display); }
 .ai-badge.ai-on { color:var(--accent-green); border:1px solid rgba(0,255,136,0.2); background:rgba(0,255,136,0.06); }
 .ai-badge.ai-learning { color:var(--accent-orange); border:1px solid rgba(255,128,64,0.2); background:rgba(255,128,64,0.06); }
 .ai-badge.ai-off { color:var(--text-dim); border:1px solid rgba(0,195,255,0.1); background:rgba(0,195,255,0.03); opacity:0.6; }
@@ -1160,8 +1422,8 @@ select.cyber-input {
 .att-kpi-val { font-family:var(--font-display); font-size:36px; font-weight:900; line-height:1; }
 .att-kpi-val.cyan   { color:var(--accent-cyan);   text-shadow:0 0 3px rgba(0,240,255,0.55); }
 .att-kpi-val.green  { color:var(--accent-green);  text-shadow:0 0 3px rgba(0,255,136,0.5); }
-.att-kpi-val.orange { color:var(--accent-orange); text-shadow:0 0 3px rgba(255,128,64,0.5); }
-.att-kpi-val.red    { color:var(--accent-red);    text-shadow:0 0 3px rgba(255,68,102,0.5); }
+.att-kpi-val.orange { color:var(--accent-orange); text-shadow:0 0 5px rgba(255,128,64,0.6),0 0 12px rgba(255,128,64,0.15); }
+.att-kpi-val.red    { color:var(--accent-red);    text-shadow:0 0 5px rgba(255,68,102,0.6),0 0 12px rgba(255,68,102,0.15); }
 .att-kpi-val.purple { color:var(--accent-purple); text-shadow:0 0 3px rgba(148,102,255,0.5); }
 
 /* (removed: att-charts-row — no longer used) */
@@ -1245,14 +1507,14 @@ select.cyber-input {
 }
 .att-alert-title::before { content:''; width:3px; height:14px; background:linear-gradient(180deg,var(--accent-red),var(--accent-orange)); border-radius:2px; box-shadow:0 0 6px rgba(255,68,102,0.5); }
 .att-alert-item {
-  display:flex; align-items:center; gap:10px; padding:8px 10px;
+  display:flex; align-items:center; gap:10px; padding:9px 12px;
   border-bottom:1px solid rgba(255,68,102,0.06);
   transition:background 0.2s;
 }
 .att-alert-item:last-child { border-bottom:none; }
 .att-alert-item:hover { background:rgba(255,68,102,0.04); }
-.att-alert-name { font-weight:700; color:var(--text-primary); font-size:15px; min-width:56px; }
-.att-alert-reason { font-size:13px; color:var(--text-secondary); }
+.att-alert-name { font-weight:800; color:var(--text-primary); font-size:15px; min-width:58px; }
+.att-alert-reason { font-size:13px; color:#a0b8d4; }
 
 /* Shift Summary Cards */
 .att-shift-cards { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -1305,14 +1567,14 @@ select.cyber-input {
 }
 .att-bay:hover { border-color:rgba(0,240,255,0.55); box-shadow:0 4px 28px rgba(0,240,255,0.22),0 0 55px rgba(0,200,255,0.08); background:rgba(0,10,30,0.4); }
 .att-bay-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
-.att-bay-label { font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:2px; transition:text-shadow 0.3s,filter 0.3s; }
+.att-bay-label { font-family:var(--font-display); font-size:13px; font-weight:700; letter-spacing:2px; transition:text-shadow 0.3s,filter 0.3s; }
 .att-bay-label.c1 { color:var(--accent-cyan); text-shadow:0 0 8px rgba(0,240,255,0.7); }
 .att-bay-label.c2 { color:var(--accent-blue); text-shadow:0 0 8px rgba(0,116,255,0.7); }
 .att-bay-label.c3 { color:var(--accent-purple); text-shadow:0 0 8px rgba(148,102,255,0.7); }
 .att-bay-label.c4 { color:var(--accent-green); text-shadow:0 0 8px rgba(0,255,136,0.7); }
 .att-bay-label.c5 { color:var(--accent-orange); text-shadow:0 0 8px rgba(255,128,64,0.7); }
 .att-bay:hover .att-bay-label { filter:brightness(1.25); }
-.att-bay-num { font-family:var(--font-display); font-size:20px; font-weight:900; }
+.att-bay-num { font-family:var(--font-display); font-size:22px; font-weight:900; -webkit-text-stroke:0.3px rgba(255,255,255,0.06); }
 .att-bay-num.c1 { color:var(--accent-cyan); animation:numPulse-c 2s ease-in-out infinite; }
 .att-bay-num.c2 { color:var(--accent-blue); animation:numPulse-b 2s ease-in-out infinite; }
 .att-bay-num.c3 { color:var(--accent-purple); animation:numPulse-p 2s ease-in-out infinite; }
@@ -1377,11 +1639,11 @@ select.cyber-input {
 .att-bay-summary .bs-label { color:var(--text-secondary); font-size:11px; }
 .att-bay-status {
   font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:2px;
-  padding:2px 8px; border-radius:2px;
+  padding:3px 10px; border-radius:2px;
 }
-.att-bay-status.bs-normal { color:var(--accent-green); border:1px solid rgba(0,255,136,0.2); background:rgba(0,255,136,0.06); }
-.att-bay-status.bs-caution { color:var(--accent-orange); border:1px solid rgba(255,128,64,0.2); background:rgba(255,128,64,0.06); }
-.att-bay-status.bs-alert { color:var(--accent-red); border:1px solid rgba(255,68,102,0.2); background:rgba(255,68,102,0.06); }
+.att-bay-status.bs-normal { color:var(--accent-green); border:1px solid rgba(0,255,136,0.25); background:rgba(0,255,136,0.06); text-shadow:0 0 3px rgba(0,255,136,0.2); }
+.att-bay-status.bs-caution { color:var(--accent-orange); border:1px solid rgba(255,128,64,0.25); background:rgba(255,128,64,0.06); text-shadow:0 0 3px rgba(255,128,64,0.2); }
+.att-bay-status.bs-alert { color:var(--accent-red); border:1px solid rgba(255,68,102,0.25); background:rgba(255,68,102,0.06); text-shadow:0 0 3px rgba(255,68,102,0.2); }
 
 /* Attendance: Dual Core Source Module */
 .att-dual-core { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; flex:1; position:relative; }
@@ -1406,7 +1668,7 @@ select.cyber-input {
 .att-core-ring.core-local::before { border-color:rgba(0,255,136,0.4); }
 .att-core-ring.core-remote::before { border-color:rgba(0,240,255,0.4); }
 @keyframes coreRingPulse { 0%,100%{transform:scale(1);opacity:0.15} 50%{transform:scale(1.12);opacity:0.3} }
-.att-core-val { font-family:var(--font-display); font-size:22px; font-weight:900; }
+.att-core-val { font-family:var(--font-display); font-size:24px; font-weight:900; }
 .att-core-val.v-local { color:var(--accent-green); text-shadow:0 0 6px rgba(0,255,136,0.5); }
 .att-core-val.v-remote { color:var(--accent-cyan); text-shadow:0 0 6px rgba(0,240,255,0.5); }
 .att-core-label { font-family:var(--font-display); font-size:11px; letter-spacing:2px; font-weight:700; }
@@ -1434,8 +1696,8 @@ select.cyber-input {
 .att-hcal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; flex:1; }
 .att-hcell {
   background:rgba(0,20,50,0.5); border:1px solid rgba(0,195,255,0.1); border-radius:3px;
-  padding:5px 6px; position:relative; overflow:hidden; cursor:pointer;
-  display:flex; flex-direction:column; min-height:52px;
+  padding:5px 7px; position:relative; overflow:hidden; cursor:pointer;
+  display:flex; flex-direction:column; min-height:54px;
   transition:border-color 0.3s,box-shadow 0.4s,transform 0.25s,background 0.3s;
 }
 .att-hcell::before {
@@ -1491,10 +1753,10 @@ select.cyber-input {
 .hc-dot.d-abn { background:var(--accent-purple); box-shadow:0 0 4px rgba(148,102,255,0.6); }
 .hc-dot.d-offline { background:#ff7098; box-shadow:0 0 4px rgba(255,80,120,0.6); }
 /* Cell inner */
-.hc-day { font-family:var(--font-display); font-size:17px; font-weight:900; color:var(--text-primary); line-height:1; margin-bottom:3px; opacity:0.9; }
+.hc-day { font-family:var(--font-display); font-size:18px; font-weight:900; color:var(--text-primary); line-height:1; margin-bottom:3px; opacity:0.92; }
 .att-hcell.h-today .hc-day { color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.5); opacity:1; }
 .att-hcell.h-we .hc-day { color:var(--text-dim); opacity:0.55; }
-.hc-shift { font-size:11px; letter-spacing:0.3px; color:var(--text-secondary); line-height:1.3; opacity:0.85; }
+.hc-shift { font-size:11px; letter-spacing:0.3px; color:#b0c4dc; line-height:1.35; opacity:0.9; font-weight:500; }
 .hc-shift .hc-sl { font-family:var(--font-display); font-weight:700; letter-spacing:0.5px; }
 .hc-shift .hc-sl.sl-e { color:rgba(0,240,255,0.75); }
 .hc-shift .hc-sl.sl-m { color:rgba(0,116,255,0.75); }
@@ -1515,7 +1777,7 @@ select.cyber-input {
 .att-day-detail { overflow-y:auto; }
 .att-day-detail::-webkit-scrollbar { width:4px; }
 .att-day-detail::-webkit-scrollbar-thumb { background:rgba(0,195,255,0.18); border-radius:2px; }
-.att-dd-date { font-family:var(--font-display); font-size:20px; font-weight:900; color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.4); margin-bottom:2px; }
+.att-dd-date { font-family:var(--font-display); font-size:22px; font-weight:900; color:var(--accent-cyan); text-shadow:0 0 6px rgba(0,240,255,0.4),0 1px 2px rgba(0,0,0,0.4); margin-bottom:3px; }
 .att-dd-sub { font-size:10px; color:var(--text-dim); margin-bottom:8px; letter-spacing:1px; font-family:var(--font-display); }
 .att-snap-row {
   display:flex; align-items:center; gap:6px; padding:5px 8px; margin-bottom:4px;
@@ -1548,52 +1810,94 @@ select.cyber-input {
 .att-roster-row > .att-panel:last-child { grid-column:1; grid-row:2; }
 .att-side-stack { display:flex; flex-direction:column; gap:6px; min-width:0; }
 .att-roster-groups { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+/* 翻页卡 */
+/* 主照明灯带 */
+.att-lightbar{position:relative;height:10px;margin-bottom:2px}
+.att-lb-frame{position:relative;height:6px;border-radius:3px;overflow:hidden;
+  border:1px solid rgba(0,195,255,0.15);
+  background:linear-gradient(90deg,rgba(0,20,50,0.3) 0%,rgba(0,40,100,0.12) 30%,rgba(0,60,140,0.18) 50%,rgba(0,40,100,0.12) 70%,rgba(0,20,50,0.3) 100%);
+  box-shadow:0 0 8px rgba(0,240,255,0.04),inset 0 0 6px rgba(0,240,255,0.06)}
+.att-lb-core{position:absolute;top:1px;bottom:1px;left:30%;right:30%;border-radius:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,240,255,0.35) 25%,rgba(0,240,255,0.5) 50%,rgba(0,240,255,0.35) 75%,transparent);
+  box-shadow:0 0 8px rgba(0,240,255,0.2);
+  animation:lbPulse 3s ease-in-out infinite}
+@keyframes lbPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.att-lb-sweep{position:absolute;top:0;bottom:0;width:60px;
+  background:linear-gradient(90deg,transparent,rgba(0,240,255,0.25),transparent);
+  animation:lbSweep 6s ease-in-out infinite}
+@keyframes lbSweep{0%{left:-60px}100%{left:calc(100% + 60px)}}
+/* 体积光(向下照) */
+.att-lb-glow{height:20px;margin-top:-1px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(0,240,255,0.06) 0%,rgba(0,180,255,0.02) 40%,transparent 70%);
+  pointer-events:none}
+
+.att-flip-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;flex:1;min-height:160px}
+.att-flip{perspective:800px;cursor:pointer;min-height:160px;position:relative}
+.att-flip-inner{position:relative;width:100%;height:100%;min-height:160px;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d}
+.att-flip.flipped .att-flip-inner{transform:rotateY(180deg)}
+.att-flip-front,.att-flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:4px;border:1px solid var(--border-mech);overflow:hidden;display:flex;flex-direction:column}
+.att-flip-front{background:linear-gradient(160deg,rgba(0,80,200,0.05),var(--bg-card) 40%);padding:10px 12px}
+.att-flip-back{background:linear-gradient(160deg,rgba(0,60,160,0.06),rgba(6,12,28,0.96) 40%);transform:rotateY(180deg);padding:8px 10px;overflow-y:auto}
+.att-flip-back::-webkit-scrollbar{width:3px}
+.att-flip-back::-webkit-scrollbar-thumb{background:rgba(0,195,255,0.15);border-radius:2px}
+/* 正面 */
+.af-label{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.af-label::before{content:'';width:3px;height:12px;border-radius:2px}
+.af-num{font-family:var(--font-display);font-size:36px;font-weight:900;line-height:1;margin-bottom:4px}
+.af-summary{font-size:11px;color:#94a8c0;line-height:1.4}
+.af-hint{font-family:var(--font-display);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-top:auto;opacity:0.5;padding-top:4px}
+/* 背面 */
+.af-back-title{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.af-back-title::before{content:'';width:3px;height:10px;border-radius:2px}
+.af-back-item{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(0,195,255,0.04);font-size:13px}
+.af-back-name{font-weight:700;color:var(--text-primary)}
+/* 顶部高光 */
+.att-flip-front::before,.att-flip-back::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--fc,rgba(0,240,255,0.3)),transparent);opacity:0.4}
 .att-roster-group { min-width:0; }
 .att-roster-group-title {
-  font-family:var(--font-display); font-size:13px; font-weight:700;
-  letter-spacing:2px; color:var(--accent-cyan); padding:3px 6px; margin-bottom:3px;
-  border-left:3px solid var(--accent-cyan);
+  font-family:var(--font-display); font-size:14px; font-weight:700;
+  letter-spacing:2.5px; color:var(--accent-cyan); padding:5px 8px; margin-bottom:4px;
+  border-left:3px solid var(--accent-cyan); border-radius:2px;
   background:linear-gradient(90deg,rgba(0,240,255,0.08),transparent 60%);
   text-shadow:0 0 3px rgba(0,240,255,0.35);
-  display:flex; align-items:center; gap:4px;
+  display:flex; align-items:center; gap:6px;
 }
-.att-roster-group-title .rg-count { font-size:11px; color:var(--text-dim); font-weight:400; margin-left:auto; font-family:var(--font-body); }
+.att-roster-group-title .rg-count { font-size:11px; color:var(--text-dim); font-weight:500; margin-left:auto; font-family:var(--font-body); }
 .att-roster-item {
-  display:flex; align-items:center; gap:6px; padding:4px 7px;
-  border-bottom:1px solid rgba(0,195,255,0.04); font-size:12px;
-  transition:background 0.2s;
+  display:flex; align-items:center; gap:8px; padding:5px 8px;
+  border-bottom:1px solid rgba(0,195,255,0.04); font-size:13px;
+  transition:background 0.2s; line-height:1.4;
 }
 .att-roster-item:hover { background:rgba(0,195,255,0.06); border-left:2px solid rgba(0,240,255,0.3); }
 .att-roster-item:last-child { border-bottom:none; }
-.att-ri-name { font-weight:700; color:var(--text-primary); font-size:14px; }
-.att-ri-role { font-family:var(--font-display); font-size:10px; letter-spacing:1px; color:var(--text-secondary); }
+.att-ri-name { font-weight:800; color:var(--text-primary); font-size:15px; }
+.att-ri-role { font-family:var(--font-display); font-size:10px; letter-spacing:1px; color:#94a8c0; }
 .att-ri-status { margin-left:auto; }
 
 /* ══════════════════════════════════════
    Page: Performance (#page-performance)
    ══════════════════════════════════════ */
-.pf-dashboard { padding:10px 24px 8px; display:block; overflow-y:auto; overflow-x:hidden; flex:1; min-height:0; }
-.pf-dashboard > section { margin-bottom:8px; }
+.pf-dashboard { padding:8px 24px 6px; display:flex; flex-direction:column; gap:6px; overflow:hidden; flex:1; min-height:0; }
 .pf-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
 .pf-kpi-card {
   background:linear-gradient(135deg,rgba(0,120,255,0.05) 0%,transparent 50%,rgba(148,102,255,0.03) 100%),var(--bg-card);
   border:1px solid var(--border-mech); border-radius:4px;
-  padding:14px 16px; position:relative; overflow:hidden; backdrop-filter:blur(16px);
+  padding:10px 14px; position:relative; overflow:hidden; backdrop-filter:blur(16px);
   transition:border-color 0.3s,box-shadow 0.4s,transform 0.3s;
   clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
 }
 .pf-kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent-cyan),var(--accent-purple),transparent); opacity:0.7; }
 .pf-kpi-card:hover { border-color:rgba(0,240,255,0.55); box-shadow:0 6px 28px rgba(0,240,255,0.22),0 0 50px rgba(0,200,255,0.08); transform:translateY(-2px); }
-.pf-kpi-label { font-size:14px; color:var(--text-secondary); letter-spacing:1px; margin-bottom:4px; font-weight:600; }
-.pf-kpi-val { font-family:var(--font-display); font-size:32px; font-weight:900; line-height:1; }
+.pf-kpi-label { font-size:16px; color:var(--text-secondary); letter-spacing:1px; margin-bottom:6px; font-weight:600; }
+.pf-kpi-val { font-family:var(--font-display); font-size:36px; font-weight:900; line-height:1; }
 .pf-kpi-val.cyan { color:var(--accent-cyan); text-shadow:0 0 4px rgba(0,240,255,0.5); }
 .pf-kpi-val.green { color:var(--accent-green); text-shadow:0 0 4px rgba(0,255,136,0.5); }
 .pf-kpi-val.orange { color:var(--accent-orange); text-shadow:0 0 4px rgba(255,128,64,0.5); }
 .pf-kpi-val.red { color:var(--accent-red); text-shadow:0 0 4px rgba(255,68,102,0.5); }
-.pf-kpi-sub { font-size:12px; color:var(--text-dim); margin-top:4px; font-family:var(--font-display); letter-spacing:1px; }
+.pf-kpi-sub { font-size:11px; color:var(--text-dim); margin-top:5px; font-family:var(--font-display); letter-spacing:1.5px; opacity:0.7; }
 
 /* Charts area */
-.pf-charts-row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; }
+.pf-charts-row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; min-height:180px; }
 .pf-panel {
   background:linear-gradient(160deg,rgba(0,100,255,0.04) 0%,transparent 40%,rgba(148,102,255,0.02) 100%),var(--bg-card);
   border:1px solid var(--border-mech); border-radius:4px; padding:12px 14px;
@@ -1604,8 +1908,8 @@ select.cyber-input {
 .pf-panel::after { content:''; position:absolute; top:0; left:14px; right:14px; height:1px; background:linear-gradient(90deg,transparent,var(--accent-cyan),var(--accent-purple),transparent); opacity:0.4; }
 .pf-panel:hover { border-color:rgba(0,240,255,0.45); box-shadow:0 6px 24px rgba(0,240,255,0.16),0 0 50px rgba(0,200,255,0.06); }
 .pf-panel-title {
-  font-size:15px; font-weight:700; color:var(--accent-cyan);
-  letter-spacing:2px; text-transform:uppercase; margin-bottom:6px;
+  font-size:17px; font-weight:700; color:var(--accent-cyan);
+  letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;
   display:flex; align-items:center; gap:8px;
   text-shadow:0 0 3px rgba(0,240,255,0.5);
 }
@@ -1613,49 +1917,49 @@ select.cyber-input {
 .pf-chart-box { width:100%; min-height:220px; }
 
 /* Lower row */
-.pf-lower-row { display:grid; grid-template-columns:1.2fr 1.8fr; gap:10px; }
+.pf-lower-row { display:grid; grid-template-columns:1.1fr 1.9fr; gap:10px; flex:1; min-height:0; }
 
 /* Risk list */
 .pf-risk-panel { border-color:rgba(255,68,102,0.28); box-shadow:0 0 14px rgba(255,68,102,0.06); }
 .pf-risk-panel::after { background:linear-gradient(90deg,transparent,var(--accent-red),var(--accent-orange),transparent); }
 .pf-risk-item {
-  display:flex; align-items:center; gap:10px; padding:10px 12px;
-  border-bottom:1px solid rgba(255,68,102,0.06);
-  transition:background 0.2s;
+  display:flex; flex-direction:column; gap:2px; padding:8px 14px;
+  border-bottom:1px solid rgba(255,68,102,0.05);
+  transition:background 0.2s; border-radius:3px;
 }
 .pf-risk-item:hover { background:rgba(255,68,102,0.04); }
-.pf-risk-rank { font-family:var(--font-display); font-size:18px; font-weight:900; color:var(--accent-red); min-width:20px; text-shadow:0 0 4px rgba(255,68,102,0.4); }
-.pf-risk-name { font-weight:700; color:var(--text-primary); font-size:16px; min-width:54px; }
+.pf-risk-rank { font-family:var(--font-display); font-size:20px; font-weight:900; color:var(--accent-red); min-width:24px; text-shadow:0 0 5px rgba(255,68,102,0.5); }
+.pf-risk-name { font-weight:800; color:var(--text-primary); font-size:17px; min-width:58px; }
 .pf-risk-shift { font-size:11px; color:var(--text-dim); font-family:var(--font-display); letter-spacing:1px; }
-.pf-risk-score { font-family:var(--font-display); font-size:16px; font-weight:700; margin-left:auto; }
+.pf-risk-score { font-family:var(--font-display); font-size:17px; font-weight:700; margin-left:auto; }
 .pf-risk-score.score-low { color:var(--accent-red); text-shadow:0 0 3px rgba(255,68,102,0.4); }
 .pf-risk-score.score-mid { color:var(--accent-orange); text-shadow:0 0 3px rgba(255,128,64,0.4); }
-.pf-risk-extra { font-size:12px; color:var(--text-secondary); margin-left:8px; }
+.pf-risk-extra { font-size:13px; color:var(--text-secondary); margin-left:8px; font-weight:500; }
 
 /* Staff cards grid */
-.pf-staff-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; max-height:320px; overflow-y:auto; }
+.pf-staff-grid { display:flex; flex-direction:column; gap:3px; flex:1; min-height:0; overflow-y:auto; }
 .pf-staff-grid::-webkit-scrollbar { width:4px; }
 .pf-staff-grid::-webkit-scrollbar-thumb { background:rgba(0,195,255,0.18); border-radius:2px; }
 .pf-staff-card {
-  background:var(--bg-card); border:1px solid rgba(0,195,255,0.12); border-radius:4px;
-  padding:10px 12px; cursor:pointer; position:relative; overflow:hidden;
-  transition:border-color 0.3s,box-shadow 0.3s,transform 0.25s;
+  background:rgba(6,12,28,0.6); border:1px solid rgba(0,195,255,0.07); border-radius:3px;
+  padding:6px 8px; cursor:pointer; position:relative; overflow:hidden;
+  transition:border-color 0.25s,box-shadow 0.25s,background 0.25s;
 }
-.pf-staff-card::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; transition:height 0.3s,opacity 0.3s; opacity:0.5; }
-.pf-staff-card:hover { transform:translateY(-3px); }
-.pf-staff-card:hover::before { height:3px; opacity:1; }
-.pf-staff-card.grade-excellent { border-color:rgba(0,255,136,0.2); }
-.pf-staff-card.grade-excellent::before { background:linear-gradient(90deg,rgba(0,255,136,0.5),rgba(0,240,255,0.4)); }
-.pf-staff-card.grade-excellent:hover { border-color:rgba(0,255,136,0.5); box-shadow:0 5px 22px rgba(0,255,136,0.15),0 0 40px rgba(0,255,136,0.05); }
-.pf-staff-card.grade-good { border-color:rgba(0,240,255,0.15); }
-.pf-staff-card.grade-good::before { background:linear-gradient(90deg,rgba(0,240,255,0.4),rgba(0,116,255,0.3)); }
-.pf-staff-card.grade-good:hover { border-color:rgba(0,240,255,0.45); box-shadow:0 5px 20px rgba(0,240,255,0.12); }
-.pf-staff-card.grade-warn { border-color:rgba(255,128,64,0.2); }
-.pf-staff-card.grade-warn::before { background:linear-gradient(90deg,rgba(255,128,64,0.5),rgba(255,68,102,0.4)); box-shadow:0 0 6px rgba(255,68,102,0.2); }
-.pf-staff-card.grade-warn:hover { border-color:rgba(255,68,102,0.5); box-shadow:0 5px 22px rgba(255,68,102,0.18),0 0 40px rgba(255,68,102,0.06); }
+.pf-staff-card::before { content:''; position:absolute; bottom:0; left:0; right:0; height:1.5px; transition:height 0.3s,opacity 0.3s; opacity:0.35; }
+.pf-staff-card:hover { border-color:rgba(0,240,255,0.3); background:rgba(0,20,50,0.5); box-shadow:0 2px 12px rgba(0,240,255,0.06); }
+.pf-staff-card:hover::before { height:2px; opacity:0.8; }
+.pf-staff-card.grade-excellent { border-color:rgba(0,255,136,0.1); }
+.pf-staff-card.grade-excellent::before { background:linear-gradient(90deg,rgba(0,255,136,0.35),rgba(0,240,255,0.25)); }
+.pf-staff-card.grade-excellent:hover { border-color:rgba(0,255,136,0.3); box-shadow:0 2px 12px rgba(0,255,136,0.08); }
+.pf-staff-card.grade-good { border-color:rgba(0,240,255,0.08); }
+.pf-staff-card.grade-good::before { background:linear-gradient(90deg,rgba(0,240,255,0.3),rgba(0,116,255,0.2)); }
+.pf-staff-card.grade-good:hover { border-color:rgba(0,240,255,0.25); box-shadow:0 2px 12px rgba(0,240,255,0.06); }
+.pf-staff-card.grade-warn { border-color:rgba(255,128,64,0.12); }
+.pf-staff-card.grade-warn::before { background:linear-gradient(90deg,rgba(255,128,64,0.35),rgba(255,68,102,0.25)); }
+.pf-staff-card.grade-warn:hover { border-color:rgba(255,68,102,0.3); box-shadow:0 2px 12px rgba(255,68,102,0.08); }
 .pf-sc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
-.pf-sc-name { font-size:16px; font-weight:700; color:var(--text-primary); }
-.pf-sc-shift { font-family:var(--font-display); font-size:10px; letter-spacing:1.5px; color:var(--text-dim); padding:2px 6px; border:1px solid rgba(0,195,255,0.12); border-radius:2px; }
+.pf-sc-name { font-size:17px; font-weight:800; color:var(--text-primary); }
+.pf-sc-shift { font-family:var(--font-display); font-size:11px; letter-spacing:1.5px; color:#94a8c0; padding:2px 7px; border:1px solid rgba(0,195,255,0.15); border-radius:2px; }
 .pf-sc-stats { display:grid; grid-template-columns:1fr 1fr; gap:3px 8px; }
 .pf-sc-stat { display:flex; justify-content:space-between; font-size:13px; }
 .pf-sc-stat-label { color:var(--text-dim); }
@@ -1704,6 +2008,28 @@ select.cyber-input {
 .pf-m-trend-box { height:140px; }
 /* Staff card hint */
 .pf-staff-hint { font-size:11px; color:var(--text-dim); margin-left:auto; letter-spacing:1px; font-family:var(--font-display); }
+/* 质检关注摘要 */
+.pf-focus-list{display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto;position:relative}
+.pf-focus-list::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,195,255,0.008) 3px,rgba(0,195,255,0.008) 4px)}
+.pf-focus-item{display:flex;align-items:center;gap:10px;padding:7px 12px;border:1px solid rgba(0,195,255,0.06);border-radius:3px;background:rgba(0,15,40,0.3);border-left:3px solid var(--fi-c,rgba(255,128,64,0.4));transition:border-color 0.2s,background 0.2s}
+.pf-focus-item:hover{border-color:rgba(0,195,255,0.15);background:rgba(0,20,50,0.4)}
+.pf-fi-node{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pf-fi-text{flex:1;font-size:13px;color:#c8daf0;line-height:1.45;font-weight:500}
+.pf-fi-text b{color:#f0f6ff;font-weight:700}
+.pf-fi-tag{font-family:var(--font-display);font-size:10px;letter-spacing:1.5px;padding:3px 9px;border-radius:2px;flex-shrink:0;font-weight:700}
+/* 人员卡状态标签 */
+.pf-sc-grade{font-family:var(--font-display);font-size:8px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:600;margin-left:auto;opacity:0.8}
+.pf-sc-grade.g-excellent{color:var(--accent-green);border:1px solid rgba(0,255,136,0.15);background:rgba(0,255,136,0.03)}
+.pf-sc-grade.g-stable{color:var(--accent-cyan);border:1px solid rgba(0,240,255,0.15);background:rgba(0,240,255,0.03)}
+.pf-sc-grade.g-warn{color:var(--accent-orange);border:1px solid rgba(255,128,64,0.15);background:rgba(255,128,64,0.03)}
+.pf-sc-grade.g-risk{color:var(--accent-red);border:1px solid rgba(255,68,102,0.18);background:rgba(255,68,102,0.04)}
+.pf-sc-grade.g-review{color:var(--accent-purple);border:1px solid rgba(148,102,255,0.15);background:rgba(148,102,255,0.03)}
+/* 人员分区块 */
+.pf-sg{min-width:0;border:1px solid rgba(0,195,255,0.04);border-radius:3px;padding:5px 6px;background:rgba(0,8,22,0.2)}
+.pf-sg-title{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:2px;padding:0 0 3px 7px;border-left:2px solid;margin-bottom:4px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(0,195,255,0.03);padding-bottom:3px}
+.pf-sg-count{font-size:10px;font-weight:500;color:var(--text-dim);font-family:var(--font-body)}
+.pf-sg-warn{color:var(--accent-orange);font-size:10px;margin-left:auto;font-family:var(--font-display);letter-spacing:1px}
+.pf-sg-cards{display:flex;flex-wrap:wrap;gap:4px}
 
 /* ══════════════════════════════════════
    Page: Daily Report (#page-daily)
@@ -2279,24 +2605,24 @@ select.cyber-input {
 .ai-badge { font-size:10px; padding:2px 6px; }
 .mem-group-header { font-size:15px; padding:10px 14px; }
 .mem-group-header .gh-count { font-size:12px; }
-.mem-group-grid { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
+.mem-group-grid { grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:8px; }
 /* Supervisor card hero */
 .mem-card.role-supervisor { padding:14px 16px; border-width:2px; }
 .mem-card.role-supervisor .mem-card-name { font-size:20px; }
 /* Member detail modal */
 /* Member detail panel — large format */
 .mem-modal-overlay {
-  display:none; position:fixed; inset:0; z-index:10000;
-  background:rgba(2,4,8,0.88); backdrop-filter:blur(10px);
+  display:none; position:fixed; inset:0; z-index:10002;
+  background:rgba(2,4,8,0.7); backdrop-filter:blur(6px);
   align-items:center; justify-content:center;
 }
 .mem-modal-overlay.active { display:flex; }
 .mem-modal {
   background:linear-gradient(160deg,rgba(8,16,36,0.98),rgba(4,8,20,0.99));
   border:2px solid rgba(0,195,255,0.3); border-radius:6px;
-  width:920px; min-height:460px; max-height:92vh; overflow-y:auto; padding:38px 46px;
+  width:1600px; height:880px; padding:24px 32px;
   box-shadow:0 0 60px rgba(0,240,255,0.14),0 0 110px rgba(0,200,255,0.05),inset 0 1px 0 rgba(0,195,255,0.12);
-  position:relative; overflow:hidden;
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
 }
 .mem-modal::before {
   content:''; position:absolute; top:0; left:0; right:0; height:3px;
@@ -2341,8 +2667,8 @@ select.cyber-input {
 .mm-tag-ai.ai-n { color:var(--text-dim); border-color:rgba(0,195,255,0.1); background:rgba(0,195,255,0.03); }
 /* Section titles */
 .mm-section-title {
-  font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:2.5px;
-  color:var(--accent-cyan); margin:18px 0 10px; padding-left:12px;
+  font-family:var(--font-display); font-size:14px; font-weight:700; letter-spacing:3px;
+  color:var(--accent-cyan); margin:22px 0 12px; padding-left:14px;
   border-left:3px solid var(--accent-cyan); text-shadow:0 0 3px rgba(0,240,255,0.3);
   position:relative; z-index:1;
 }
@@ -2511,7 +2837,11 @@ select.cyber-input {
 <div class="page" id="page-members" data-access="组员">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">组员档案总表</span><span class="ht-sub">MEMBER PROFILE DATABASE</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-2">--:--:--</div></div>
+  <div class="header-right-sub">
+    <div class="hrs-left"><div class="hrs-status"><span class="hrs-dot"></span>ONLINE</div><div class="hrs-sub-label">ALL NOMINAL</div></div>
+    <div class="hrs-center"><div class="hrs-clock-label">REALTIME</div><div class="hrs-clock" id="clock-2">--:--:--</div></div>
+    <div class="hrs-right"><div class="hrs-date" id="date-sub-2">----/--/--</div><div class="hrs-week" id="week-sub-2">---</div><div class="hrs-up" id="up-sub-2">UPTIME 00:00:00</div></div>
+  </div>
 </header>
 <div class="members-dashboard">
   <!-- KPI Row -->
@@ -2521,374 +2851,103 @@ select.cyber-input {
     <div class="mem-kpi-card"><div class="mem-kpi-label">远程人员</div><div class="mem-kpi-val purple">8</div></div>
     <div class="mem-kpi-card"><div class="mem-kpi-label">在职中</div><div class="mem-kpi-val green">23</div></div>
     <div class="mem-kpi-card"><div class="mem-kpi-label">请假 / 异常</div><div class="mem-kpi-val orange">3</div></div>
-    <div class="mem-kpi-card"><div class="mem-kpi-label">AI 启用</div><div class="mem-kpi-val green">10</div></div>
+    <div class="mem-kpi-card"><div class="mem-kpi-label">AI 接入率</div><div class="mem-kpi-val green">36%</div></div>
   </section>
 
-  <!-- Charts Row -->
-  <section class="mem-charts-row">
-    <div class="mem-panel">
-      <div class="mem-panel-title">本地班别分布</div>
-      <div class="mem-chart-wrap"><canvas id="mem-chart-local"></canvas></div>
-    </div>
-    <div class="mem-panel">
-      <div class="mem-panel-title">远程分布</div>
-      <div class="mem-chart-wrap"><canvas id="mem-chart-remote"></canvas></div>
-    </div>
-  </section>
+  <!-- 宇宙战术舞台 -->
+  <div class="mem-stage" id="mem-stage">
+    <!-- 双传送门背景 -->
+    <div class="stg-3d" id="stg-portals"></div>
+    <!-- 连接线保留 -->
+    <!-- 连接线 -->
+    <svg class="mem-link-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="mLnk"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="bridgeL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00f0ff" stop-opacity="0.3"/><stop offset="100%" stop-color="#00f0ff" stop-opacity="0.02"/></linearGradient>
+        <linearGradient id="bridgeR" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#9466ff" stop-opacity="0.3"/><stop offset="100%" stop-color="#9466ff" stop-opacity="0.02"/></linearGradient>
+      </defs>
+      <!-- 宽光桥 -->
+      <line x1="280" y1="300" x2="480" y2="300" stroke="rgba(0,240,255,0.05)" stroke-width="20" filter="url(#mLnk)"/>
+      <line x1="480" y1="300" x2="680" y2="300" stroke="rgba(148,102,255,0.05)" stroke-width="20" filter="url(#mLnk)"/>
+      <!-- 双轨线 -->
+      <line x1="280" y1="298" x2="480" y2="298" stroke="url(#bridgeL)" stroke-width="1"/>
+      <line x1="280" y1="302" x2="480" y2="302" stroke="url(#bridgeL)" stroke-width="0.5" stroke-dasharray="4 4"/>
+      <line x1="480" y1="298" x2="680" y2="298" stroke="url(#bridgeR)" stroke-width="1"/>
+      <line x1="480" y1="302" x2="680" y2="302" stroke="url(#bridgeR)" stroke-width="0.5" stroke-dasharray="4 4"/>
+      <!-- 流动粒子 左→中 -->
+      <circle r="2.5" fill="#00f0ff" opacity="0.6"><animateMotion dur="2s" repeatCount="indefinite" path="M280,300 L480,300"/></circle>
+      <circle r="1.5" fill="#00f0ff" opacity="0.4"><animateMotion dur="2.8s" repeatCount="indefinite" path="M280,300 L480,300" begin="0.7s"/></circle>
+      <!-- 流动粒子 右→中 -->
+      <circle r="2.5" fill="#9466ff" opacity="0.6"><animateMotion dur="2s" repeatCount="indefinite" path="M680,300 L480,300"/></circle>
+      <circle r="1.5" fill="#9466ff" opacity="0.4"><animateMotion dur="2.8s" repeatCount="indefinite" path="M680,300 L480,300" begin="0.7s"/></circle>
+      <!-- 中心节点 -->
+      <circle cx="480" cy="300" r="6" fill="rgba(255,255,255,0.1)" stroke="rgba(0,240,255,0.12)" stroke-width="1">
+        <animate attributeName="r" values="5;7;5" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="480" cy="300" r="14" fill="none" stroke="rgba(0,195,255,0.06)" stroke-width="0.5" stroke-dasharray="2 3">
+        <animateTransform attributeName="transform" type="rotate" from="0 480 300" to="360 480 300" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <!-- 端点脉冲 -->
+      <circle cx="280" cy="300" r="4" fill="rgba(0,240,255,0.25)"><animate attributeName="opacity" values="0.15;0.5;0.15" dur="2s" repeatCount="indefinite"/><animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="680" cy="300" r="4" fill="rgba(148,102,255,0.25)"><animate attributeName="opacity" values="0.15;0.5;0.15" dur="2s" begin="1s" repeatCount="indefinite"/><animate attributeName="r" values="3;5;3" dur="2s" begin="1s" repeatCount="indefinite"/></circle>
+    </svg>
 
-  <!-- Group: 主管 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">主管<span class="gh-count">1 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-supervisor">
-        <div class="mem-card-top"><span class="mem-card-name">百川</span><span class="mem-card-role">主管</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">96%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">520</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">98</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">客服中心-1组主管</div>
+    <!-- 左卡：悦达组 -->
+    <div class="mh-card mh-local" id="mh-local">
+      <div class="mh-corner tl"></div><div class="mh-corner tr"></div><div class="mh-corner bl"></div><div class="mh-corner br"></div>
+      <div class="mh-inner-frame" style="position:absolute;inset:5px;border:1px solid rgba(0,195,255,0.05);border-radius:5px;pointer-events:none"></div>
+      <div class="mh-ring" style="width:500px;height:500px;margin-left:-250px;margin-top:-250px"></div>
+      <div class="mh-ring r2" style="width:540px;height:540px;margin-left:-270px;margin-top:-270px"></div>
+      <div style="position:absolute;top:6px;right:14px;font-family:Orbitron,monospace;font-size:8px;letter-spacing:2px;color:rgba(0,240,255,0.2);pointer-events:none">NODE-LC01</div>
+      <div class="mh-tag">LOCAL COMMAND</div>
+      <div class="mh-name">悦达组<span class="mh-role">主管</span></div>
+      <div class="mh-status"><span class="mh-dot on"></span>编制运作中</div>
+      <div class="mh-metrics">
+        <div class="mh-metric"><div class="mh-m-val cyan">20</div><div class="mh-m-lbl">本地编制</div></div>
+        <div class="mh-metric"><div class="mh-m-val green">18</div><div class="mh-m-lbl">在岗人数</div></div>
+        <div class="mh-metric"><div class="mh-m-val cyan">7</div><div class="mh-m-lbl">AI 接入</div></div>
       </div>
+      <div class="mh-shifts">
+        <div class="mh-shift"><span class="mh-sh-dot" style="background:#00f0ff"></span>早班 <b>6</b></div>
+        <div class="mh-shift"><span class="mh-sh-dot" style="background:#0074ff"></span>中班 <b>6</b></div>
+        <div class="mh-shift"><span class="mh-sh-dot" style="background:#9466ff"></span>夜班 <b>7</b></div>
+      </div>
+      <div class="mh-action">查看班组结构 ▸</div>
     </div>
-  </section>
 
-  <!-- Group: 早班 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">早班<span class="gh-count">6 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-leader">
-        <div class="mem-card-top"><span class="mem-card-name">奇奇</span><span class="mem-card-role">组长</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">95%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">468</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">97</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">早班带班</div>
+    <!-- 右卡：远程组 -->
+    <div class="mh-card mh-remote" id="mh-remote">
+      <div class="mh-corner tl"></div><div class="mh-corner tr"></div><div class="mh-corner bl"></div><div class="mh-corner br"></div>
+      <div class="mh-inner-frame" style="position:absolute;inset:5px;border:1px solid rgba(148,102,255,0.04);border-radius:5px;pointer-events:none"></div>
+      <div class="mh-ring" style="width:460px;height:460px;margin-left:-230px;margin-top:-230px"></div>
+      <div class="mh-ring r2" style="width:500px;height:500px;margin-left:-250px;margin-top:-250px"></div>
+      <div style="position:absolute;top:6px;right:14px;font-family:Orbitron,monospace;font-size:8px;letter-spacing:2px;color:rgba(148,102,255,0.2);pointer-events:none">NODE-RM02</div>
+      <div class="mh-tag">REMOTE LINK</div>
+      <div class="mh-name">远程组</div>
+      <div class="mh-status"><span class="mh-dot on"></span>全员在线</div>
+      <div class="mh-metrics">
+        <div class="mh-metric"><div class="mh-m-val purple">8</div><div class="mh-m-lbl">远程编制</div></div>
+        <div class="mh-metric"><div class="mh-m-val green">7</div><div class="mh-m-lbl">在线人数</div></div>
+        <div class="mh-metric"><div class="mh-m-val purple">3</div><div class="mh-m-lbl">AI 接入</div></div>
       </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">貝果</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">93%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">421</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">92</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">日常回单稳定</div>
+      <div class="mh-shifts">
+        <div class="mh-shift"><span class="mh-sh-dot" style="background:#00ff88"></span>悦达 <b>4</b></div>
+        <div class="mh-shift"><span class="mh-sh-dot" style="background:#ff8040"></span>鼎丰 <b>4</b></div>
       </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">卡比</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">97%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">445</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">94</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">支援高峰时段</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">艾娃</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-leave">请假</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">88%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">362</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">89</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">本周请假中</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">果凍</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">92%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">398</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">91</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">处理一般咨询</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">路奇</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">94%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">409</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">90</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">早班轮值</div>
-      </div>
+      <div class="mh-action">查看远程结构 ▸</div>
     </div>
-  </section>
-
-  <!-- Group: 中班 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">中班<span class="gh-count">6 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-leader">
-        <div class="mem-card-top"><span class="mem-card-name">沙西米</span><span class="mem-card-role">组长</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">96%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">452</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">96</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">中班带班</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">小玥</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">91%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">387</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">90</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">中班主力</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">卡姆利</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">94%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">402</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">93</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">质检稳定</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">魚丸</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-abnormal">异常</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">85%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">336</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">87</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">需追踪出勤</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">翅膀</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">93%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">395</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">91</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">中班支援</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">霄霄</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">95%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">418</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">94</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">回复效率佳</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Group: 夜班 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">夜班<span class="gh-count">7 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-leader">
-        <div class="mem-card-top"><span class="mem-card-name">軒軒</span><span class="mem-card-role">组长</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">92%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">440</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">93</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">夜班带班</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">小邱</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">91%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">392</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">89</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">夜班支援</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">咖啡</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">96%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">441</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">94</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">夜班稳定输出</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">小江</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">90%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">374</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">88</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">需加强质检</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">大雄</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">93%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">401</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">91</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">负责夜间高峰</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">九节狼</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-leave">请假</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">87%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">348</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">86</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">排休中</div>
-      </div>
-      <div class="mem-card role-member">
-        <div class="mem-card-top"><span class="mem-card-name">当肯</span><span class="mem-card-role">组员</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">94%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">416</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">92</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">夜班回单稳定</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Group: 悦达远程 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">悦达远程<span class="gh-count">4 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">李中意</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">93%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">410</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">90</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">悦达远程支援</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">尹東</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">91%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">386</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">88</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">日常案件支援</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">華乙</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">95%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">425</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">92</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">回复效率佳</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">鮑博</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-trial">试用</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">89%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">318</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">85</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">新进人员</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Group: 鼎丰远程 -->
-  <section class="mem-group-section">
-    <div class="mem-group-header">鼎丰远程<span class="gh-count">4 人</span></div>
-    <div class="mem-group-grid">
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">西南</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">92%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">404</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">89</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">鼎丰远程支援</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">江初雨</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">94%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">417</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">91</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-on">已使用</span></div>
-        </div>
-        <div class="mem-card-note">稳定回复</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">劉玉虹</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-abnormal">异常</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">84%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">295</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">83</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-off">未启用</span></div>
-        </div>
-        <div class="mem-card-note">需追踪状态</div>
-      </div>
-      <div class="mem-card role-remote">
-        <div class="mem-card-top"><span class="mem-card-name">謝辰</span><span class="mem-card-role">远程客服</span></div>
-        <div class="mem-status-dot s-active">在职</div>
-        <div class="mem-card-stats">
-          <div class="mem-stat"><span class="mem-stat-label">出勤率</span><span class="mem-stat-val">90%</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">回复量</span><span class="mem-stat-val">372</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">质检</span><span class="mem-stat-val">87</span></div>
-          <div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge ai-learning">学习中</span></div>
-        </div>
-        <div class="mem-card-note">鼎丰体系支援</div>
-      </div>
-    </div>
-  </section>
+  </div>
 </div>
 <div class="access-lock" id="lock-page-members"><div class="lock-icon">&#x1F512;</div><div class="lock-title">ACCESS DENIED</div><div class="lock-sub">请先登入以访问此模块<br>Please login to access this module</div></div>
 </div>
-<!-- Member Detail Modal -->
+<!-- 班组弹窗 -->
+<div class="mh-modal-overlay" id="mh-shift-modal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="mh-modal">
+    <button class="mh-modal-close" onclick="document.getElementById('mh-shift-modal').classList.remove('active')">&times;</button>
+    <div id="mh-shift-body"></div>
+  </div>
+</div>
+<!-- 个人详情弹窗 (保留原有) -->
 <div class="mem-modal-overlay" id="mem-modal" onclick="if(event.target===this)this.classList.remove('active')">
   <div class="mem-modal">
     <button class="mem-modal-close" onclick="document.getElementById('mem-modal').classList.remove('active')">&times;</button>
@@ -2898,68 +2957,42 @@ select.cyber-input {
 <div class="page" id="page-attendance" data-access="组员">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">出勤排班</span><span class="ht-sub">ATTENDANCE &amp; SHIFT CONTROL</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-3">--:--:--</div></div>
+  <div class="header-right-sub">
+    <div class="hrs-left"><div class="hrs-status"><span class="hrs-dot"></span>ONLINE</div><div class="hrs-sub-label">ALL NOMINAL</div></div>
+    <div class="hrs-center"><div class="hrs-clock-label">REALTIME</div><div class="hrs-clock" id="clock-3">--:--:--</div></div>
+    <div class="hrs-right"><div class="hrs-date" id="date-sub-3">----/--/--</div><div class="hrs-week" id="week-sub-3">---</div><div class="hrs-up" id="up-sub-3">UPTIME 00:00:00</div></div>
+  </div>
 </header>
 <div class="att-dashboard">
-  <!-- KPI Row -->
-  <section class="att-kpi-row">
-    <div class="att-kpi-card"><div class="att-kpi-label">今日出勤</div><div class="att-kpi-val green">24</div></div>
-    <div class="att-kpi-card"><div class="att-kpi-label">请假人数</div><div class="att-kpi-val red">2</div></div>
-    <div class="att-kpi-card"><div class="att-kpi-label">异常人数</div><div class="att-kpi-val red">1</div></div>
-    <div class="att-kpi-card"><div class="att-kpi-label">迟到人数</div><div class="att-kpi-val orange">1</div></div>
-    <div class="att-kpi-card"><div class="att-kpi-label">夜班人数</div><div class="att-kpi-val purple">7</div></div>
-    <div class="att-kpi-card"><div class="att-kpi-label">远程在线</div><div class="att-kpi-val cyan">6</div></div>
+  <!-- 日期锚点 + 主照明灯带 -->
+  <section style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+      <span id="ak-date-big" style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--accent-cyan);text-shadow:0 0 6px rgba(0,240,255,0.3);letter-spacing:2px;line-height:1">04/22</span>
+      <span id="ak-weekday" style="font-family:var(--font-display);font-size:11px;color:var(--text-dim);letter-spacing:2px">WED</span>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(0,240,255,0.06),transparent)"></div>
+    </div>
+    <!-- 主照明灯带 -->
+    <div class="att-lightbar">
+      <div class="att-lb-frame">
+        <div class="att-lb-core"></div>
+        <div class="att-lb-sweep"></div>
+      </div>
+      <div class="att-lb-glow"></div>
+    </div>
+    <!-- 隐藏的KPI值容器(供JS更新) -->
+    <div style="display:none">
+      <span id="ak-morning"></span><span id="ak-swing"></span><span id="ak-night"></span>
+      <span id="ak-yueda"></span><span id="ak-dingfeng"></span>
+      <span id="ak-attend"></span><span id="ak-leave"></span><span id="ak-abnormal"></span>
+      <span id="ak-late"></span><span id="ak-remote"></span>
+    </div>
   </section>
 
   <!-- Top Row: Today Roster + Charts -->
   <section class="att-roster-row">
-    <div class="att-panel">
-      <div class="att-panel-title">今日排班人员 <span style="font-size:10px;color:var(--text-dim);font-weight:400;letter-spacing:1px;margin-left:8px">TODAY SHIFT ROSTER</span></div>
-      <div class="att-roster-groups">
-        <div class="att-roster-group">
-          <div class="att-roster-group-title">早班<span class="rg-count">7</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">百川</span><span class="att-ri-role">主管</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">奇奇</span><span class="att-ri-role">组长</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">贝果</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">卡比</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">艾娃</span><span class="att-ri-role">组员</span><span class="att-status st-leave att-ri-status">请假</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">果冻</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">路奇</span><span class="att-ri-role">组员</span><span class="att-status st-late att-ri-status">迟到</span></div>
-        </div>
-        <div class="att-roster-group">
-          <div class="att-roster-group-title">中班<span class="rg-count">6</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">沙西米</span><span class="att-ri-role">组长</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">小玥</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">卡姆利</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">鱼丸</span><span class="att-ri-role">组员</span><span class="att-status st-abnormal att-ri-status">异常</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">翅膀</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">霄霄</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-        </div>
-        <div class="att-roster-group">
-          <div class="att-roster-group-title">夜班<span class="rg-count">7</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">轩轩</span><span class="att-ri-role">组长</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">小邱</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">咖啡</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">小江</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">大雄</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">九节狼</span><span class="att-ri-role">组员</span><span class="att-status st-leave att-ri-status">请假</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">当肯</span><span class="att-ri-role">组员</span><span class="att-status st-ok att-ri-status">在岗</span></div>
-        </div>
-        <div class="att-roster-group">
-          <div class="att-roster-group-title">悦达远程<span class="rg-count">4</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">李中意</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">尹东</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">华乙</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">鲍博</span><span class="att-ri-role">远程</span><span class="att-status st-offline att-ri-status">离线</span></div>
-        </div>
-        <div class="att-roster-group">
-          <div class="att-roster-group-title">鼎丰远程<span class="rg-count">4</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">西南</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">江初雨</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">刘玉虹</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-          <div class="att-roster-item"><span class="att-ri-name">谢辰</span><span class="att-ri-role">远程</span><span class="att-status st-online att-ri-status">在线</span></div>
-        </div>
-      </div>
+    <div class="att-panel" style="display:flex;flex-direction:column;position:relative">
+      <div id="att-roster-title" style="position:absolute;top:6px;right:12px;font-family:var(--font-display);font-size:9px;color:var(--text-dim);letter-spacing:2px;opacity:0.4;z-index:1">SHIFT DETAIL · 点击翻面</div>
+      <div class="att-flip-row" id="att-flip-row"></div>
     </div>
     <!-- Right Side: Bay + Core -->
     <div class="att-side-stack">
@@ -3084,31 +3117,33 @@ select.cyber-input {
 <div class="page" id="page-performance" data-access="组员">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">绩效质检分析</span><span class="ht-sub">PERFORMANCE &amp; QC ANALYSIS</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-4">--:--:--</div></div>
+  <div class="header-right-sub">
+    <div class="hrs-left"><div class="hrs-status"><span class="hrs-dot"></span>ONLINE</div><div class="hrs-sub-label">ALL NOMINAL</div></div>
+    <div class="hrs-center"><div class="hrs-clock-label">REALTIME</div><div class="hrs-clock" id="clock-4">--:--:--</div></div>
+    <div class="hrs-right"><div class="hrs-date" id="date-sub-4">----/--/--</div><div class="hrs-week" id="week-sub-4">---</div><div class="hrs-up" id="up-sub-4">UPTIME 00:00:00</div></div>
+  </div>
 </header>
 <div class="pf-dashboard">
-  <section class="pf-kpi-row">
+  <!-- 第一层：KPI 总览(3卡) -->
+  <section class="pf-kpi-row" style="grid-template-columns:repeat(3,1fr)">
     <div class="pf-kpi-card"><div class="pf-kpi-label">本月质检总量</div><div class="pf-kpi-val cyan" id="pf-kpi-total">--</div><div class="pf-kpi-sub">CHECKED THIS MONTH</div></div>
     <div class="pf-kpi-card"><div class="pf-kpi-label">平均质检分</div><div class="pf-kpi-val green" id="pf-kpi-avg">--</div><div class="pf-kpi-sub">AVG QC SCORE</div></div>
     <div class="pf-kpi-card"><div class="pf-kpi-label">错误率</div><div class="pf-kpi-val orange" id="pf-kpi-err">--</div><div class="pf-kpi-sub">ERROR RATE</div></div>
-    <div class="pf-kpi-card"><div class="pf-kpi-label">严重错误数</div><div class="pf-kpi-val red" id="pf-kpi-severe">--</div><div class="pf-kpi-sub">SEVERE ERRORS</div></div>
   </section>
 
-  <section class="pf-charts-row">
-    <div class="pf-panel">
-      <div class="pf-panel-title">近7日质检趋势</div>
-      <div class="pf-chart-box" id="pf-chart-trend"></div>
-    </div>
+  <!-- 第二层：分析区(错误分布+关注摘要) -->
+  <section class="pf-charts-row" style="grid-template-columns:1fr 1fr">
     <div class="pf-panel">
       <div class="pf-panel-title">错误类型分布</div>
       <div class="pf-chart-box" id="pf-chart-error-type"></div>
     </div>
     <div class="pf-panel">
-      <div class="pf-panel-title">班别对比</div>
-      <div class="pf-chart-box" id="pf-chart-shift"></div>
+      <div class="pf-panel-title" style="color:var(--accent-orange)">质检关注摘要</div>
+      <div id="pf-focus-list" class="pf-focus-list"></div>
     </div>
   </section>
 
+  <!-- 第三层：行动区(风险榜+人员明细) -->
   <section class="pf-lower-row">
     <div class="pf-panel pf-risk-panel">
       <div class="pf-panel-title" style="color:var(--accent-red)">风险人员榜</div>
@@ -3132,7 +3167,11 @@ select.cyber-input {
 <div class="page" id="page-daily" data-access="组员">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">需求日报追踪</span><span class="ht-sub">DAILY REPORT &amp; REQUEST</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-5">--:--:--</div></div>
+  <div class="header-right-sub">
+    <div class="hrs-left"><div class="hrs-status"><span class="hrs-dot"></span>ONLINE</div><div class="hrs-sub-label">ALL NOMINAL</div></div>
+    <div class="hrs-center"><div class="hrs-clock-label">REALTIME</div><div class="hrs-clock" id="clock-5">--:--:--</div></div>
+    <div class="hrs-right"><div class="hrs-date" id="date-sub-5">----/--/--</div><div class="hrs-week" id="week-sub-5">---</div><div class="hrs-up" id="up-sub-5">UPTIME 00:00:00</div></div>
+  </div>
 </header>
 <div class="dr-dashboard">
   <section class="dr-kpi-row">
@@ -3198,7 +3237,11 @@ select.cyber-input {
 <div class="page" id="page-products" data-access="组员">
 <header class="header">
   <div><div class="header-title"><span class="ht-main">产品每日检测</span><span class="ht-sub">DAILY PRODUCT INSPECTION</span></div></div>
-  <div class="header-right"><div class="header-status">● SYSTEM ONLINE</div><div class="header-clock" id="clock-6">--:--:--</div></div>
+  <div class="header-right-sub">
+    <div class="hrs-left"><div class="hrs-status"><span class="hrs-dot"></span>ONLINE</div><div class="hrs-sub-label">ALL NOMINAL</div></div>
+    <div class="hrs-center"><div class="hrs-clock-label">REALTIME</div><div class="hrs-clock" id="clock-6">--:--:--</div></div>
+    <div class="hrs-right"><div class="hrs-date" id="date-sub-6">----/--/--</div><div class="hrs-week" id="week-sub-6">---</div><div class="hrs-up" id="up-sub-6">UPTIME 00:00:00</div></div>
+  </div>
 </header>
 <div class="pl-dashboard">
   <section class="pl-kpi-row">
@@ -4826,12 +4869,20 @@ function updateClock(){
   var wd=document.getElementById('weekday-display');
   if(wd) wd.textContent=weekday;
   var ut=document.getElementById('uptime-display');
-  if(ut){
-    var diff=Math.floor((Date.now()-_clockStartTime)/1000);
-    var h=String(Math.floor(diff/3600)).padStart(2,'0');
-    var m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
-    var s=String(diff%60).padStart(2,'0');
-    ut.textContent='UPTIME '+h+':'+m+':'+s;
+  var diff=Math.floor((Date.now()-_clockStartTime)/1000);
+  var h=String(Math.floor(diff/3600)).padStart(2,'0');
+  var m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+  var sec=String(diff%60).padStart(2,'0');
+  var upStr='UPTIME '+h+':'+m+':'+sec;
+  if(ut) ut.textContent=upStr;
+  // 子页面 02-06 同步
+  for(var pg=2;pg<=6;pg++){
+    var ds=document.getElementById('date-sub-'+pg);
+    if(ds) ds.textContent=dateStr;
+    var ws=document.getElementById('week-sub-'+pg);
+    if(ws) ws.textContent=weekday;
+    var us=document.getElementById('up-sub-'+pg);
+    if(us) us.textContent=upStr;
   }
 }
 setInterval(updateClock,1000);updateClock();
@@ -5437,20 +5488,417 @@ setTimeout(function(){
   }
 }, 2000);
 
-// ── Members Page Charts ──
+// ── Members Page — Dual Hub Interaction ──
 (function(){
-  var localCtx=document.getElementById('mem-chart-local');
-  var remoteCtx=document.getElementById('mem-chart-remote');
-  if(!localCtx||!remoteCtx) return;
-  var chartFont={family:'Noto Sans TC, sans-serif'};
-  new Chart(localCtx,{type:'doughnut',data:{
-    labels:['早班','中班','夜班'],
-    datasets:[{data:[6,6,7],backgroundColor:['rgba(0,240,255,0.7)','rgba(0,116,255,0.7)','rgba(148,102,255,0.7)'],borderColor:['rgba(0,240,255,0.9)','rgba(0,116,255,0.9)','rgba(148,102,255,0.9)'],borderWidth:1,hoverBorderWidth:2}]
-  },options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#b0c8e4',font:chartFont,padding:10,usePointStyle:true,pointStyleWidth:8}},tooltip:{backgroundColor:'rgba(6,12,28,0.95)',titleColor:'#00f0ff',bodyColor:'#f4f9ff',borderColor:'rgba(0,195,255,0.3)',borderWidth:1}}}});
-  new Chart(remoteCtx,{type:'doughnut',data:{
-    labels:['悦达远程','鼎丰远程'],
-    datasets:[{data:[4,4],backgroundColor:['rgba(0,255,136,0.6)','rgba(255,128,64,0.6)'],borderColor:['rgba(0,255,136,0.85)','rgba(255,128,64,0.85)'],borderWidth:1,hoverBorderWidth:2}]
-  },options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#b0c8e4',font:chartFont,padding:10,usePointStyle:true,pointStyleWidth:8}},tooltip:{backgroundColor:'rgba(6,12,28,0.95)',titleColor:'#00f0ff',bodyColor:'#f4f9ff',borderColor:'rgba(0,195,255,0.3)',borderWidth:1}}}});
+  // 全员数据
+  var STAFF={
+    local:{
+      supervisor:{name:'百川',role:'主管',status:'在职',att:'96%',reply:520,qc:98,ai:'已使用',note:'客服中心-1组主管'},
+      shifts:[
+        {name:'早班',color:'#00f0ff',leader:{name:'奇奇',role:'组长',status:'在职',att:'95%',reply:468,qc:97,ai:'已使用',note:'早班带班'},
+          members:[
+            {name:'貝果',role:'组员',status:'在职',att:'93%',reply:421,qc:92,ai:'学习中',note:'日常回单稳定'},
+            {name:'卡比',role:'组员',status:'在职',att:'97%',reply:445,qc:94,ai:'已使用',note:'支援高峰时段'},
+            {name:'艾娃',role:'组员',status:'请假',att:'88%',reply:362,qc:89,ai:'未启用',note:'本周请假中'},
+            {name:'果凍',role:'组员',status:'在职',att:'92%',reply:398,qc:91,ai:'学习中',note:'处理一般咨询'},
+            {name:'路奇',role:'组员',status:'在职',att:'94%',reply:409,qc:90,ai:'未启用',note:'早班轮值'}
+          ]},
+        {name:'中班',color:'#0074ff',leader:{name:'沙西米',role:'组长',status:'���职',att:'96%',reply:452,qc:96,ai:'已使用',note:'中班带班'},
+          members:[
+            {name:'小玥',role:'组员',status:'在职',att:'91%',reply:387,qc:90,ai:'学习中',note:'中班主力'},
+            {name:'卡姆利',role:'组员',status:'在职',att:'94%',reply:402,qc:93,ai:'已使用',note:'质检稳定'},
+            {name:'魚丸',role:'组员',status:'异常',att:'85%',reply:336,qc:87,ai:'未启用',note:'需追踪出勤'},
+            {name:'翅膀',role:'组员',status:'在职',att:'93%',reply:395,qc:91,ai:'学习中',note:'中班支援'},
+            {name:'霄霄',role:'组员',status:'在职',att:'95%',reply:418,qc:94,ai:'已使用',note:'回复效率佳'}
+          ]},
+        {name:'夜班',color:'#9466ff',leader:{name:'軒軒',role:'组长',status:'在职',att:'92%',reply:440,qc:93,ai:'已使用',note:'夜班带班'},
+          members:[
+            {name:'小邱',role:'组员',status:'在职',att:'91%',reply:392,qc:89,ai:'学习中',note:'夜班支援'},
+            {name:'咖啡',role:'组员',status:'在职',att:'96%',reply:441,qc:94,ai:'已使用',note:'夜班稳定输出'},
+            {name:'小江',role:'组员',status:'在职',att:'90%',reply:374,qc:88,ai:'未启用',note:'需加强质检'},
+            {name:'大雄',role:'组员',status:'在职',att:'93%',reply:401,qc:91,ai:'学习中',note:'负责夜间高峰'},
+            {name:'九节狼',role:'组员',status:'请假',att:'87%',reply:348,qc:86,ai:'未启用',note:'排休中'},
+            {name:'当肯',role:'组员',status:'在职',att:'94%',reply:416,qc:92,ai:'已使用',note:'夜班回单稳定'}
+          ]}
+      ]
+    },
+    remote:[
+      {group:'悦达远程',color:'#00ff88',members:[
+        {name:'李中意',role:'远程客服',status:'在职',att:'93%',reply:410,qc:90,ai:'未启用',note:'悦达远程支援'},
+        {name:'尹東',role:'远程客服',status:'在职',att:'91%',reply:386,qc:88,ai:'学习中',note:'日常案件支援'},
+        {name:'華乙',role:'远程客服',status:'在职',att:'95%',reply:425,qc:92,ai:'已使用',note:'回复效率佳'},
+        {name:'鮑博',role:'远程客服',status:'试用',att:'89%',reply:318,qc:85,ai:'未启用',note:'新进人员'}
+      ]},
+      {group:'鼎丰远程',color:'#ff8040',members:[
+        {name:'西南',role:'远程客服',status:'在职',att:'92%',reply:404,qc:89,ai:'学习中',note:'鼎丰远程支援'},
+        {name:'江初雨',role:'远程客服',status:'在职',att:'94%',reply:417,qc:91,ai:'已使用',note:'稳定回复'},
+        {name:'劉玉虹',role:'远程客服',status:'异常',att:'84%',reply:295,qc:83,ai:'未启用',note:'需追踪状态'},
+        {name:'謝辰',role:'远程客服',status:'在职',att:'90%',reply:372,qc:87,ai:'学习中',note:'鼎丰体系支援'}
+      ]}
+    ]
+  };
+
+  function statusCls(s){return s==='在职'?'s-active':s==='请假'?'s-leave':s==='试用'?'s-trial':s==='异常'?'s-abnormal':'s-active'}
+  function aiBadge(a){return a==='已使用'?'ai-on':a==='学习中'?'ai-learning':'ai-off'}
+  function miniCard(p){
+    return '<div class="mem-card role-'+(p.role==='组长'?'leader':p.role==='远程客服'?'remote':'member')+'" data-name="'+p.name+'" data-role="'+p.role+'" data-status="'+p.status+'" data-att="'+p.att+'" data-reply="'+p.reply+'" data-qc="'+p.qc+'" data-ai="'+p.ai+'" data-note="'+p.note+'"><div class="mem-card-top"><span class="mem-card-name">'+p.name+'</span><span class="mem-card-role">'+p.role+'</span></div><div class="mem-status-dot '+statusCls(p.status)+'">'+p.status+'</div><div class="mem-card-stats"><div class="mem-stat"><span class="mem-stat-label">出勤</span><span class="mem-stat-val">'+p.att+'</span></div><div class="mem-stat"><span class="mem-stat-label">AI</span><span class="ai-badge '+aiBadge(p.ai)+'">'+p.ai+'</span></div></div></div>';
+  }
+
+  // 计算班组统计
+  function shiftStats(sh){
+    var all=[sh.leader].concat(sh.members);
+    var total=all.length;
+    var onDuty=all.filter(function(m){return m.status==='在职'}).length;
+    var abnormal=all.filter(function(m){return m.status==='异常'||m.status==='请假'}).length;
+    var aiOn=all.filter(function(m){return m.ai==='已使用'}).length;
+    var attSum=all.reduce(function(s,m){return s+parseInt(m.att)},0);
+    var replySum=all.reduce(function(s,m){return s+m.reply},0);
+    var avgAtt=Math.round(attSum/total);
+    return {total:total,onDuty:onDuty,abnormal:abnormal,aiOn:aiOn,avgAtt:avgAtt,replySum:replySum};
+  }
+
+  // 左侧主方块 → 本地班组战术弹窗
+  var localBlock=document.getElementById('mh-local');
+  if(localBlock) localBlock.addEventListener('click',function(){
+    var modal=document.getElementById('mh-shift-modal');
+    var body=document.getElementById('mh-shift-body');
+    var shifts=STAFF.local.shifts;
+
+    // 计算总览数据
+    var totalPeople=1, totalOnDuty=1, totalReply=520, totalAbn=0;
+    shifts.forEach(function(sh){var st=shiftStats(sh);totalPeople+=st.total;totalOnDuty+=st.onDuty;totalReply+=st.replySum;totalAbn+=st.abnormal});
+
+    // 头部
+    var html='<h3>本地班组总览</h3><div class="mh-modal-sub">LOCAL SHIFT COMMAND — '+STAFF.local.supervisor.name+' 主管指挥体系</div>';
+
+    // 摘要行
+    html+='<div class="mh-summary">';
+    html+='<div class="mh-summary-item"><div class="mh-summary-val" style="color:var(--accent-cyan)">'+totalPeople+'</div><div class="mh-summary-lbl">本地总人数</div></div>';
+    html+='<div class="mh-summary-item"><div class="mh-summary-val" style="color:var(--accent-green)">'+totalOnDuty+'</div><div class="mh-summary-lbl">在岗人数</div></div>';
+    var totalAI=0;shifts.forEach(function(sh){[sh.leader].concat(sh.members).forEach(function(m){if(m.ai==='已使用'||m.ai==='学习中')totalAI++})});
+    html+='<div class="mh-summary-item"><div class="mh-summary-val" style="color:var(--accent-cyan)">'+totalAI+'</div><div class="mh-summary-lbl">AI 接入</div></div>';
+    html+='<div class="mh-summary-item"><div class="mh-summary-val" style="color:'+(totalAbn>0?'var(--accent-orange)':'var(--accent-green)')+'">'+totalAbn+'</div><div class="mh-summary-lbl">异常人数</div></div>';
+    html+='</div>';
+
+    // 三班状态卡
+    html+='<div class="mh-shift-tabs">';
+    shifts.forEach(function(sh,idx){
+      var st=shiftStats(sh);
+      var badge=st.abnormal>0?'<span class="mh-tab-badge warn">注意</span>':'<span class="mh-tab-badge ok">稳定</span>';
+      html+='<div class="mh-shift-tab'+(idx===0?' active':'')+'" data-shift="'+idx+'" style="--tab-c:'+sh.color+';--tab-g:'+sh.color+'1e;--tab-g2:'+sh.color+'08">';
+      html+='<div class="mh-tab-head"><span class="mh-tab-dot" style="background:'+sh.color+'"></span><span class="mh-tab-name" style="color:'+sh.color+'">'+sh.name+'</span>'+badge+'</div>';
+      html+='<div class="mh-tab-stats">';
+      html+='<div class="mh-tab-stat"><div class="mh-tab-stat-val" style="color:'+sh.color+'">'+st.onDuty+'/'+st.total+'</div><div class="mh-tab-stat-lbl">在岗</div></div>';
+      html+='<div class="mh-tab-stat"><div class="mh-tab-stat-val" style="color:var(--accent-green)">'+st.avgAtt+'%</div><div class="mh-tab-stat-lbl">出勤率</div></div>';
+      html+='<div class="mh-tab-stat"><div class="mh-tab-stat-val" style="color:#fff">'+st.replySum.toLocaleString()+'</div><div class="mh-tab-stat-lbl">回复量</div></div>';
+      html+='</div></div>';
+    });
+    html+='</div>';
+
+    // 成员区
+    html+='<div class="mh-members-area" id="mh-mem-area"></div>';
+
+    body.innerHTML=html;
+
+    // 渲染成员区
+    function renderShiftMembers(idx){
+      var sh=shifts[idx];
+      var area=document.getElementById('mh-mem-area');
+      var mhtml='<div class="mh-members-label" style="--c:'+sh.color+'"><span style="background:'+sh.color+';width:3px;height:12px;border-radius:2px;display:inline-block"></span> 当前查看：'+sh.name+' <span style="color:var(--text-dim);font-weight:400;margin-left:4px">'+(1+sh.members.length)+' 人</span></div>';
+      mhtml+='<div class="mh-card-grid">';
+      mhtml+=miniCard(sh.leader);
+      sh.members.forEach(function(m){mhtml+=miniCard(m)});
+      mhtml+='</div>';
+      area.innerHTML=mhtml;
+      // 绑定小卡点击
+      area.querySelectorAll('.mem-card').forEach(function(card){
+        card.addEventListener('click',function(e){e.stopPropagation();showDetail(this)});
+      });
+    }
+
+    // Tab 切换
+    body.querySelectorAll('.mh-shift-tab').forEach(function(tab){
+      tab.addEventListener('click',function(e){
+        e.stopPropagation();
+        body.querySelectorAll('.mh-shift-tab').forEach(function(t){t.classList.remove('active')});
+        this.classList.add('active');
+        renderShiftMembers(parseInt(this.dataset.shift));
+      });
+    });
+
+    // 默认早班
+    renderShiftMembers(0);
+    modal.classList.add('active');
+  });
+
+  // 右侧主方块 → 远程团队弹窗
+  var remoteBlock=document.getElementById('mh-remote');
+  if(remoteBlock) remoteBlock.addEventListener('click',function(){
+    var modal=document.getElementById('mh-shift-modal');
+    var body=document.getElementById('mh-shift-body');
+    var html='<h3>远程团队总览</h3><div class="mh-modal-sub">REMOTE TEAM STRUCTURE — 全域在线连接</div>';
+    STAFF.remote.forEach(function(grp){
+      html+='<div class="mh-shift-section"><div class="mh-shift-title" style="border-left-color:'+grp.color+'">'+grp.group+' <span style="font-weight:400;font-size:11px;color:#8aa0c0;margin-left:8px">'+grp.members.length+' 人</span></div><div class="mh-card-grid">';
+      grp.members.forEach(function(m){html+=miniCard(m)});
+      html+='</div></div>';
+    });
+    body.innerHTML=html;
+    modal.classList.add('active');
+    body.querySelectorAll('.mem-card').forEach(function(card){
+      card.addEventListener('click',function(e){e.stopPropagation();showDetail(this)});
+    });
+  });
+
+  // 综合档案数据 — 按姓名索引
+  var PROFILE={};
+  function addP(n,o){PROFILE[n]=o}
+  // 主管
+  addP('百川',{alias:'百川',shift:'全局',group:'主管体系',title:'主管',phase:'核心成员',tags:['核心成员','AI积极','管理者'],scores:{stable:96,quality:98,output:95,growth:90,collab:97,extra:92},grade:'优秀',late:0,leave:0,abnormal:0,qcPass:'99%',errors:1,errType:'流程偏差',dailyReply:26,weekReply:520,monthReply:2080,independent:'极强',pressure:'优秀',reliable:'极高',aiUse:'深度使用',learnSpeed:'极快',processAccept:'高',autoColab:'主导',communication:'优秀',crossShift:'主导协调',mentor:'全组带教',mgmtPotential:'现任管理',dataSense:'高',selfLearn:'极高',support:'日常巡班指挥',mentorNew:'全组新人培训',assistLead:'—',findIssue:'每周主动复盘',suggestion:'3项被采纳',aiContrib:'主导AI部署',docContrib:'话术体系建立',crossRecord:'全班协调',hardCase:'高难案件终审',special:'年度最佳管理',comment:'全局统筹能力强，团队稳定度高，AI推进核心人物。',advice:'持续赋能，扩大管理幅度',bonusSuggest:'是'});
+  addP('奇奇',{alias:'奇奇',shift:'早班',group:'早班',title:'组长',phase:'核心成员',tags:['核心成员','AI积极','可培养'],scores:{stable:95,quality:97,output:92,growth:88,collab:94,extra:85},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'97%',errors:2,errType:'话术偏差',dailyReply:23,weekReply:468,monthReply:1872,independent:'强',pressure:'优秀',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'偶尔支援中班',mentor:'带教2人',mgmtPotential:'储备主管',dataSense:'中高',selfLearn:'高',support:'支援中班3次',mentorNew:'带教貝果、果凍',assistLead:'协助排班',findIssue:'发现流程漏洞1次',suggestion:'1项被采纳',aiContrib:'推广AI使用',docContrib:'更新早班话术',crossRecord:'支援中班',hardCase:'处理退费纠纷',special:'早班效率最佳',comment:'带班稳定，质检优秀，有管理潜力，建议列入储备主管培养名单。',advice:'重点培养，可承担更多管理任务',bonusSuggest:'是'});
+  addP('貝果',{alias:'貝果',shift:'早班',group:'早班',title:'组员',phase:'稳定期',tags:['稳定','可培养'],scores:{stable:90,quality:88,output:85,growth:82,collab:86,extra:70},grade:'稳定',late:2,leave:0,abnormal:0,qcPass:'92%',errors:3,errType:'信息遗漏',dailyReply:21,weekReply:421,monthReply:1684,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'待观察',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'日常回单稳定，无重大失误，AI学习中，建议持续关注成长。',advice:'持续观察，加强AI培训',bonusSuggest:'否'});
+  addP('卡比',{alias:'卡比',shift:'早班',group:'早班',title:'组员',phase:'核心成员',tags:['核心成员','AI积极'],scores:{stable:94,quality:92,output:90,growth:80,collab:88,extra:78},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'95%',errors:2,errType:'格式问题',dailyReply:22,weekReply:445,monthReply:1780,independent:'强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'支援高峰',mentor:'无',mgmtPotential:'可培养',dataSense:'中高',selfLearn:'高',support:'高峰时段主力',mentorNew:'无',assistLead:'协助统计',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'高峰支援',hardCase:'处理投诉2件',special:'无',comment:'执行力强，高峰期表现优秀，AI使用积极。',advice:'可承担更多任务',bonusSuggest:'是'});
+  addP('艾娃',{alias:'艾娃',shift:'早班',group:'早班',title:'组员',phase:'稳定期',tags:['需关注'],scores:{stable:78,quality:82,output:72,growth:75,collab:80,extra:60},grade:'需关注',late:3,leave:5,abnormal:0,qcPass:'88%',errors:4,errType:'响应延迟',dailyReply:18,weekReply:362,monthReply:1448,independent:'中等',pressure:'一般',reliable:'中',aiUse:'未启用',learnSpeed:'慢',processAccept:'中',autoColab:'被动',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'本周请假中，出勤率偏低，AI未启用，需持续关注并加强沟通。',advice:'加强带���，关注出勤稳定度',bonusSuggest:'否'});
+  addP('果凍',{alias:'果凍',shift:'早班',group:'早班',title:'组员',phase:'稳定期',tags:['可培养'],scores:{stable:88,quality:86,output:82,growth:84,collab:82,extra:68},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'91%',errors:3,errType:'分类错误',dailyReply:20,weekReply:398,monthReply:1592,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'学习中',learnSpeed:'中',processAccept:'中高',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'待观察',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'处理一般咨询稳定，AI正在学习，有一定成长空间。',advice:'持续观察，鼓励AI学习',bonusSuggest:'否'});
+  addP('���奇',{alias:'路奇',shift:'早班',group:'早班',title:'组员',phase:'稳定期',tags:['稳定'],scores:{stable:90,quality:85,output:83,growth:78,collab:84,extra:65},grade:'稳定',late:1,leave:1,abnormal:0,qcPass:'90%',errors:3,errType:'话术不规范',dailyReply:20,weekReply:409,monthReply:1636,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'未启用',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'早班轮值稳定，但AI未启用，建议引导学习。',advice:'引导AI使用',bonusSuggest:'否'});
+  // 中班
+  addP('沙西米',{alias:'沙西米',shift:'中班',group:'中班',title:'组长',phase:'核心成员',tags:['核心成员','AI积极','可培养'],scores:{stable:94,quality:96,output:90,growth:86,collab:92,extra:82},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'96%',errors:2,errType:'流程偏差',dailyReply:22,weekReply:452,monthReply:1808,independent:'强',pressure:'优秀',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'协调夜班交接',mentor:'带教1人',mgmtPotential:'储备主管',dataSense:'中高',selfLearn:'高',support:'协调交接3次',mentorNew:'带教小玥',assistLead:'协助排班',findIssue:'提出流程改善1次',suggestion:'1项被采纳',aiContrib:'中班AI推广',docContrib:'中班话术整理',crossRecord:'与夜班协调',hardCase:'处理升级案件',special:'中班效率最佳',comment:'中班带班稳定，质检优秀，跨班协调能力强。',advice:'重点培养，储备主管候选',bonusSuggest:'是'});
+  addP('小玥',{alias:'小玥',shift:'中班',group:'中班',title:'组员',phase:'稳定期',tags:['可培养'],scores:{stable:86,quality:85,output:80,growth:82,collab:84,extra:68},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'90%',errors:3,errType:'信息遗漏',dailyReply:19,weekReply:387,monthReply:1548,independent:'中等',pressure:'稳定',reliable:'中',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'待观察',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'中班主力，工作稳定，有一定成长潜力。',advice:'持续观察',bonusSuggest:'否'});
+  addP('卡姆利',{alias:'卡姆利',shift:'中班',group:'中班',title:'组员',phase:'核心成员',tags:['稳定','AI积极'],scores:{stable:92,quality:90,output:84,growth:80,collab:86,extra:72},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'93%',errors:2,errType:'格式问题',dailyReply:20,weekReply:402,monthReply:1608,independent:'中强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'中快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'无',mentor:'无',mgmtPotential:'可培养',dataSense:'中',selfLearn:'中高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'质检稳定，AI使用积极，执行力可靠。',advice:'可承担更多任务',bonusSuggest:'否'});
+  addP('魚丸',{alias:'魚丸',shift:'中班',group:'中班',title:'组员',phase:'新人期',tags:['需关注'],scores:{stable:72,quality:78,output:70,growth:74,collab:76,extra:55},grade:'需关注',late:5,leave:2,abnormal:1,qcPass:'85%',errors:6,errType:'多类型混合',dailyReply:17,weekReply:336,monthReply:1344,independent:'弱',pressure:'一般',reliable:'低',aiUse:'未启用',learnSpeed:'慢',processAccept:'低',autoColab:'被动',communication:'一般',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'出勤异常，质检偏低，错误率较高，需重点追踪并加强带教。',advice:'加强带教，重点关注出勤',bonusSuggest:'否'});
+  addP('翅膀',{alias:'翅膀',shift:'中班',group:'中班',title:'组员',phase:'稳定期',tags:['稳定'],scores:{stable:88,quality:86,output:82,growth:80,collab:84,extra:66},grade:'稳定',late:2,leave:0,abnormal:0,qcPass:'91%',errors:3,errType:'话术偏差',dailyReply:20,weekReply:395,monthReply:1580,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'中班支援稳定，无重大问题。',advice:'持续观察',bonusSuggest:'否'});
+  addP('霄霄',{alias:'霄霄',shift:'中班',group:'中班',title:'组员',phase:'核心成员',tags:['核心成员','AI积极'],scores:{stable:92,quality:90,output:88,growth:82,collab:88,extra:75},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'94%',errors:2,errType:'格式问题',dailyReply:21,weekReply:418,monthReply:1672,independent:'强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'无',mentor:'无',mgmtPotential:'可培养',dataSense:'中高',selfLearn:'高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'处理投诉1件',special:'无',comment:'回复效率佳，AI使用积极，可��担更多责任。',advice:'可承担更多任务',bonusSuggest:'是'});
+  // 夜班
+  addP('軒軒',{alias:'軒軒',shift:'夜班',group:'夜班',title:'组长',phase:'核心成员',tags:['核心成员','AI积极'],scores:{stable:90,quality:90,output:88,growth:84,collab:90,extra:80},grade:'优秀',late:2,leave:0,abnormal:0,qcPass:'93%',errors:2,errType:'流程偏差',dailyReply:22,weekReply:440,monthReply:1760,independent:'强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'与中班交接',mentor:'带教2人',mgmtPotential:'储备组长',dataSense:'中高',selfLearn:'高',support:'夜间紧急支援',mentorNew:'带教小邱、大雄',assistLead:'夜班排班协调',findIssue:'发现系统异常1次',suggestion:'无',aiContrib:'夜班AI推广',docContrib:'夜班流程文档',crossRecord:'与中班交接',hardCase:'夜间升级案件处理',special:'夜班最佳带班',comment:'夜班带班稳定，带教积极，应急能力强。',advice:'重点培养',bonusSuggest:'是'});
+  addP('小邱',{alias:'小邱',shift:'夜班',group:'夜班',title:'组员',phase:'稳定期',tags:['可培养'],scores:{stable:86,quality:84,output:80,growth:82,collab:82,extra:66},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'89%',errors:3,errType:'响应延迟',dailyReply:20,weekReply:392,monthReply:1568,independent:'中等',pressure:'稳定',reliable:'中',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'待观察',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'夜班支援稳定，有一定成长空间。',advice:'持续观察',bonusSuggest:'否'});
+  addP('咖啡',{alias:'咖啡',shift:'夜班',group:'夜班',title:'组员',phase:'核心成员',tags:['核心成员','AI积极'],scores:{stable:94,quality:92,output:90,growth:80,collab:88,extra:76},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'94%',errors:2,errType:'格式问题',dailyReply:22,weekReply:441,monthReply:1764,independent:'强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'无',mentor:'无',mgmtPotential:'可培养',dataSense:'中高',selfLearn:'高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'夜班稳定输出，AI使用积极，执行力强。',advice:'可承担更多任务',bonusSuggest:'是'});
+  addP('小江',{alias:'小江',shift:'夜班',group:'夜班',title:'组员',phase:'稳定期',tags:['需关注'],scores:{stable:84,quality:80,output:78,growth:76,collab:80,extra:60},grade:'待提升',late:3,leave:1,abnormal:0,qcPass:'88%',errors:4,errType:'信息遗漏',dailyReply:19,weekReply:374,monthReply:1496,independent:'中等',pressure:'一般',reliable:'中',aiUse:'未启用',learnSpeed:'慢',processAccept:'中低',autoColab:'被动',communication:'一般',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'需加强质检，AI未启用，建议安排带教。',advice:'加强带教',bonusSuggest:'否'});
+  addP('大雄',{alias:'大雄',shift:'夜班',group:'夜班',title:'组员',phase:'稳定期',tags:['可培养'],scores:{stable:88,quality:86,output:84,growth:82,collab:84,extra:68},grade:'稳定',late:2,leave:0,abnormal:0,qcPass:'91%',errors:3,errType:'分类错误',dailyReply:20,weekReply:401,monthReply:1604,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'普通',crossShift:'无',mentor:'无',mgmtPotential:'待观察',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'夜间高峰处理',special:'���',comment:'负责夜间高峰，表现稳定。',advice:'持续观察',bonusSuggest:'否'});
+  addP('九节狼',{alias:'九节狼',shift:'夜班',group:'夜班',title:'组员',phase:'稳定期',tags:['需关注'],scores:{stable:76,quality:78,output:72,growth:72,collab:78,extra:58},grade:'需关注',late:4,leave:4,abnormal:0,qcPass:'86%',errors:5,errType:'响应延迟',dailyReply:17,weekReply:348,monthReply:1392,independent:'中等',pressure:'一般',reliable:'中低',aiUse:'未启用',learnSpeed:'慢',processAccept:'低',autoColab:'被动',communication:'一般',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'排休中，出勤率偏低，AI未启用，需持续追踪。',advice:'持续关注出勤',bonusSuggest:'否'});
+  addP('当肯',{alias:'当肯',shift:'夜班',group:'夜班',title:'组员',phase:'核心成员',tags:['稳定','AI积极'],scores:{stable:92,quality:88,output:86,growth:80,collab:86,extra:72},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'92%',errors:2,errType:'格式问题',dailyReply:21,weekReply:416,monthReply:1664,independent:'中强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'中快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'无',mentor:'无',mgmtPotential:'可培养',dataSense:'中',selfLearn:'中高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'夜班回单稳定，AI使用积极。',advice:'可承担更多任务',bonusSuggest:'否'});
+  // 远程
+  addP('李中意',{alias:'李中意',shift:'远程',group:'悦达远程',title:'远程客服',phase:'稳定期',tags:['稳定'],scores:{stable:88,quality:86,output:84,growth:78,collab:80,extra:62},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'90%',errors:3,errType:'信息遗漏',dailyReply:20,weekReply:410,monthReply:1640,independent:'中等',pressure:'稳定',reliable:'中高',aiUse:'未启用',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'远程沟通正常',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'悦达远程支援稳定。',advice:'引导AI使用',bonusSuggest:'否'});
+  addP('尹東',{alias:'尹東',shift:'远程',group:'悦达远程',title:'远程客服',phase:'稳定期',tags:['可培养'],scores:{stable:86,quality:84,output:80,growth:80,collab:82,extra:65},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'88%',errors:3,errType:'话术偏差',dailyReply:19,weekReply:386,monthReply:1544,independent:'中等',pressure:'稳定',reliable:'中',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'远程沟通正常',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'日常案件支援稳定，AI学习中。',advice:'持续观察',bonusSuggest:'否'});
+  addP('華乙',{alias:'華乙',shift:'远程',group:'悦达远程',title:'远程客服',phase:'核心成员',tags:['核心成员','AI积极'],scores:{stable:92,quality:90,output:88,growth:82,collab:86,extra:74},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'92%',errors:2,errType:'格式问题',dailyReply:21,weekReply:425,monthReply:1700,independent:'强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'快',processAccept:'高',autoColab:'积极',communication:'优秀',crossShift:'无',mentor:'无',mgmtPotential:'远程组长候选',dataSense:'中高',selfLearn:'高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'远程最佳表现',comment:'回复效率佳，AI使用积极，远程表现最优。',advice:'可培养为远程组长',bonusSuggest:'是'});
+  addP('鮑博',{alias:'鮑博',shift:'远程',group:'悦达远程',title:'远程客服',phase:'新人期',tags:['新人'],scores:{stable:78,quality:76,output:68,growth:80,collab:74,extra:55},grade:'可培养',late:3,leave:1,abnormal:0,qcPass:'85%',errors:5,errType:'多类型混合',dailyReply:16,weekReply:318,monthReply:1272,independent:'弱',pressure:'一般',reliable:'中低',aiUse:'未启用',learnSpeed:'中',processAccept:'中',autoColab:'被动',communication:'一般',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'新进人员，试用期中，需加强培训。',advice:'加强带教，安排老员工辅导',bonusSuggest:'否'});
+  addP('西南',{alias:'西南',shift:'远程',group:'鼎丰远程',title:'远程客服',phase:'稳定期',tags:['稳定'],scores:{stable:86,quality:84,output:82,growth:78,collab:80,extra:64},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'89%',errors:3,errType:'信息遗漏',dailyReply:20,weekReply:404,monthReply:1616,independent:'中等',pressure:'稳定',reliable:'中',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'远程沟通正常',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'鼎丰远程支援稳定。',advice:'持续观察',bonusSuggest:'否'});
+  addP('江初雨',{alias:'江初雨',shift:'远程',group:'鼎丰远程',title:'远程客服',phase:'核心成员',tags:['稳定','AI积极'],scores:{stable:90,quality:88,output:86,growth:80,collab:84,extra:70},grade:'优秀',late:1,leave:0,abnormal:0,qcPass:'91%',errors:2,errType:'格式问题',dailyReply:21,weekReply:417,monthReply:1668,independent:'中强',pressure:'好',reliable:'高',aiUse:'已使用',learnSpeed:'中快',processAccept:'高',autoColab:'积极',communication:'好',crossShift:'无',mentor:'无',mgmtPotential:'可培养',dataSense:'中',selfLearn:'中高',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'日常使用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'稳定回复，AI使用积极。',advice:'可承担更多任务',bonusSuggest:'否'});
+  addP('劉玉虹',{alias:'劉玉虹',shift:'远程',group:'鼎丰远程',title:'远程客服',phase:'稳定期',tags:['需关注'],scores:{stable:70,quality:74,output:65,growth:70,collab:72,extra:50},grade:'需关注',late:5,leave:3,abnormal:1,qcPass:'83%',errors:7,errType:'多类型混合',dailyReply:15,weekReply:295,monthReply:1180,independent:'弱',pressure:'差',reliable:'低',aiUse:'未启用',learnSpeed:'慢',processAccept:'低',autoColab:'被动',communication:'一般',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'低',selfLearn:'低',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'未启用',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'出勤异常，质检偏低，错误率高，需重点追踪。',advice:'重点关注，加强带教',bonusSuggest:'否'});
+  addP('謝辰',{alias:'謝辰',shift:'远程',group:'鼎丰远程',title:'远程客服',phase:'稳定期',tags:['可培养'],scores:{stable:84,quality:82,output:78,growth:78,collab:80,extra:62},grade:'稳定',late:2,leave:1,abnormal:0,qcPass:'87%',errors:4,errType:'响应延迟',dailyReply:19,weekReply:372,monthReply:1488,independent:'中等',pressure:'稳定',reliable:'中',aiUse:'学习中',learnSpeed:'中',processAccept:'中',autoColab:'配合',communication:'远程沟通正常',crossShift:'无',mentor:'无',mgmtPotential:'无',dataSense:'中',selfLearn:'中',support:'无',mentorNew:'无',assistLead:'无',findIssue:'无',suggestion:'无',aiContrib:'学习中',docContrib:'无',crossRecord:'无',hardCase:'无',special:'无',comment:'鼎丰体系支援稳定，有一定成长空间。',advice:'持续观察',bonusSuggest:'否'});
+
+  // 个人综合表现档案 — 单屏仪表板
+  function showDetail(card){
+    var d=card.dataset;
+    var p=PROFILE[d.name];
+    if(!p){p={alias:d.name,shift:'—',group:'—',title:d.role,phase:'—',tags:[],scores:{stable:80,quality:80,output:80,growth:80,collab:80,extra:60},grade:'—',late:0,leave:0,abnormal:0,qcPass:d.qc+'%',errors:0,errType:'—',dailyReply:Math.round(d.reply/20),weekReply:parseInt(d.reply),monthReply:parseInt(d.reply)*4,independent:'—',pressure:'—',reliable:'—',aiUse:d.ai,learnSpeed:'—',processAccept:'—',autoColab:'—',communication:'—',crossShift:'—',mentor:'—',mgmtPotential:'—',dataSense:'—',selfLearn:'—',support:'—',mentorNew:'—',assistLead:'—',findIssue:'—',suggestion:'—',aiContrib:'—',docContrib:'—',crossRecord:'—',hardCase:'—',special:'—',comment:d.note||'—',advice:'—',bonusSuggest:'—'}}
+    var modal=document.getElementById('mem-modal');
+    var body=document.getElementById('mem-modal-body');
+    body.style.cssText='flex:1;display:flex;flex-direction:column;overflow:hidden';
+    var sc=p.scores;
+    var gc=p.grade==='优秀'?'#00ff88':p.grade==='稳定'?'#00f0ff':p.grade==='可培养'?'#9466ff':p.grade==='需关注'?'#ff8040':'#ff4466';
+    function bar(val,c){return '<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="width:'+val+'%;height:100%;border-radius:5px;background:linear-gradient(90deg,'+c+'44,'+c+');box-shadow:0 0 4px '+c+'33"></div></div><span style="font-family:Orbitron,monospace;font-size:16px;font-weight:900;color:'+c+';min-width:32px;text-align:right">'+val+'</span></div>'}
+    function kv(k,v){return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,195,255,0.04)"><span style="color:#c0d4e8;font-size:15px;font-weight:600">'+k+'</span><span style="color:#f4f9ff;font-size:15px;font-weight:800">'+v+'</span></div>'}
+    function sec(t){return '<div style="font-family:Orbitron,monospace;font-size:14px;font-weight:800;letter-spacing:2px;color:#00f0ff;margin-bottom:10px;padding-left:10px;border-left:3px solid #00f0ff">'+t+'</div>'}
+
+    // 顶栏
+    var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(0,195,255,0.08);flex-shrink:0">';
+    h+='<div><div style="font-size:36px;font-weight:900;color:#fff;margin-bottom:3px">'+p.alias+'</div>';
+    h+='<div style="font-family:Orbitron,monospace;font-size:13px;color:#b0c8e4;letter-spacing:2px;font-weight:700;margin-bottom:7px">'+p.shift+' · '+p.group+' · '+p.title+'</div>';
+    h+='<div style="display:flex;gap:5px;flex-wrap:wrap">';
+    h+='<span class="mm-tag mm-tag-role">'+p.title+'</span>';
+    h+='<span class="mm-tag mm-tag-status'+(d.status==='请假'?' tag-leave':d.status==='异常'?' tag-abnormal':d.status==='试用'?' tag-trial':'')+'">'+d.status+'</span>';
+    h+='<span style="font-size:11px;padding:3px 9px;border-radius:2px;letter-spacing:1px;font-family:Orbitron,monospace;font-weight:700;color:'+gc+';border:1px solid '+gc+'33;background:'+gc+'0a">'+p.phase+'</span>';
+    p.tags.forEach(function(t){
+      var tc=t==='核心成员'?'#00ff88':t==='AI积极'?'#00f0ff':t==='可培养'?'#9466ff':t==='需关注'?'#ff8040':'#8aa0c0';
+      h+='<span style="font-size:10px;padding:3px 7px;border-radius:2px;letter-spacing:1px;font-weight:600;color:'+tc+';border:1px solid '+tc+'22;background:'+tc+'08">'+t+'</span>';
+    });
+    h+='</div></div>';
+    h+='<div style="text-align:center;padding:10px 20px;border:1px solid '+gc+'28;border-radius:6px;background:'+gc+'06"><div style="font-family:Orbitron,monospace;font-size:11px;color:#94a8c0;letter-spacing:2px;margin-bottom:3px">GRADE</div><div style="font-family:Orbitron,monospace;font-size:34px;font-weight:900;color:'+gc+';text-shadow:0 0 8px '+gc+'44;letter-spacing:2px">'+p.grade+'</div></div></div>';
+
+    // 3列主区域
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex:1;min-height:0">';
+
+    // ── 左栏：综合评分 + 工作表现 ──
+    h+='<div style="display:flex;flex-direction:column;gap:12px">';
+    h+='<div>'+sec('综合评分');
+    var dims=[['稳定度',sc.stable],['质量',sc.quality],['产出',sc.output],['成长',sc.growth],['协作',sc.collab],['贡献',sc.extra]];
+    dims.forEach(function(dm){var c=dm[1]>=90?'#00ff88':dm[1]>=80?'#00f0ff':dm[1]>=70?'#ff8040':'#ff4466';h+='<div style="margin-bottom:5px"><div style="font-size:14px;color:#c0d4e8;font-weight:700;margin-bottom:3px">'+dm[0]+'</div>'+bar(dm[1],c)+'</div>'});
+    h+='</div>';
+    h+='<div style="flex:1">'+sec('工作表现');
+    h+=kv('月出勤率',d.att)+kv('迟到/请假',p.late+' / '+p.leave+'次')+kv('质检得分',d.qc)+kv('质检达标',p.qcPass)+kv('错误次数',p.errors+'次');
+    h+=kv('日均回复',p.dailyReply)+kv('周回复量',p.weekReply)+kv('月处理量',p.monthReply);
+    h+='</div></div>';
+
+    // ── 中栏：能力与潜力 ──
+    h+='<div style="display:flex;flex-direction:column;gap:12px">';
+    h+='<div>'+sec('能力与潜力');
+    h+=kv('AI 使用',p.aiUse)+kv('学习速度',p.learnSpeed)+kv('流程接受度',p.processAccept);
+    h+=kv('自动化配合',p.autoColab)+kv('沟通表达',p.communication)+kv('跨班协作',p.crossShift);
+    h+=kv('带教能力',p.mentor)+kv('管理潜力',p.mgmtPotential)+kv('数据敏感度',p.dataSense)+kv('主动学习',p.selfLearn);
+    h+='</div>';
+    h+='<div>'+sec('独立能力');
+    h+=kv('独立处理',p.independent)+kv('承压表现',p.pressure)+kv('执行可靠度',p.reliable);
+    h+='</div></div>';
+
+    // ── 右栏：加分项 + 主管评语 ──
+    h+='<div style="display:flex;flex-direction:column;gap:12px">';
+    h+='<div>'+sec('加分项');
+    var bonusItems=[[p.support,'临时支援'],[p.mentorNew,'带教新人'],[p.assistLead,'协助组长'],[p.findIssue,'发现问题'],[p.suggestion,'建议采纳'],[p.aiContrib,'AI贡献']];
+    bonusItems.forEach(function(b){if(b[0]&&b[0]!=='无'&&b[0]!=='—')h+=kv(b[1],b[0])});
+    var noneCount=bonusItems.filter(function(b){return !b[0]||b[0]==='无'||b[0]==='—'}).length;
+    if(noneCount===bonusItems.length)h+='<div style="font-size:14px;color:#94a8c0;padding:6px 0">暂无加分记录</div>';
+    h+='</div>';
+    h+='<div style="flex:1;display:flex;flex-direction:column">'+sec('主管评语');
+    h+='<div style="padding:10px 12px;border:1px solid rgba(0,195,255,0.08);border-radius:4px;background:rgba(0,195,255,0.02);flex:1;display:flex;flex-direction:column;justify-content:space-between">';
+    h+='<div style="font-size:15px;color:#f0f6ff;line-height:1.7;font-weight:600">'+p.comment+'</div>';
+    h+='<div style="display:flex;gap:16px;margin-top:8px;font-size:15px;border-top:1px solid rgba(0,195,255,0.06);padding-top:8px">';
+    h+='<span style="color:#b0c8e4;font-weight:600">建议</span><span style="color:#00f0ff;font-weight:800">'+p.advice+'</span>';
+    h+='<span style="color:#b0c8e4;font-weight:600">加分</span><span style="color:'+(p.bonusSuggest==='是'?'#00ff88':'#94a8c0')+';font-weight:800">'+p.bonusSuggest+'</span>';
+    h+='</div></div></div></div>';
+
+    h+='</div>'; // close 3-col grid
+
+    body.innerHTML=h;
+    modal.classList.add('active');
+  }
+
+  // 双传送门背景
+  var portalBox=document.getElementById('stg-portals');
+  if(portalBox){
+    var pCfg=[
+      {cx:'28%',color:'#00f0ff',color2:'#0074ff',label:'LOCAL'},
+      {cx:'72%',color:'#9466ff',color2:'#7050ff',label:'REMOTE'}
+    ];
+    function rn(a,b){return Math.random()*(b-a)+a}
+    pCfg.forEach(function(pc,pi){
+      var wrap=document.createElement('div');
+      wrap.className='portal-bg '+(pi===0?'pl':'pr');
+      wrap.style.cssText='left:'+pc.cx+';width:640px;height:640px;margin-left:-320px;margin-top:'+(pi===0?'-310':'-305')+'px';
+
+      // ── 传送深井 ──
+      var db=pi===0?[0,10,32]:[8,2,20];
+
+      // 外沿光晕(淡,只做氛围)
+      var w0=document.createElement('div');w0.className='portal-ring';
+      w0.style.cssText='width:620px;height:620px;margin-left:-310px;margin-top:-310px;border-radius:50%;background:radial-gradient(circle,rgba('+db[0]+','+db[1]+','+db[2]+',0.07) 30%,transparent 65%);border:1px solid '+pc.color+'12';
+      wrap.appendChild(w0);
+
+      // 外门框(亮但不均匀 — 用两段弧模拟)
+      var r1=document.createElement('div');r1.className='portal-ring';
+      r1.style.cssText='width:560px;height:560px;margin-left:-280px;margin-top:-280px;border-radius:50%;border:4px solid transparent;border-top-color:'+pc.color+(pi===0?'88':'66')+';border-right-color:'+pc.color+'28;border-bottom-color:'+pc.color+'18;border-left-color:'+pc.color+(pi===0?'60':'4a')+';box-shadow:0 0 38px '+pc.color+'22;animation:portalRingSpin '+(pi===0?'22':'28')+'s linear infinite';
+      wrap.appendChild(r1);
+
+      // 第一沉(开始变暗)
+      var w1=document.createElement('div');w1.className='portal-ring';
+      w1.style.cssText='width:480px;height:480px;margin-left:-240px;margin-top:-240px;border-radius:50%;background:rgba('+db[0]+','+db[1]+','+db[2]+',0.5);box-shadow:inset 0 0 60px rgba(0,0,0,0.5),inset 0 0 30px '+pc.color+'0c';
+      wrap.appendChild(w1);
+
+      // 旋涡(不均匀亮弧)
+      var tx1=document.createElement('div');tx1.className='portal-ring';
+      tx1.style.cssText='width:440px;height:440px;margin-left:-220px;margin-top:-220px;border-radius:50%;border:2px solid transparent;border-top-color:'+pc.color+'2a;border-left-color:'+pc.color+'15;animation:portalRingSpin 16s linear infinite reverse';
+      wrap.appendChild(tx1);
+
+      // 第二沉(明显暗)
+      var w2=document.createElement('div');w2.className='portal-ring';
+      w2.style.cssText='width:360px;height:360px;margin-left:-180px;margin-top:-180px;border-radius:50%;background:rgba('+Math.max(0,db[0]-3)+','+Math.max(0,db[1]-3)+','+Math.max(0,db[2]-5)+',0.68);box-shadow:inset 0 0 75px rgba(0,0,0,0.62),inset 0 0 35px '+pc.color+'14';
+      wrap.appendChild(w2);
+
+      // 内旋涡
+      var tx2=document.createElement('div');tx2.className='portal-ring';
+      tx2.style.cssText='width:310px;height:310px;margin-left:-155px;margin-top:-155px;border-radius:50%;border:1.5px solid transparent;border-right-color:'+pc.color+'20;border-bottom-color:'+pc.color+'10;animation:portalRingSpin 11s linear infinite';
+      wrap.appendChild(tx2);
+
+      // 井底(最暗)
+      var w3=document.createElement('div');w3.className='portal-ring';
+      w3.style.cssText='width:240px;height:240px;margin-left:-120px;margin-top:-120px;border-radius:50%;background:rgba('+Math.max(0,db[0]-6)+','+Math.max(0,db[1]-6)+','+Math.max(0,db[2]-10)+',0.8);box-shadow:inset 0 0 80px rgba(0,0,0,0.7),inset 0 0 40px '+pc.color+'1a';
+      wrap.appendChild(w3);
+
+      // 最深处(几乎纯黑)
+      var w4=document.createElement('div');w4.className='portal-ring';
+      w4.style.cssText='width:150px;height:150px;margin-left:-75px;margin-top:-75px;border-radius:50%;background:rgba('+Math.max(0,db[0]-8)+','+Math.max(0,db[1]-8)+','+Math.max(0,db[2]-14)+',0.9);box-shadow:inset 0 0 60px rgba(0,0,0,0.8),inset 0 0 20px '+pc.color+'15';
+      wrap.appendChild(w4);
+
+      // 体积光雾(从深处往外透)
+      var fog=document.createElement('div');
+      var fogBright=pi===0?'33':'28';
+      fog.style.cssText='position:absolute;left:50%;top:50%;width:420px;height:420px;margin-left:-210px;margin-top:-210px;border-radius:50%;background:radial-gradient(circle,'+pc.color+fogBright+' 0%,'+pc.color+'10 30%,transparent 55%);filter:blur(20px);animation:portalPulse 4s ease-in-out infinite '+(pi*-1.5)+'s;--pc1:transparent;--pc2:transparent;--pc3:transparent;--pc4:transparent;--ps1:0;--ps2:0;--ps3:0;--ps4:0';
+      wrap.appendChild(fog);
+
+      // 能量内核雾(柔和大范围)
+      var coreSize=pi===0?95:80;
+      var core=document.createElement('div');
+      core.style.cssText='position:absolute;left:50%;top:50%;width:'+coreSize+'px;height:'+coreSize+'px;margin-left:-'+(coreSize/2)+'px;margin-top:-'+(coreSize/2)+'px;border-radius:50%;background:radial-gradient(circle,'+pc.color+(pi===0?'66':'50')+' 0%,'+pc.color+'22 40%,transparent 78%);box-shadow:0 0 40px '+pc.color+'44,0 0 80px '+pc.color+'22;animation:portalPulse '+(pi===0?'3':'3.5')+'s ease-in-out infinite '+(pi*-1)+'s;--pc1:'+pc.color+'30;--pc2:'+pc.color+'44;--pc3:'+pc.color+'5a;--pc4:'+pc.color+'48;--ps1:25px;--ps2:42px;--ps3:52px;--ps4:60px';
+      wrap.appendChild(core);
+
+      // 中心光点(精准亮核)
+      var dotSize=pi===0?16:12;
+      var dot=document.createElement('div');
+      dot.style.cssText='position:absolute;left:50%;top:50%;width:'+dotSize+'px;height:'+dotSize+'px;margin-left:-'+(dotSize/2)+'px;margin-top:-'+(dotSize/2)+'px;border-radius:50%;background:'+pc.color+';box-shadow:0 0 20px '+pc.color+',0 0 44px '+pc.color+'bb,0 0 70px '+pc.color+'44;opacity:'+(pi===0?'0.8':'0.65')+';animation:portalPulse 2.5s ease-in-out infinite '+(pi*-0.8)+'s;--pc1:'+pc.color+'ee;--pc2:'+pc.color+'aa;--pc3:'+pc.color+'ff;--pc4:'+pc.color+'ee;--ps1:12px;--ps2:18px;--ps3:26px;--ps4:22px';
+      wrap.appendChild(dot);
+
+      // 局部爆亮弧段 x3
+      for(var ba=0;ba<3;ba++){
+        var arc=document.createElement('div');arc.className='portal-ring';
+        var arcSz=440+ba*50;
+        var rotAngle=ba*120+rn(-20,20);
+        arc.style.cssText='width:'+arcSz+'px;height:'+arcSz+'px;margin-left:-'+(arcSz/2)+'px;margin-top:-'+(arcSz/2)+'px;border-radius:50%;border:3.5px solid transparent;border-top-color:'+pc.color+(pi===0?'77':'66')+';transform:rotate('+rotAngle+'deg);box-shadow:0 0 16px '+pc.color+'2a;animation:portalBurst '+(2+ba*0.8)+'s ease-in-out infinite '+(-ba*0.7-pi*1.2)+'s;--bo:'+(pi===0?'0.8':'0.6')+';pointer-events:none';
+        wrap.appendChild(arc);
+      }
+
+      // 翻涌核心替换静态核心
+      var churn=document.createElement('div');
+      var chSz=pi===0?90:75;
+      churn.style.cssText='position:absolute;left:50%;top:50%;width:'+chSz+'px;height:'+chSz+'px;margin-left:-'+(chSz/2)+'px;margin-top:-'+(chSz/2)+'px;border-radius:50%;background:radial-gradient(ellipse at '+(pi===0?'45% 40%':'55% 60%')+','+pc.color+(pi===0?'55':'40')+','+pc.color+'15 50%,transparent 80%);animation:portalCoreChurn '+(pi===0?'3':'4')+'s ease-in-out infinite '+(pi*-1.3)+'s;--co1:'+(pi===0?'0.55':'0.4')+';--co2:'+(pi===0?'0.75':'0.6');
+      wrap.appendChild(churn);
+
+      // 深井雾核(blur层)
+      var fogCore=document.createElement('div');
+      var fcSz=pi===0?120:100;
+      fogCore.style.cssText='position:absolute;left:50%;top:50%;width:'+fcSz+'px;height:'+fcSz+'px;margin-left:-'+(fcSz/2)+'px;margin-top:-'+(fcSz/2)+'px;border-radius:50%;background:radial-gradient(circle,'+pc.color+(pi===0?'1a':'14')+',transparent 65%);filter:blur(10px);animation:portalCoreChurn '+(pi===0?'5':'6')+'s ease-in-out infinite '+(pi*-2)+'s;--co1:0.4;--co2:0.65;pointer-events:none';
+      wrap.appendChild(fogCore);
+
+      // 高亮飞散碎粒 x3
+      var shardAngles=pi===0?[-40,30,160]:[-70,50,200];
+      for(var sh=0;sh<3;sh++){
+        var shard=document.createElement('div');
+        var shAngle=shardAngles[sh]*Math.PI/180;
+        var shDist=rn(200,320);
+        shard.style.cssText='position:absolute;left:50%;top:50%;width:'+(rn(3,5))+'px;height:'+(rn(2,3))+'px;margin-left:-2px;margin-top:-1px;border-radius:1px;background:'+pc.color+';box-shadow:0 0 8px '+pc.color+',0 0 16px '+pc.color+'88;animation:portalShard '+(1.8+rn(0,1.5))+'s ease-out infinite '+(-rn(0,3))+'s;--shx:'+(Math.cos(shAngle)*shDist)+'px;--shy:'+(Math.sin(shAngle)*shDist)+'px;transform:rotate('+(shardAngles[sh])+'deg);pointer-events:none';
+        wrap.appendChild(shard);
+      }
+
+      // 溢出粒子(从中心往外+偏上漂)
+      var pCount=pi===0?32:26;
+      for(var pp=0;pp<pCount;pp++){
+        var angle=rn(0,Math.PI*2);
+        var dist=rn(55,280);
+        var el=document.createElement('div');
+        el.className='portal-particle';
+        var sz=rn(1.5,4);
+        var c=pp%3===0?pc.color:pc.color2;
+        var driftY=Math.sin(angle)*dist - rn(10,40);
+        el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:calc(50% - 1px);top:calc(50% - 1px);background:'+c+';box-shadow:0 0 '+(sz+4)+'px '+c+',0 0 '+(sz+10)+'px '+c+'66;animation:portalFloat '+(2+rn(0,2.5))+'s ease-out infinite '+(-rn(0,5))+'s;--po:'+rn(0.45,0.9)+';--px:'+(Math.cos(angle)*dist)+'px;--py:'+driftY+'px';
+        wrap.appendChild(el);
+      }
+
+      portalBox.appendChild(wrap);
+    });
+  }
+
+  // 中间共享节点
+  if(portalBox){
+    var mid=document.createElement('div');
+    mid.style.cssText='position:absolute;left:50%;top:50%;width:10px;height:10px;margin-left:-5px;margin-top:-5px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(0,195,255,0.08);box-shadow:0 0 12px rgba(0,195,255,0.04),0 0 24px rgba(148,102,255,0.03);pointer-events:none;animation:portalPulse 4s ease-in-out infinite;--pc1:rgba(0,195,255,0.06);--pc2:rgba(0,195,255,0.03);--pc3:rgba(0,195,255,0.12);--pc4:rgba(0,195,255,0.06);--ps1:8px;--ps2:12px;--ps3:16px;--ps4:14px';
+    portalBox.appendChild(mid);
+    // 微弱连接线
+    var ln=document.createElement('div');
+    ln.style.cssText='position:absolute;left:35%;top:50%;width:30%;height:1px;background:linear-gradient(90deg,rgba(0,240,255,0.04),rgba(0,195,255,0.06) 50%,rgba(148,102,255,0.04));pointer-events:none';
+    portalBox.appendChild(ln);
+  }
+
+  // 背景微粒
+  var stg=document.getElementById('mem-stage');
+  if(stg){
+  }
 })();
 
 // ── Attendance Page: Heat Calendar Renderer ──
@@ -5521,22 +5969,133 @@ setTimeout(function(){
     }
     html+='</div>';
     el.innerHTML=html;
+    // ── 排班假资料(未来可替换为 Google Sheet fetch) ──
+    var STAFF_POOL={
+      morning:{leader:'奇奇',members:['贝果','卡比','艾娃','果冻','路奇']},
+      swing:{leader:'沙西米',members:['小玥','卡姆利','鱼丸','翅膀','霄霄']},
+      night:{leader:'轩轩',members:['小邱','咖啡','小江','大雄','九节狼','当肯']},
+      yueda:['李中意','尹东','华乙','鲍博'],
+      dingfeng:['西南','江初雨','刘玉虹','谢辰']
+    };
+    function stCls(s){return s==='在岗'?'st-ok':s==='请假'?'st-leave':s==='迟到'?'st-late':s==='异常'?'st-abnormal':s==='在线'?'st-online':'st-offline'}
+    // 固定休假/异常排程表(未来可替换 Google Sheet)
+    var LEAVE_MAP={
+      // day: {name: status}
+      1:{},2:{},
+      3:{'艾娃':'请假','路奇':'迟到','鱼丸':'异常','鲍博':'离线'},
+      4:{'艾娃':'请假','九节狼':'请假'},
+      5:{'艾娃':'请假'},6:{},7:{},
+      8:{'大雄':'迟到'},9:{},10:{'翅膀':'请假','刘玉虹':'异常'},
+      11:{},12:{'路奇':'请假','小江':'迟到'},13:{},14:{},
+      15:{'九节狼':'请假','鱼丸':'迟到','鲍博':'离线'},
+      16:{'九节狼':'请假'},17:{},18:{'霄霄':'请假'},19:{},20:{},21:{},
+      22:{'艾娃':'请假','路奇':'迟到','鱼丸':'异常','九节狼':'请假','鲍博':'离线'},
+      23:{'艾娃':'请假','九节狼':'请假'},24:{'小邱':'迟到'},
+      25:{'果冻':'请假','刘玉虹':'异常'},26:{},27:{},28:{},
+      29:{'卡比':'请假','大雄':'迟到','谢辰':'离线'},30:{'翅膀':'请假'}
+    };
+    // 根据日期生成当日排班
+    function genRoster(day){
+      var leave=LEAVE_MAP[day]||{};
+      var roster={morning:[],swing:[],night:[],yueda:[],dingfeng:[]};
+      // 主管
+      roster.morning.push({name:'百川',role:'主管',status:leave['百川']||'在岗'});
+      // 本地班
+      ['morning','swing','night'].forEach(function(shift){
+        var pool=STAFF_POOL[shift];
+        roster[shift].push({name:pool.leader,role:'组长',status:leave[pool.leader]||'在岗'});
+        pool.members.forEach(function(m){
+          roster[shift].push({name:m,role:'组员',status:leave[m]||'在岗'});
+        });
+      });
+      // 远程
+      STAFF_POOL.yueda.forEach(function(m){
+        var st=leave[m];
+        roster.yueda.push({name:m,role:'远程',status:st==='离线'?'离线':st||'在线'});
+      });
+      STAFF_POOL.dingfeng.forEach(function(m){
+        var st=leave[m];
+        roster.dingfeng.push({name:m,role:'远程',status:st==='离线'?'离线':st==='异常'?'异常':st||'在线'});
+      });
+      return roster;
+    }
+    // 渲染排班名单
+    function renderRoster(day){
+      var roster=genRoster(day);
+      var dd=dayData[day]||{e:6,m:6,n:7,leave:0,late:0,abn:0,offline:0};
+      var dateStr='04/'+String(day).padStart(2,'0');
+      // 摘要条日期
+      var bigDate=document.getElementById('ak-date-big');
+      if(bigDate) bigDate.textContent=dateStr;
+      var wkEl=document.getElementById('ak-weekday');
+      var dow=new Date(2026,3,day).getDay();
+      var WKS=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+      if(wkEl) wkEl.textContent=WKS[dow];
+      // 翻页卡渲染
+      var flipColors=['#00f0ff','#0074ff','#9466ff','#00ff88','#ff8040'];
+      var shifts=[
+        {label:'早班',data:roster.morning,c:flipColors[0]},
+        {label:'中班',data:roster.swing,c:flipColors[1]},
+        {label:'夜班',data:roster.night,c:flipColors[2]},
+        {label:'悦达远程',data:roster.yueda,c:flipColors[3]},
+        {label:'鼎丰远程',data:roster.dingfeng,c:flipColors[4]}
+      ];
+      var flipRow=document.getElementById('att-flip-row');
+      if(flipRow){
+        flipRow.innerHTML='';
+        shifts.forEach(function(sh){
+          var ok=sh.data.filter(function(p){return p.status==='在岗'||p.status==='在线'}).length;
+          var parts=[];
+          parts.push('在岗 '+ok);
+          var lv=sh.data.filter(function(p){return p.status==='请假'}).length;if(lv)parts.push('假'+lv);
+          var lt=sh.data.filter(function(p){return p.status==='迟到'}).length;if(lt)parts.push('迟'+lt);
+          var ab=sh.data.filter(function(p){return p.status==='异常'}).length;if(ab)parts.push('异'+ab);
+          var ol=sh.data.filter(function(p){return p.status==='离线'}).length;if(ol)parts.push('离'+ol);
+          var issues=sh.data.filter(function(p){return p.status!=='在岗'&&p.status!=='在线'});
+          var front='<div class="att-flip-front" style="--fc:'+sh.c+'44"><div class="af-label" style="color:'+sh.c+'"><span style="background:'+sh.c+';width:3px;height:12px;border-radius:2px;display:inline-block"></span>'+sh.label+'</div><div class="af-num" style="color:'+sh.c+';text-shadow:0 0 6px '+sh.c+'44">'+sh.data.length+'</div><div class="af-summary">'+parts.join(' · ')+'</div>';
+          if(issues.length)front+='<div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap">'+issues.map(function(p){return'<span class="att-status '+stCls(p.status)+'" style="font-size:9px;padding:1px 5px">'+p.name+'</span>'}).join('')+'</div>';
+          front+='<div class="af-hint">CLICK TO VIEW</div></div>';
+          var back='<div class="att-flip-back" style="--fc:'+sh.c+'44"><div class="af-back-title" style="color:'+sh.c+'"><span style="background:'+sh.c+';width:3px;height:10px;border-radius:2px;display:inline-block"></span>'+sh.label+' 明细</div>';
+          sh.data.forEach(function(p){back+='<div class="af-back-item"><span class="af-back-name">'+p.name+'</span><span class="att-status '+stCls(p.status)+'" style="font-size:11px;padding:2px 7px">'+p.status+'</span></div>'});
+          back+='<div class="af-hint" style="text-align:center;padding-top:6px">CLICK TO CLOSE</div></div>';
+          var card=document.createElement('div');card.className='att-flip';
+          card.innerHTML='<div class="att-flip-inner">'+front+back+'</div>';
+          card.addEventListener('click',function(){this.classList.toggle('flipped')});
+          flipRow.appendChild(card);
+        });
+      }
+      // KPI — 五段人数 + 辅助状态
+      var allLocal=roster.morning.concat(roster.swing,roster.night);
+      var allRemote=roster.yueda.concat(roster.dingfeng);
+      var all=allLocal.concat(allRemote);
+      var attend=all.filter(function(p){return p.status==='在岗'||p.status==='在线'}).length;
+      var leave=all.filter(function(p){return p.status==='请假'}).length;
+      var abnormal=all.filter(function(p){return p.status==='异常'}).length;
+      var late=all.filter(function(p){return p.status==='迟到'}).length;
+      var remote=allRemote.filter(function(p){return p.status==='在线'}).length;
+      var setV=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+      setV('ak-morning',roster.morning.length);setV('ak-swing',roster.swing.length);setV('ak-night',roster.night.length);setV('ak-yueda',roster.yueda.length);setV('ak-dingfeng',roster.dingfeng.length);
+      setV('ak-attend',attend);setV('ak-leave',leave);setV('ak-abnormal',abnormal);setV('ak-late',late);setV('ak-remote',remote);
+      // 右下日期显示
+      var dateEl2=document.getElementById('att-dd-date');
+      var subEl2=document.getElementById('att-dd-sub');
+      if(dateEl2) dateEl2.textContent=dateStr;
+      var DN=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+      if(subEl2) subEl2.textContent=DN[dow]+(day===22?' - TODAY':'');
+    }
+
     // Click handler
     el.addEventListener('click',function(ev){
       var cell=ev.target.closest('.att-hcell[data-day]');
       if(!cell) return;
       var day=parseInt(cell.getAttribute('data-day'));
       if(isNaN(day)) return;
-      var dd2=dayData[day];
       el.querySelectorAll('.h-selected').forEach(function(c){c.classList.remove('h-selected');});
       cell.classList.add('h-selected');
-      var dateEl=document.getElementById('att-dd-date');
-      var subEl=document.getElementById('att-dd-sub');
-      if(dateEl) dateEl.textContent='04/'+String(day).padStart(2,'0');
-      var dow=new Date(2026,3,day).getDay();
-      var DN=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-      if(subEl) subEl.textContent=DN[dow]+(day===3?' - TODAY':'');
+      renderRoster(day);
     });
+    // 默认选中22日 — 渲染翻页卡
+    renderRoster(22);
   }
   var observer=new MutationObserver(function(muts){
     muts.forEach(function(m){
@@ -5583,7 +6142,6 @@ setTimeout(function(){
       {name:'小江',shift:'夜班',score:88.1,errorRate:6.1,severeErrors:2}
     ],
     staffDetail:[
-      {name:'百川',role:'主管',shift:'管理',team:'客服中心-1组',checkedCount:85,avgScore:96.2,errorRate:1.8,severeErrorCount:0,passRate:98.8,responseTimeliness:97,processAccuracy:96,serviceTone:98,productKnowledge:95,issues:[],trend:[95,96,95,97,96,96,96]},
       {name:'奇奇',role:'组长',shift:'早班',team:'客服中心-1组',checkedCount:78,avgScore:94.8,errorRate:2.5,severeErrorCount:1,passRate:97.4,responseTimeliness:95,processAccuracy:94,serviceTone:96,productKnowledge:93,issues:['偶有流程遗漏'],trend:[93,94,95,94,95,95,95]},
       {name:'贝果',role:'组员',shift:'早班',team:'客服中心-1组',checkedCount:72,avgScore:92.1,errorRate:3.8,severeErrorCount:1,passRate:96.1,responseTimeliness:93,processAccuracy:91,serviceTone:94,productKnowledge:90,issues:['信息录入偶有疏漏'],trend:[91,92,91,92,93,92,92]},
       {name:'卡比',role:'组员',shift:'早班',team:'客服中心-1组',checkedCount:70,avgScore:93.5,errorRate:3.2,severeErrorCount:0,passRate:96.8,responseTimeliness:94,processAccuracy:93,serviceTone:95,productKnowledge:92,issues:[],trend:[92,93,93,94,93,94,94]},
@@ -5620,43 +6178,26 @@ setTimeout(function(){
 
   function initPF(){
     if(pfDone) return;
-    var el=document.getElementById('pf-chart-trend');
+    var el=document.getElementById('pf-chart-error-type');
     if(!el||el.offsetWidth===0) return;
     pfDone=true;
     var D=PF_DATA;
 
-    // KPI
+    // KPI (3卡)
     document.getElementById('pf-kpi-total').textContent=D.summary.totalChecked.toLocaleString();
     document.getElementById('pf-kpi-avg').textContent=D.summary.avgScore.toFixed(1);
     document.getElementById('pf-kpi-err').textContent=D.summary.errorRate+'%';
-    document.getElementById('pf-kpi-severe').textContent=D.summary.severeErrors;
 
-    // Trend chart
-    var trendChart=echarts.init(el);
-    trendChart.setOption({
-      tooltip:{trigger:'axis',backgroundColor:'rgba(6,12,28,0.95)',borderColor:'rgba(0,195,255,0.3)',textStyle:{color:'#f4f9ff'}},
-      legend:{data:['平均分','错误率'],textStyle:{color:'#8aa0c0',fontSize:13},top:0,right:0},
-      grid:{top:32,right:52,bottom:26,left:42},
-      xAxis:{type:'category',data:D.dailyTrend.map(function(d){return d.date}),axisLine:{lineStyle:{color:'rgba(0,195,255,0.15)'}},axisLabel:{color:'#8aa0c0',fontSize:12}},
-      yAxis:[
-        {type:'value',name:'分',min:85,max:100,splitLine:{lineStyle:{color:'rgba(0,195,255,0.06)'}},axisLabel:{color:'#8aa0c0',fontSize:12},nameTextStyle:{color:'#8aa0c0'}},
-        {type:'value',name:'%',min:0,max:10,splitLine:{show:false},axisLabel:{color:'#8aa0c0',fontSize:12},nameTextStyle:{color:'#8aa0c0'}}
-      ],
-      series:[
-        {name:'平均分',type:'line',data:D.dailyTrend.map(function(d){return d.avgScore}),smooth:true,lineStyle:{color:'#00f0ff',width:2,shadowColor:'rgba(0,240,255,0.3)',shadowBlur:8},itemStyle:{color:'#00f0ff'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(0,240,255,0.12)'},{offset:1,color:'rgba(0,240,255,0)'}]}}},
-        {name:'错误率',type:'line',yAxisIndex:1,data:D.dailyTrend.map(function(d){return d.errorRate}),smooth:true,lineStyle:{color:'#ff8040',width:2,shadowColor:'rgba(255,128,64,0.3)',shadowBlur:8},itemStyle:{color:'#ff8040'}}
-      ]
-    });
-
-    // Error type donut
-    var errChart=echarts.init(document.getElementById('pf-chart-error-type'));
+    // Error type donut (优化版 — 显示百分比)
+    var errChart=echarts.init(el);
     errChart.setOption({
-      tooltip:{trigger:'item',backgroundColor:'rgba(6,12,28,0.95)',borderColor:'rgba(0,195,255,0.3)',textStyle:{color:'#f4f9ff'}},
-      legend:{orient:'vertical',right:4,top:'middle',textStyle:{color:'#b0c8e4',fontSize:12},itemWidth:10,itemHeight:8},
+      tooltip:{trigger:'item',backgroundColor:'rgba(6,12,28,0.95)',borderColor:'rgba(0,195,255,0.3)',textStyle:{color:'#f4f9ff',fontSize:14}},
+      legend:{orient:'vertical',right:4,top:'middle',textStyle:{color:'#b0c8e4',fontSize:13,fontWeight:600},itemWidth:12,itemHeight:10,itemGap:14},
       series:[{
-        type:'pie',radius:['45%','72%'],center:['35%','50%'],
-        label:{show:true,position:'center',formatter:'错误类型',color:'#8aa0c0',fontSize:12,fontFamily:'Orbitron'},
-        emphasis:{label:{show:true,fontSize:14,fontWeight:'bold',color:'#00f0ff'}},
+        type:'pie',radius:['42%','72%'],center:['35%','50%'],
+        label:{show:true,position:'outside',formatter:'{d}%',color:'#c0d4e8',fontSize:12,fontFamily:'Orbitron',fontWeight:700},
+        labelLine:{lineStyle:{color:'rgba(0,195,255,0.2)'}},
+        emphasis:{label:{show:true,fontSize:15,fontWeight:'bold',color:'#00f0ff',formatter:'{b}\n{d}%'}},
         data:D.errorTypeDistribution.map(function(d,i){
           var colors=['#00f0ff','#0074ff','#9466ff','#ff8040','#ff4466'];
           return {value:d.value,name:d.name,itemStyle:{color:colors[i],shadowBlur:10,shadowColor:colors[i].replace(')',',0.3)').replace('rgb','rgba')}};
@@ -5664,51 +6205,67 @@ setTimeout(function(){
         itemStyle:{borderColor:'rgba(5,9,16,0.8)',borderWidth:2}
       }]
     });
+    window.addEventListener('resize',function(){errChart.resize()});
 
-    // Shift comparison bar
-    var shiftChart=echarts.init(document.getElementById('pf-chart-shift'));
-    var shifts=D.shiftComparison;
-    shiftChart.setOption({
-      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'rgba(6,12,28,0.95)',borderColor:'rgba(0,195,255,0.3)',textStyle:{color:'#f4f9ff'}},
-      grid:{top:10,right:16,bottom:26,left:74},
-      xAxis:{type:'value',min:80,max:100,splitLine:{lineStyle:{color:'rgba(0,195,255,0.06)'}},axisLabel:{color:'#8aa0c0',fontSize:12}},
-      yAxis:{type:'category',data:shifts.map(function(s){return s.shift}),axisLabel:{color:'#b0c8e4',fontSize:13},axisLine:{lineStyle:{color:'rgba(0,195,255,0.15)'}}},
-      series:[{
-        type:'bar',barWidth:14,data:shifts.map(function(s){
-          var c=s.avgScore>=93?'#00ff88':s.avgScore>=90?'#00f0ff':'#ff8040';
-          return {value:s.avgScore,itemStyle:{color:c,borderRadius:[0,3,3,0]}};
-        }),
-        label:{show:true,position:'right',color:'#f4f9ff',fontSize:11,fontFamily:'Orbitron',formatter:'{c}'}
-      }]
+    // 质检关注摘要
+    var focusItems=[
+      {text:'本月最高频错误：<b>话术不规范</b>，占比 32%',c:'#ff8040',tag:'HIGH'},
+      {text:'<b>信息录入错误</b>集中于试用期人员（鲍博、刘玉虹）',c:'#00f0ff',tag:'PATTERN'},
+      {text:'高风险人员共 <b>5 名</b>，建议本周优先安排复检',c:'#ff4466',tag:'ACTION'},
+      {text:'本周错误率 <b>4.7%</b>，较上周 <b>持平</b>',c:'#00ff88',tag:'STABLE'},
+      {text:'建议优先复检：<b>鱼丸、九节狼、小江、鲍博、刘玉虹</b>',c:'#9466ff',tag:'REVIEW'}
+    ];
+    var focusHtml='';
+    focusItems.forEach(function(f){
+      focusHtml+='<div class="pf-focus-item" style="--fi-c:'+f.c+'44;border-left-color:'+f.c+'66"><span class="pf-fi-node" style="background:'+f.c+';box-shadow:0 0 6px '+f.c+',0 0 12px '+f.c+'44"></span><span class="pf-fi-text">'+f.text+'</span><span class="pf-fi-tag" style="color:'+f.c+';border:1px solid '+f.c+'33;background:'+f.c+'0a">'+f.tag+'</span></div>';
     });
+    document.getElementById('pf-focus-list').innerHTML=focusHtml;
 
-    // Resize handler
-    window.addEventListener('resize',function(){trendChart.resize();errChart.resize();shiftChart.resize();});
-
-    // Risk list
+    // Risk list — 3层结构
     var riskHtml='';
     D.topRiskUsers.forEach(function(u,i){
       var issues=D.staffDetail.find(function(s){return s.name===u.name});
       var issueTag=issues&&issues.issues&&issues.issues.length>0?issues.issues[0]:'';
-      riskHtml+='<div class="pf-risk-item"><span class="pf-risk-rank">#'+(i+1)+'</span><span class="pf-risk-name">'+u.name+'</span><span class="pf-risk-shift">'+u.shift+'</span><span class="pf-risk-score '+scoreCss(u.score)+'">'+u.score+'</span><span class="pf-risk-extra">ERR '+u.errorRate+'%</span></div>';
-      if(issueTag) riskHtml+='<div style="padding:0 0 6px 32px;font-size:12px;color:var(--accent-orange);opacity:0.8">→ '+issueTag+'</div>';
+      var rankOp=i<3?(1-i*0.15):0.5;
+      riskHtml+='<div class="pf-risk-item" style="'+(i<3?'border-left:2px solid rgba(255,68,102,'+(0.4-i*0.1)+')':'border-left:2px solid rgba(255,128,64,0.15)')+'">';
+      var sc=u.score<87?'var(--accent-red)':u.score<90?'var(--accent-orange)':'var(--accent-cyan)';
+      // 行1: 排名+姓名+班别 | 分数+ERR
+      riskHtml+='<div style="display:flex;align-items:center;gap:6px"><span class="pf-risk-rank" style="opacity:'+rankOp+';font-size:16px">#'+(i+1)+'</span><span class="pf-risk-name" style="font-size:15px">'+u.name+'</span><span class="pf-risk-shift">'+u.shift+'</span><span style="margin-left:auto;font-family:Orbitron,monospace;font-size:13px;color:'+sc+'">'+u.score+'</span><span style="font-family:Orbitron,monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.5px">ERR '+u.errorRate+'%</span></div>';
+      // 行2: 错误类型+严重数
+      if(issueTag) riskHtml+='<div style="padding-left:26px;font-size:11px;color:var(--accent-orange);opacity:0.8;display:flex;gap:10px">'+issueTag+'<span style="color:var(--text-dim);opacity:0.7">严重'+u.severeErrors+'</span></div>';
+      riskHtml+='</div>';
     });
     document.getElementById('pf-risk-list').innerHTML=riskHtml;
 
-    // Staff cards
-    var staffHtml='';
-    D.staffDetail.forEach(function(s,i){
-      var g=scoreGrade(s.avgScore);
-      var vc=scoreValCls(s.avgScore);
-      var evc=s.errorRate>=6?'v-bad':s.errorRate>=4?'v-warn':'v-good';
-      staffHtml+='<div class="pf-staff-card grade-'+g+'" data-idx="'+i+'">';
-      staffHtml+='<div class="pf-sc-top"><span class="pf-sc-name">'+s.name+'</span><span class="pf-sc-shift">'+s.shift+'</span></div>';
-      staffHtml+='<div class="pf-sc-stats">';
-      staffHtml+='<div class="pf-sc-stat"><span class="pf-sc-stat-label">均分</span><span class="pf-sc-stat-val '+vc+'">'+s.avgScore+'</span></div>';
-      staffHtml+='<div class="pf-sc-stat"><span class="pf-sc-stat-label">错误率</span><span class="pf-sc-stat-val '+evc+'">'+s.errorRate+'%</span></div>';
-      staffHtml+='<div class="pf-sc-stat"><span class="pf-sc-stat-label">严重</span><span class="pf-sc-stat-val '+(s.severeErrorCount>0?'v-bad':'v-good')+'">'+s.severeErrorCount+'</span></div>';
-      staffHtml+='</div></div>';
-    });
+    // Staff cards — 分区块
+    var shiftGroups=[
+      {key:'早班',label:'早班',c:'#00f0ff'},
+      {key:'中班',label:'中班',c:'#0074ff'},
+      {key:'夜班',label:'夜班',c:'#9466ff'},
+      {key:'悦达远程',label:'悦达远程',c:'#00ff88'},
+      {key:'鼎丰远程',label:'鼎丰远程',c:'#ff8040'}
+    ];
+    // 双排分区面板
+    function buildSG(sg){
+      var members=D.staffDetail.filter(function(s){return s.shift===sg.key});
+      if(!members.length) return '';
+      var warnN=members.filter(function(s){return s.avgScore<90||s.errorRate>=5}).length;
+      var h='<div class="pf-sg"><div class="pf-sg-title" style="border-left-color:'+sg.c+';color:'+sg.c+'">'+sg.label+' <span class="pf-sg-count">'+members.length+'人</span>'+(warnN>0?'<span class="pf-sg-warn">注意'+warnN+'</span>':'')+'</div><div class="pf-sg-cards">';
+      members.forEach(function(s){
+        var idx=D.staffDetail.indexOf(s);
+        var gl=s.avgScore>=95?'优秀':s.avgScore>=92?'稳定':s.avgScore>=89?'注意':s.errorRate>=6?'高风险':'待复检';
+        var gc=s.avgScore>=95?'g-excellent':s.avgScore>=92?'g-stable':s.avgScore>=89?'g-warn':s.errorRate>=6?'g-risk':'g-review';
+        var vc=scoreValCls(s.avgScore);
+        h+='<div class="pf-staff-card grade-'+scoreGrade(s.avgScore)+'" data-idx="'+idx+'" style="padding:5px 8px;min-width:0"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span class="pf-sc-name" style="font-size:14px">'+s.name+'</span><span class="pf-sc-grade '+gc+'" style="font-size:8px;padding:1px 5px">'+gl+'</span></div><div style="font-family:Orbitron,monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.5px"><span class="pf-sc-stat-val '+vc+'" style="font-size:12px">'+s.avgScore+'</span> 分</div></div>';
+      });
+      h+='</div></div>';
+      return h;
+    }
+    var staffHtml='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:5px">';
+    shiftGroups.slice(0,3).forEach(function(sg){staffHtml+=buildSG(sg)});
+    staffHtml+='</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+    shiftGroups.slice(3).forEach(function(sg){staffHtml+=buildSG(sg)});
+    staffHtml+='</div>';
     document.getElementById('pf-staff-grid').innerHTML=staffHtml;
 
     // Card click -> modal

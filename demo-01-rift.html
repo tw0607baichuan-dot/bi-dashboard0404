@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Demo 01 — 裂隙核心</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;overflow:hidden;height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Noto Sans TC',sans-serif}
+.stage{width:960px;height:600px;position:relative;overflow:hidden}
+.label{position:absolute;top:12px;left:16px;font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,240,255,0.4);letter-spacing:3px;z-index:20}
+/* 假卡 */
+.card{position:absolute;top:50%;width:340px;height:320px;border:1.5px solid rgba(0,195,255,0.25);border-radius:8px;background:rgba(6,12,28,0.92);backdrop-filter:blur(8px);z-index:10;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:2px;color:rgba(0,240,255,0.3)}
+.card.l{left:80px;transform:translateY(-50%)}
+.card.r{right:80px;transform:translateY(-50%);border-color:rgba(148,102,255,0.25);color:rgba(148,102,255,0.3)}
+/* 裂缝 */
+.rift{position:absolute;left:50%;top:8%;width:6px;height:84%;margin-left:-3px;z-index:5;pointer-events:none}
+.rift-line{position:absolute;left:50%;width:0;height:100%}
+.rift-seg{position:absolute;width:4px;background:#00f0ff;box-shadow:0 0 12px #00f0ff,0 0 28px rgba(0,240,255,0.4),0 0 50px rgba(0,240,255,0.15);border-radius:2px;animation:riftPulse 2.5s ease-in-out infinite}
+@keyframes riftPulse{0%,100%{opacity:0.35;width:3px}12%{opacity:0.9;width:5px}25%{opacity:0.3;width:3px}40%{opacity:0.85;width:6px}55%{opacity:0.25;width:3px}70%{opacity:0.8;width:4px}85%{opacity:0.3;width:3px}}
+/* 裂缝光晕 */
+.rift-glow{position:absolute;left:50%;width:60px;margin-left:-30px;height:100%;background:linear-gradient(90deg,transparent,rgba(0,240,255,0.06) 30%,rgba(0,240,255,0.1) 50%,rgba(0,240,255,0.06) 70%,transparent);animation:riftGlowPulse 2.5s ease-in-out infinite;filter:blur(4px)}
+@keyframes riftGlowPulse{0%,100%{opacity:0.3}15%{opacity:0.8}30%{opacity:0.25}45%{opacity:0.75}60%{opacity:0.2}75%{opacity:0.7}90%{opacity:0.3}}
+/* 支裂纹 */
+.crack{position:absolute;background:rgba(0,240,255,0.12);border-radius:1px;pointer-events:none}
+/* 碎屑 */
+.shard{position:absolute;border-radius:1px;pointer-events:none}
+@keyframes shardDrift{0%{opacity:0.5;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--sx),var(--sy)) rotate(var(--sr))}}
+/* 裂缝内光点 */
+.rift-dot{position:absolute;border-radius:50%;background:#fff;pointer-events:none}
+@keyframes riftDotMove{0%{top:100%;opacity:0}10%{opacity:0.7}90%{opacity:0.5}100%{top:-5%;opacity:0}}
+/* 抖动 */
+@keyframes riftShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-1px)}35%{transform:translateX(1px)}55%{transform:translateX(-0.5px)}75%{transform:translateX(1px)}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="label">01 — RIFT CORE</div>
+  <div class="card l">LOCAL COMMAND</div>
+  <div class="card r">REMOTE LINK</div>
+  <div class="rift" id="rift" style="animation:riftShake 3s ease-in-out infinite"></div>
+</div>
+<script>
+var rift=document.getElementById('rift');
+// 光晕
+var glow=document.createElement('div');glow.className='rift-glow';rift.appendChild(glow);
+// 锯齿裂缝段 — 用多段偏移模拟
+var segs=[{top:0,h:18,x:-2},{top:16,h:22,x:3},{top:36,h:16,x:-4},{top:50,h:20,x:2},{top:68,h:18,x:-3},{top:84,h:16,x:1}];
+segs.forEach(function(s,i){
+  var seg=document.createElement('div');seg.className='rift-seg';
+  seg.style.cssText='top:'+s.top+'%;height:'+s.h+'%;left:calc(50% + '+s.x+'px);animation-delay:'+(-i*0.3)+'s';
+  rift.appendChild(seg);
+});
+// 支裂纹
+var cracks=[[30,-1,40,8,-25],[30,-1,25,6,20],[55,2,35,7,-30],[70,-2,30,5,18],[85,1,20,4,-15],[15,3,22,5,22]];
+cracks.forEach(function(c){
+  var el=document.createElement('div');el.className='crack';
+  el.style.cssText='top:'+c[0]+'%;left:calc(50% + '+c[1]+'px);width:'+c[2]+'px;height:1px;transform:rotate('+c[4]+'deg);opacity:0;animation:crackFlash '+(2+Math.random()*3)+'s ease-in-out infinite '+(-Math.random()*4)+'s';
+  rift.appendChild(el);
+});
+var st=document.createElement('style');
+st.textContent='@keyframes crackFlash{0%,100%{opacity:0}30%{opacity:0.25}50%{opacity:0.08}70%{opacity:0.2}}';
+document.head.appendChild(st);
+// 碎屑
+for(var i=0;i<14;i++){
+  var sh=document.createElement('div');sh.className='shard';
+  var sz=1.5+Math.random()*3;
+  var startX=Math.random()*6-3;
+  var startY=10+Math.random()*80;
+  sh.style.cssText='left:calc(50% + '+startX+'px);top:'+startY+'%;width:'+sz+'px;height:'+(sz*0.5+0.5)+'px;background:rgba(0,240,255,'+(0.15+Math.random()*0.2)+');box-shadow:0 0 3px rgba(0,240,255,0.3);animation:shardDrift '+(12+Math.random()*15)+'s linear infinite '+(-Math.random()*10)+'s;--sx:'+(20+Math.random()*40)*(Math.random()>0.5?1:-1)+'px;--sy:'+(Math.random()*30-15)+'px;--sr:'+(Math.random()*180)+'deg';
+  rift.appendChild(sh);
+}
+// 裂缝内上行光点
+for(var i=0;i<4;i++){
+  var dot=document.createElement('div');dot.className='rift-dot';
+  dot.style.cssText='left:calc(50% + '+(Math.random()*4-2)+'px);width:'+(1+Math.random())+'px;height:'+(1+Math.random())+'px;box-shadow:0 0 4px #00f0ff;animation:riftDotMove '+(8+Math.random()*5)+'s linear infinite '+(-Math.random()*10)+'s';
+  rift.appendChild(dot);
+}
+</script>
+</body>
+</html>

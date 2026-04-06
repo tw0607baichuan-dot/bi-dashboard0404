@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>方案4 — 核心反应炉 + 三向能量输入</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#050910;display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Noto Sans TC',sans-serif;color:#f4f9ff;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+
+.panel{
+  width:580px;height:360px;position:relative;
+  background:linear-gradient(160deg,rgba(0,100,255,0.04) 0%,transparent 40%,rgba(148,102,255,0.02) 100%),rgba(6,12,28,0.94);
+  border:1px solid rgba(0,195,255,0.32);border-radius:4px;padding:14px 18px;
+  backdrop-filter:blur(16px);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.panel::before{content:'';position:absolute;inset:3px;border:1px solid rgba(0,180,255,0.05);border-radius:2px;pointer-events:none}
+.panel::after{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,#00f0ff,#9466ff,transparent);opacity:0.4}
+.panel-title{font-size:17px;font-weight:700;color:#00f0ff;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:8px;font-family:'Orbitron',monospace}
+.panel-title::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,#00f0ff,#9466ff);border-radius:2px;box-shadow:0 0 6px rgba(0,240,255,0.5)}
+.panel-title .mod{font-size:10px;color:rgba(0,240,255,0.4);letter-spacing:1px;margin-left:auto}
+
+.reactor-scene{flex:1;position:relative;display:flex;align-items:center;justify-content:center}
+
+/* ── 核心反应炉 ── */
+.reactor-core{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:120px;height:120px;z-index:10;
+}
+/* 外环旋转 */
+.rc-ring-outer{
+  position:absolute;inset:-16px;border-radius:50%;
+  border:1.5px solid rgba(255,128,64,0.2);
+  box-shadow:0 0 24px rgba(255,128,64,0.08),inset 0 0 24px rgba(255,128,64,0.04);
+  animation:rcSpin 12s linear infinite;
+}
+.rc-ring-outer::before{content:'';position:absolute;top:-3px;left:50%;width:6px;height:6px;background:#ff8040;border-radius:50%;box-shadow:0 0 10px #ff8040,0 0 20px rgba(255,128,64,0.4);transform:translateX(-50%)}
+@keyframes rcSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+/* 中环反转 */
+.rc-ring-mid{
+  position:absolute;inset:-4px;border-radius:50%;
+  border:1px dashed rgba(0,240,255,0.15);
+  animation:rcSpin 8s linear infinite reverse;
+}
+/* 核心球 */
+.rc-ball{
+  position:absolute;inset:20px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(255,180,100,0.25),rgba(255,128,64,0.1) 50%,rgba(0,0,0,0.2));
+  border:1px solid rgba(255,128,64,0.3);
+  box-shadow:0 0 30px rgba(255,128,64,0.15),0 0 60px rgba(255,128,64,0.06),inset 0 0 20px rgba(255,128,64,0.08);
+  animation:rcPulse 3s ease-in-out infinite;
+}
+@keyframes rcPulse{0%,100%{box-shadow:0 0 30px rgba(255,128,64,0.15),0 0 60px rgba(255,128,64,0.06)}50%{box-shadow:0 0 40px rgba(255,128,64,0.25),0 0 80px rgba(255,128,64,0.1)}}
+/* 核心数字 */
+.rc-num{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;
+}
+.rc-num .val{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:#fff;text-shadow:0 0 10px rgba(255,180,100,0.6),0 0 24px rgba(255,128,64,0.2);letter-spacing:2px;line-height:1}
+.rc-num .lbl{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(255,180,100,0.5);margin-top:4px}
+
+/* ── 能量输入通道 ── */
+.energy-channel{position:absolute;display:flex;align-items:center;z-index:5}
+
+/* 数据晶块节点 */
+.ec-node{
+  width:130px;padding:12px 10px;border-radius:5px;
+  backdrop-filter:blur(10px);text-align:center;position:relative;
+}
+.ec-node::before{
+  content:'';position:absolute;inset:0;border-radius:5px;
+  border:1px solid var(--ec-c,rgba(0,240,255,0.3));
+  box-shadow:0 0 14px var(--ec-g,rgba(0,240,255,0.08)),inset 0 1px 0 var(--ec-h,rgba(0,240,255,0.15));
+  pointer-events:none;
+}
+.ec-node .ec-label{font-size:11px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:5px;opacity:0.7}
+.ec-node .ec-val{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;line-height:1;margin-bottom:3px}
+.ec-node .ec-time{font-size:9px;color:rgba(180,200,228,0.45);letter-spacing:1px}
+.ec-node .ec-pct{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;margin-top:6px;
+  padding:2px 8px;border-radius:2px;display:inline-block;
+}
+
+/* 早班 — 左上 */
+.ch-morning{left:14px;top:20px}
+.ch-morning .ec-node{
+  background:linear-gradient(135deg,rgba(0,240,255,0.08),rgba(0,120,200,0.04));
+  --ec-c:rgba(0,240,255,0.3);--ec-g:rgba(0,240,255,0.08);--ec-h:rgba(0,240,255,0.15);
+}
+.ch-morning .ec-val{color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,0.5)}
+.ch-morning .ec-pct{color:#00f0ff;background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.2)}
+
+/* 中班 — 右上 */
+.ch-mid{right:14px;top:20px}
+.ch-mid .ec-node{
+  background:linear-gradient(135deg,rgba(0,116,255,0.08),rgba(0,60,180,0.04));
+  --ec-c:rgba(0,116,255,0.3);--ec-g:rgba(0,116,255,0.08);--ec-h:rgba(0,116,255,0.15);
+}
+.ch-mid .ec-val{color:#0074ff;text-shadow:0 0 8px rgba(0,116,255,0.5)}
+.ch-mid .ec-pct{color:#0074ff;background:rgba(0,116,255,0.08);border:1px solid rgba(0,116,255,0.2)}
+
+/* 晚班 — 下方 */
+.ch-night{left:50%;bottom:10px;transform:translateX(-50%)}
+.ch-night .ec-node{
+  background:linear-gradient(135deg,rgba(148,102,255,0.08),rgba(100,60,200,0.04));
+  --ec-c:rgba(148,102,255,0.3);--ec-g:rgba(148,102,255,0.08);--ec-h:rgba(148,102,255,0.15);
+}
+.ch-night .ec-val{color:#9466ff;text-shadow:0 0 8px rgba(148,102,255,0.5)}
+.ch-night .ec-pct{color:#9466ff;background:rgba(148,102,255,0.08);border:1px solid rgba(148,102,255,0.2)}
+
+/* ── 能量传输流 ── */
+.energy-beam{position:absolute;pointer-events:none;z-index:4}
+
+/* 能量粒子 */
+.e-particle{
+  position:absolute;width:4px;height:4px;border-radius:50%;
+  animation:ePulse 2s ease-in-out infinite;
+}
+@keyframes ePulse{0%,100%{opacity:0.3;transform:scale(0.6)}50%{opacity:1;transform:scale(1.2)}}
+
+/* 方案标识 */
+.scheme-tag{position:absolute;top:12px;right:16px;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,240,255,0.3);z-index:20}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="panel-title"><span>各班别回复量</span><span class="mod">SYS-02</span></div>
+  <span class="scheme-tag">SCHEME 4 — REACTOR CORE</span>
+
+  <div class="reactor-scene" id="scene">
+    <!-- 能量传输线 SVG -->
+    <svg class="energy-beam" width="100%" height="100%" style="position:absolute;inset:0">
+      <defs>
+        <!-- 能量流动画 -->
+        <linearGradient id="beam1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#ff8040" stop-opacity="0.4"/>
+        </linearGradient>
+        <linearGradient id="beam2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0074ff" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#0074ff" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#ff8040" stop-opacity="0.4"/>
+        </linearGradient>
+        <linearGradient id="beam3" x1="50%" y1="100%" x2="50%" y2="0%">
+          <stop offset="0%" stop-color="#9466ff" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#9466ff" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#ff8040" stop-opacity="0.4"/>
+        </linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- 早班→核心 -->
+      <line x1="25%" y1="32%" x2="44%" y2="46%" stroke="url(#beam1)" stroke-width="2" filter="url(#glow)" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite"/>
+      </line>
+      <!-- 中班→核心 -->
+      <line x1="75%" y1="32%" x2="56%" y2="46%" stroke="url(#beam2)" stroke-width="2" filter="url(#glow)" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+      </line>
+      <!-- 晚班→核心 -->
+      <line x1="50%" y1="85%" x2="50%" y2="58%" stroke="url(#beam3)" stroke-width="2" filter="url(#glow)" stroke-dasharray="6 4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+      </line>
+      <!-- 传输节点 -->
+      <circle cx="34%" cy="39%" r="3" fill="#00f0ff" opacity="0.6" filter="url(#glow)"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="66%" cy="39%" r="3" fill="#0074ff" opacity="0.6" filter="url(#glow)"><animate attributeName="r" values="2;4;2" dur="2s" begin="0.6s" repeatCount="indefinite"/></circle>
+      <circle cx="50%" cy="70%" r="3" fill="#9466ff" opacity="0.6" filter="url(#glow)"><animate attributeName="r" values="2;4;2" dur="2s" begin="1.2s" repeatCount="indefinite"/></circle>
+    </svg>
+
+    <!-- 核心反应炉 -->
+    <div class="reactor-core">
+      <div class="rc-ring-outer"></div>
+      <div class="rc-ring-mid"></div>
+      <div class="rc-ball"></div>
+      <div class="rc-num">
+        <div class="val">1,284</div>
+        <div class="lbl">CORE OUTPUT</div>
+      </div>
+    </div>
+
+    <!-- 早班 — 左上能量输入 -->
+    <div class="energy-channel ch-morning">
+      <div class="ec-node">
+        <div class="ec-label">早班</div>
+        <div class="ec-val">520</div>
+        <div class="ec-time">08:00 — 16:00</div>
+        <div class="ec-pct">40.5%</div>
+      </div>
+    </div>
+
+    <!-- 中班 — 右上能量输入 -->
+    <div class="energy-channel ch-mid">
+      <div class="ec-node">
+        <div class="ec-label">中班</div>
+        <div class="ec-val">485</div>
+        <div class="ec-time">16:00 — 00:00</div>
+        <div class="ec-pct">37.8%</div>
+      </div>
+    </div>
+
+    <!-- 晚班 — 底部能量输入 -->
+    <div class="energy-channel ch-night">
+      <div class="ec-node">
+        <div class="ec-label">晚班</div>
+        <div class="ec-val">279</div>
+        <div class="ec-time">00:00 — 08:00</div>
+        <div class="ec-pct">21.7%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 沿传输线移动的能量粒子
+(function(){
+  var scene=document.getElementById('scene');
+  var paths=[
+    {x1:0.25,y1:0.32,x2:0.44,y2:0.46,color:'#00f0ff'},
+    {x1:0.75,y1:0.32,x2:0.56,y2:0.46,color:'#0074ff'},
+    {x1:0.50,y1:0.85,x2:0.50,y2:0.58,color:'#9466ff'}
+  ];
+  paths.forEach(function(p,pi){
+    for(var i=0;i<3;i++){
+      var dot=document.createElement('div');
+      dot.className='e-particle';
+      dot.style.background=p.color;
+      dot.style.boxShadow='0 0 8px '+p.color;
+      dot.style.animationDelay=(-i*0.7-pi*0.3)+'s';
+      // animate position along path
+      var keyframes=[
+        {left:p.x1*100+'%',top:p.y1*100+'%',opacity:0},
+        {left:(p.x1+(p.x2-p.x1)*0.3)*100+'%',top:(p.y1+(p.y2-p.y1)*0.3)*100+'%',opacity:0.9},
+        {left:(p.x1+(p.x2-p.x1)*0.7)*100+'%',top:(p.y1+(p.y2-p.y1)*0.7)*100+'%',opacity:0.7},
+        {left:p.x2*100+'%',top:p.y2*100+'%',opacity:0}
+      ];
+      dot.animate(keyframes,{duration:2000+pi*300,iterations:Infinity,delay:i*600+pi*200});
+      scene.appendChild(dot);
+    }
+  });
+})();
+</script>
+</body>
+</html>
