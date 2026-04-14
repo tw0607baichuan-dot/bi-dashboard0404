@@ -14,7 +14,7 @@
 // 設定
 // ══════════════════════════════════════
 var CONFIG = {
-  API_KEY: 'bi-dashboard-sync-2026',  // ← 請修改為你自己的密鑰
+  API_KEY: 'bi-dashboard-sync-2026-secure-01',  // ← 請修改為你自己的密鑰
   SHEET_USERS: 'users',
   SHEET_LOGIN_LOGS: 'login_logs',
   SHEET_ACTION_LOGS: 'action_logs'
@@ -47,12 +47,38 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  // GET 也需要 apiKey（透過 query parameter）
   var key = e.parameter.apiKey || '';
   if (key !== CONFIG.API_KEY) {
     return respond({ ok: false, error: 'INVALID_API_KEY' });
   }
+
+  var action = e.parameter.action || 'getUsers';
+
+  if (action === 'getLocalSchedule') {
+    return respond(handleGetLocalSchedule(e.parameter.sheet));
+  }
+
   return respond(handleGetUsers());
+}
+
+function handleGetLocalSchedule(sheetName) {
+  var name = sheetName || LocalParser.TARGET_SHEET;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    return { ok: false, error: 'SHEET_NOT_FOUND', message: '找不到 Sheet: ' + name };
+  }
+  var result = LocalParser.parse(sheet);
+  if (result.error) {
+    return { ok: false, error: result.error, message: result.message };
+  }
+  // ── 诊断：对比 day10 vs day11 ──
+  var d10 = result.daily['10'];
+  var d11 = result.daily['11'];
+  result._debug_day10_morning = d10 && d10.morning ? d10.morning : 'MISSING';
+  result._debug_day11_morning = d11 && d11.morning ? d11.morning : 'MISSING';
+  result._debug_parseLog = result._parseLog || [];
+  return { ok: true, data: result };
 }
 
 function respond(data) {
