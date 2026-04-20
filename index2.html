@@ -697,6 +697,27 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .panel-title::before { content:''; width:3px; height:14px; background:linear-gradient(180deg,var(--accent-cyan),var(--accent-purple)); border-radius:2px; box-shadow:0 0 6px rgba(0,240,255,0.5); }
 .panel-title::after { content:attr(data-module); color:var(--accent-purple); opacity:0.6; font-size:12px; margin-left:auto; font-family:var(--font-display); letter-spacing:1.5px; border:1px solid rgba(148,102,255,0.25); padding:2px 8px; border-radius:2px; }
 
+/* ── Sync Button (SYS-01) ── */
+.sync-btn {
+  margin-left:auto; display:inline-flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,rgba(0,240,255,0.12),rgba(0,116,255,0.08));
+  border:1px solid rgba(0,240,255,0.4); color:var(--accent-cyan);
+  padding:3px 10px; border-radius:3px; cursor:pointer;
+  font-family:var(--font-display); font-size:11px; font-weight:600; letter-spacing:1.5px;
+  text-shadow:0 0 4px rgba(0,240,255,0.4); box-shadow:0 0 8px rgba(0,240,255,0.15), inset 0 0 8px rgba(0,240,255,0.08);
+  transition:all 0.2s; text-transform:uppercase;
+}
+.sync-btn:hover { background:linear-gradient(135deg,rgba(0,240,255,0.25),rgba(0,116,255,0.15)); border-color:var(--accent-cyan); box-shadow:0 0 14px rgba(0,240,255,0.4), inset 0 0 10px rgba(0,240,255,0.15); }
+.sync-btn:active { transform:translateY(1px); }
+.sync-btn:disabled { opacity:0.6; cursor:wait; }
+.sync-btn .sync-icon { display:inline-block; font-size:14px; line-height:1; }
+.sync-btn.syncing .sync-icon { animation:syncSpin 0.9s linear infinite; }
+.sync-btn.success { border-color:var(--accent-green); color:var(--accent-green); text-shadow:0 0 4px rgba(0,255,136,0.5); box-shadow:0 0 12px rgba(0,255,136,0.3); }
+.sync-btn.error { border-color:var(--accent-red); color:var(--accent-red); text-shadow:0 0 4px rgba(255,68,102,0.5); box-shadow:0 0 12px rgba(255,68,102,0.3); }
+@keyframes syncSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+.sync-time { font-family:var(--font-display); font-size:10px; color:var(--text-dim); letter-spacing:1px; margin-left:8px; opacity:0.8; }
+.panel-title:has(.sync-btn)::after { margin-left:0; }
+
 /* ══════════════════════════════════════
    5. Dual Marquee — system alert bus
    ══════════════════════════════════════ */
@@ -3492,7 +3513,7 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan">2,127</div></div>
   </section>
   <section class="charts-row">
-    <div class="panel"><div class="panel-title" data-module="SYS-01">每日进线量 vs 实际回复单量（近 14 天）</div><div class="chart-container" style="position:relative"><canvas id="chart-trend" width="920" height="280"></canvas><div class="chart-placeholder">逐日数据待补</div></div></div>
+    <div class="panel"><div class="panel-title" data-module="SYS-01">每日回复量（近 14 天）<button class="sync-btn" id="sync-trend-btn" title="从 Google Sheets 同步最新数据"><span class="sync-icon">⟳</span><span class="sync-label">同步</span></button><span class="sync-time" id="sync-trend-time"></span></div><div class="chart-container" style="position:relative"><canvas id="chart-trend" width="920" height="280"></canvas><div class="chart-placeholder" id="chart-trend-placeholder">逐日数据待补</div></div></div>
     <div class="panel"><div class="panel-title" data-module="SYS-02">各班别回复量</div>
     <div class="crystal-scene" id="crystal-scene">
       <!-- SVG 连接线 — 动态更新 -->
@@ -5913,19 +5934,122 @@ Chart.register({id:'doughnutCenter',afterDraw(chart){
 
 // 3. Trend — refined lines
 const trendChart=new Chart(document.getElementById('chart-trend'),{type:'line',data:{labels:DAYS_14,datasets:[
-  {label:'每日进线量',data:[...DAILY_IN],borderColor:'#00f0ff',
-    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(0,240,255,0.18)');g.addColorStop(0.5,'rgba(0,240,255,0.03)');g.addColorStop(1,'transparent');return g},
+  {label:'每日回复量',data:[...DAILY_IN],borderColor:'#00f0ff',
+    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(0,240,255,0.22)');g.addColorStop(0.5,'rgba(0,240,255,0.05)');g.addColorStop(1,'transparent');return g},
     fill:true,tension:0.4,borderWidth:2.5,pointRadius:3,pointHoverRadius:5,
-    pointBackgroundColor:'#00f0ff',pointBorderColor:'rgba(0,240,255,0.35)',pointBorderWidth:1},
-  {label:'实际回复单量',data:[...DAILY_RE],borderColor:'#9466ff',
-    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(148,102,255,0.10)');g.addColorStop(1,'transparent');return g},
-    fill:true,tension:0.4,borderWidth:1.5,borderDash:[5,3],pointRadius:2.5,pointHoverRadius:4,
-    pointBackgroundColor:'#9466ff',pointBorderColor:'rgba(148,102,255,0.3)',pointBorderWidth:1}
+    pointBackgroundColor:'#00f0ff',pointBorderColor:'rgba(0,240,255,0.35)',pointBorderWidth:1}
 ]},options:{responsive:false,
   plugins:{legend:{labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:12,weight:600}}},tooltip:TT},
   scales:{x:{grid:{color:GRID},ticks:{font:{size:12,weight:500},color:TICK}},y:{grid:{color:GRID},beginAtZero:true,suggestedMax:400,ticks:{font:{size:12,weight:500},color:TICK}}},
   interaction:{intersect:false,mode:'index'}}});
-pgRegInterval('page-overview',()=>{const d0=trendChart.data.datasets[0].data,d1=trendChart.data.datasets[1].data;d0[13]=Math.max(1,Math.round(DAILY_IN[13]+(Math.random()-0.5)*30));d1[13]=Math.max(1,Math.round(DAILY_RE[13]+(Math.random()-0.5)*25));trendChart.update('none')},5000);
+pgRegInterval('page-overview',()=>{const d0=trendChart.data.datasets[0].data;d0[13]=Math.max(1,Math.round(DAILY_IN[13]+(Math.random()-0.5)*30));trendChart.update('none')},5000);
+
+// ── SYS-01 Google Sheets 同步 ──
+// 数据源：日报群回复量统计 (gid=1762805145)
+// CSV 结构：A=早班日期 | B-F=早班 5 人 | G=中班日期 | H-L=中班 5 人 | M=夜班日期 | N-T=夜班 7 人
+const SHEET_ID='1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk';
+const SHEET_GID='1762805145';
+const SHEET_CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
+
+function parseCSV(text){
+  // 简单 CSV parser（支援引号包裹）
+  const rows=[];let cur=[],cell='',q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cell+='"';i++}else q=false}else cell+=ch}
+    else{if(ch==='"')q=true;else if(ch===','){cur.push(cell);cell=''}else if(ch==='\n'){cur.push(cell);rows.push(cur);cur=[];cell=''}else if(ch!=='\r')cell+=ch}
+  }
+  if(cell||cur.length){cur.push(cell);rows.push(cur)}
+  return rows;
+}
+
+function parseSheetDate(s){
+  // 表单格式 "2026/04/01"
+  if(!s) return null;
+  const m=s.trim().match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if(!m) return null;
+  return new Date(+m[1],+m[2]-1,+m[3]);
+}
+
+function buildDailyTotals(rows){
+  // rows[0] 是表头；从 rows[1] 开始找日期
+  // 回传 Map: "YYYY-MM-DD" -> 当日总回复量（三班加总）
+  const totals=new Map();
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];if(!r||!r.length)continue;
+    // 早班 A=0, B-F=1..5
+    const d1=parseSheetDate(r[0]);
+    if(d1){
+      const key=d1.toISOString().slice(0,10);
+      let sum=totals.get(key)||0;
+      for(let c=1;c<=5;c++){const v=parseFloat(r[c]);if(!isNaN(v))sum+=v}
+      totals.set(key,sum);
+    }
+    // 中班 G=6, H-L=7..11
+    const d2=parseSheetDate(r[6]);
+    if(d2){
+      const key=d2.toISOString().slice(0,10);
+      let sum=totals.get(key)||0;
+      for(let c=7;c<=11;c++){const v=parseFloat(r[c]);if(!isNaN(v))sum+=v}
+      totals.set(key,sum);
+    }
+    // 夜班 M=12, N-T=13..19
+    const d3=parseSheetDate(r[12]);
+    if(d3){
+      const key=d3.toISOString().slice(0,10);
+      let sum=totals.get(key)||0;
+      for(let c=13;c<=19;c++){const v=parseFloat(r[c]);if(!isNaN(v))sum+=v}
+      totals.set(key,sum);
+    }
+  }
+  return totals;
+}
+
+function last14Days(){
+  // 回传最近 14 天的日期（含今天），从旧到新
+  const arr=[],today=new Date();today.setHours(0,0,0,0);
+  for(let i=13;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);arr.push(d)}
+  return arr;
+}
+
+async function syncTrendFromSheet(){
+  const btn=document.getElementById('sync-trend-btn');
+  const timeEl=document.getElementById('sync-trend-time');
+  const ph=document.getElementById('chart-trend-placeholder');
+  if(!btn)return;
+  btn.classList.remove('success','error');
+  btn.classList.add('syncing');btn.disabled=true;
+  const label=btn.querySelector('.sync-label');const oldLabel=label.textContent;label.textContent='同步中';
+  try{
+    const res=await fetch(SHEET_CSV_URL,{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const rows=parseCSV(text);
+    const totals=buildDailyTotals(rows);
+    const days=last14Days();
+    const newLabels=days.map(d=>`${d.getMonth()+1}/${d.getDate()}`);
+    const newData=days.map(d=>{const k=d.toISOString().slice(0,10);return totals.get(k)||0});
+    // 更新底层数组，让 interval 小波动继续运作
+    for(let i=0;i<14;i++){DAYS_14[i]=newLabels[i];DAILY_IN[i]=newData[i];DAILY_RE[i]=newData[i]}
+    trendChart.data.labels=newLabels;
+    trendChart.data.datasets[0].data=[...newData];
+    trendChart.update();
+    if(ph)ph.style.display='none';
+    btn.classList.remove('syncing');btn.classList.add('success');
+    label.textContent='已同步';
+    const now=new Date();
+    const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
+    if(timeEl)timeEl.textContent='最后同步 '+hh+':'+mm;
+    setTimeout(()=>{btn.classList.remove('success');label.textContent=oldLabel},2000);
+  }catch(err){
+    console.error('[SYS-01 sync]',err);
+    btn.classList.remove('syncing');btn.classList.add('error');
+    label.textContent='同步失败';
+    if(timeEl)timeEl.textContent='错误：'+(err.message||'未知');
+    setTimeout(()=>{btn.classList.remove('error');label.textContent=oldLabel},3000);
+  }finally{btn.disabled=false}
+}
+document.getElementById('sync-trend-btn')?.addEventListener('click',syncTrendFromSheet);
 
 // Crystal Matrix — 粒子系统 v2.0
 (function(){
@@ -6434,7 +6558,7 @@ renderMarquee();
       ['4/13-14','早班',0],['4/13-14','中班',0],['4/13-14','夜班',0],['4/13-14','合计',0]
     ],
     dailyTrend:{
-      title:'每日进线量 vs 实际回复单量（近 14 天）',
+      title:'每日回复量（近 14 天）',
       rows:[],
       placeholderText:'逐日数据待补'
     }
@@ -6529,7 +6653,7 @@ renderMarquee();
   var secMap=[
     {sel:'.hero-counter',panel:'summary',label:'编辑',title:'编辑：顶部主标题'},
     {sel:'.kpi-row',panel:'kpi',label:'编辑',title:'编辑：KPI 六卡'},
-    {sel:'[data-module="SYS-01"]',panel:'chart',label:'编辑',title:'编辑：每日进线量 vs 实际回复量',parent:true},
+    {sel:'[data-module="SYS-01"]',panel:'chart',label:'编辑',title:'编辑：每日回复量',parent:true},
     {sel:'[data-module="SYS-02"]',panel:'shift',label:'编辑',title:'编辑：各班别回复量',parent:true},
     {sel:'[data-module="SYS-03"]',panel:'stage',label:'编辑',title:'编辑：阶段回复量统计',parent:true},
     {sel:'[data-module="SYS-04"]',panel:'ops',label:'编辑',title:'编辑：营运数据总览',parent:true},
