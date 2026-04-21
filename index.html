@@ -555,7 +555,7 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 /* ══════════════════════════════════════
    2. KPI Cards — unified rhythm
    ══════════════════════════════════════ */
-.kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+.kpi-row { display:grid; grid-template-columns:repeat(5,1fr) auto; gap:10px; align-items:stretch; }
 .kpi-card {
   background:linear-gradient(135deg,rgba(0,120,255,0.05) 0%,transparent 50%,rgba(148,102,255,0.03) 100%),rgba(6,12,28,0.97);
   border:1px solid var(--border-mech); border-radius:4px;
@@ -565,6 +565,35 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
   clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
   display:flex; flex-direction:column; justify-content:center;
 }
+/* KPI 可编辑卡：hover 显示 ✏️ 暗示 */
+.kpi-card.editable .kpi-value { cursor:pointer; position:relative; padding-right:20px; }
+.kpi-card.editable .kpi-value::after {
+  content:'\270E'; position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  font-size:13px; color:var(--text-dim); opacity:0; transition:opacity .2s;
+  font-family:var(--font-body); text-shadow:none;
+}
+.kpi-card.editable:hover .kpi-value::after { opacity:0.75; }
+.kpi-edit-input {
+  font-family:var(--font-display); font-size:32px; font-weight:900;
+  color:inherit; background:rgba(0,20,40,0.55); border:1px solid rgba(0,240,255,0.55);
+  border-radius:2px; padding:0 6px; width:100%; height:40px; line-height:1;
+  outline:none; box-shadow:inset 0 0 8px rgba(0,240,255,0.15),0 0 10px rgba(0,200,255,0.2);
+  text-shadow:inherit;
+}
+.kpi-edit-input:focus { border-color:var(--accent-cyan); box-shadow:inset 0 0 10px rgba(0,240,255,0.25),0 0 14px rgba(0,200,255,0.35); }
+/* KPI 总同步按钮 cell：按钮 + 时间戳垂直排列 */
+.kpi-sync-cell {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; padding:0 14px; min-width:120px;
+}
+.kpi-sync-cell .sync-last { text-align:center; }
+.sync-btn.kpi-sync-btn { padding:8px 16px; font-size:13px; letter-spacing:1.8px; }
+/* 顶部同步状态文字（取代 UPDATED REALTIME） */
+.hero-sync-note { font-size:12px; color:var(--text-dim); font-family:var(--font-display); letter-spacing:1px; transition:color .3s,text-shadow .3s; }
+.hero-sync-note.blink { color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.4); animation:hero-sync-blink 1.4s ease-in-out infinite; }
+.hero-sync-note.ok { color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.4); animation:none; }
+.hero-sync-note.err { color:var(--accent-red); text-shadow:0 0 5px rgba(255,68,102,0.4); animation:none; }
+@keyframes hero-sync-blink { 0%,100% { opacity:0.45; } 50% { opacity:1; } }
 .kpi-card:hover { border-color:rgba(0,240,255,0.55); box-shadow:0 5px 20px var(--glow-med),0 1px 40px var(--glow-soft),inset 0 -16px 35px rgba(0,200,255,0.035); transform:translateY(-2px); }
 .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent-cyan),var(--accent-purple),transparent); opacity:0.7; }
 .kpi-card::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,200,255,0.03),transparent); animation:cardSweep 8s ease-in-out infinite; pointer-events:none; }
@@ -3506,15 +3535,15 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
     <div class="hero-sweep"></div>
     <div class="hero-counter-info"><div class="hero-counter-title">本月回复总量</div><div class="hero-counter-sub">MTD / MONTHLY TOTAL</div></div>
     <div class="hero-counter-digits" id="flip-digits"></div>
-    <div class="hero-counter-meta"><div class="trend-note">UPDATED REALTIME</div><div class="dl-btns"><button class="dl-btn" id="dl-csv"><span class="dl-btn-icon">&#9660;</span> 下载 CSV</button><button class="dl-btn" id="dl-xlsx"><span class="dl-btn-icon">&#9660;</span> 下载 Excel</button></div></div>
+    <div class="hero-counter-meta"><div class="trend-note hero-sync-note blink" id="hero-sync-note">更新中…</div><div class="dl-btns"><button class="dl-btn" id="dl-csv"><span class="dl-btn-icon">&#9660;</span> 下载 CSV</button><button class="dl-btn" id="dl-xlsx"><span class="dl-btn-icon">&#9660;</span> 下载 Excel</button></div></div>
   </section>
   <section class="kpi-row">
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">客服总人数</div><div class="kpi-value cyan">28</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange">532</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange">88,300</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan">70,080</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">总回复量</div><div class="kpi-value cyan">25,894</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan">2,127</div></div>
+    <div class="kpi-card editable" data-lskey="kpi_complaint_count" title="点击编辑"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange" id="kpi-complaint-count">0</div></div>
+    <div class="kpi-card editable" data-lskey="kpi_complaint_amount" title="点击编辑"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange" id="kpi-complaint-amount">0</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan" id="kpi-weekly-inbound">0</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan" id="kpi-product-report">0</div></div>
+    <div class="kpi-sync-cell"><span class="sync-last" id="kpi-sync-last">尚未同步</span><button type="button" class="sync-btn kpi-sync-btn" id="kpi-sync-btn" data-state="idle" title="从 Google Sheets 同步所有 KPI 与顶部总量"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">总同步</span></button></div>
   </section>
   <section class="charts-row">
     <div class="panel"><div class="panel-title" data-module="SYS-01"><span class="pt-text">每日回复量（近 14 天）</span><div class="sync-ctrl"><span class="sync-last" id="sync-last">尚未同步</span><button type="button" class="sync-btn" id="sync-btn" data-state="idle" title="从 Google Sheets 同步最新资料"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">同步</span></button></div></div><div class="chart-container" style="position:relative"><canvas id="chart-trend" width="920" height="280"></canvas><div class="chart-placeholder">逐日数据待补</div></div></div>
@@ -5804,12 +5833,11 @@ function updateClock(){
 }
 setInterval(updateClock,1000);updateClock();
 // ── Flip Counter ──
-const MONTHLY_TOTAL=25894;let currentFlipValue=0;const flipContainer=document.getElementById('flip-digits');
+let currentFlipValue=0;const flipContainer=document.getElementById('flip-digits');
 function renderFlipDigits(s){flipContainer.innerHTML='';for(const ch of s){if(ch===','){const c=document.createElement('span');c.className='flip-comma';c.textContent=',';flipContainer.appendChild(c)}else{const d=document.createElement('div');d.className='flip-digit';d.innerHTML='<div class="digit-current">'+ch+'</div>';flipContainer.appendChild(d)}}}
 function fmt(n){return n.toLocaleString('en-US')}
 function flipTo(target){const ts=fmt(target),cs=fmt(currentFlipValue);if(ts.length!==cs.length||!flipContainer.children.length){renderFlipDigits(ts);currentFlipValue=target;return}let di=0;for(let i=0;i<ts.length;i++){if(ts[i]===',')continue;if((cs[i]||'0')!==ts[i]){const el=flipContainer.querySelectorAll('.flip-digit')[di];if(el){el.classList.remove('flipping');el.querySelectorAll('.digit-old').forEach(o=>o.remove());const od=document.createElement('div');od.className='digit-old';od.textContent=cs[i]||'0';el.appendChild(od);el.querySelector('.digit-current').textContent=ts[i];void el.offsetWidth;el.classList.add('flipping');setTimeout(()=>{el.classList.remove('flipping');od.remove()},500)}}di++}currentFlipValue=target}
-renderFlipDigits(fmt(0));setTimeout(()=>flipTo(MONTHLY_TOTAL),400);
-pgRegInterval('page-overview',()=>flipTo(Math.max(0,currentFlipValue+Math.floor(Math.random()*7)-2)),8000);
+renderFlipDigits(fmt(0));
 
 // ── Data ──
 const DAYS_14=['—','—','—','—','—','—','—','—','—','—','—','—','—','—'];
@@ -6382,6 +6410,199 @@ window.__syncUtils=(function(){
   btn.addEventListener('click',doSync);
 })();
 
+// ── KPI 总同步：并行拉 SYS-01 + SYS-04，更新顶部 flip / 本周总进线量 / 产品回报数量 ──
+(function(){
+  var SHEET_01='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
+  var SHEET_04='https://docs.google.com/spreadsheets/d/19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40/export?format=csv&gid=860680192';
+  var btn=document.getElementById('kpi-sync-btn');
+  var last=document.getElementById('kpi-sync-last');
+  var note=document.getElementById('hero-sync-note');
+  if(!btn||!last) return;
+  var U=window.__syncUtils; if(!U) return;
+  var btnTxt=btn.querySelector('.sync-btn-txt');
+
+  // SYS-01 三班栏位：早班 A(0)+B-F(1-5)、中班 G(6)+H-L(7-11)、夜班 M(12)+N-T(13-19)
+  var BLOCKS_01=[{date:0,start:1,end:5},{date:6,start:7,end:11},{date:12,start:13,end:19}];
+
+  function setState(state,lastMsg){
+    btn.dataset.state=state;
+    if(state==='syncing'){btnTxt.textContent='同步中';}
+    else if(state==='success'){btnTxt.textContent='已同步';setTimeout(function(){if(btn.dataset.state==='success'){btn.dataset.state='idle';btnTxt.textContent='总同步';}},2200);}
+    else if(state==='error'){btnTxt.textContent='同步失败';setTimeout(function(){if(btn.dataset.state==='error'){btn.dataset.state='idle';btnTxt.textContent='总同步';}},3500);}
+    else {btnTxt.textContent='总同步';}
+    if(lastMsg!==undefined){
+      last.textContent=lastMsg;
+      last.classList.remove('ok','err');
+      if(state==='success') last.classList.add('ok');
+      else if(state==='error') last.classList.add('err');
+    }
+  }
+
+  function setNote(text,cls){
+    if(!note) return;
+    note.textContent=text;
+    note.classList.remove('blink','ok','err');
+    if(cls) note.classList.add(cls);
+  }
+
+  // ISO 周：周一 00:00 ~ 今日 23:59（未来日期跳过）
+  function isoWeekRange(today){
+    var dow=today.getDay(); // 0=Sun,1=Mon,...6=Sat
+    var offset=(dow===0)?-6:(1-dow);
+    var monday=new Date(today.getFullYear(),today.getMonth(),today.getDate()+offset,0,0,0,0);
+    var cutoff=new Date(today.getFullYear(),today.getMonth(),today.getDate(),23,59,59,999);
+    return {start:monday,end:cutoff};
+  }
+
+  function aggregate01(rows){
+    var now=new Date();
+    var monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+    var cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999);
+    var week=isoWeekRange(now);
+    var monthly=0, weekly=0;
+    for(var r=1;r<rows.length;r++){
+      var row=rows[r]; if(!row||!row.length) continue;
+      for(var b=0;b<BLOCKS_01.length;b++){
+        var B=BLOCKS_01[b], d=U.parseDate(row[B.date]);
+        if(!d) continue;
+        if(d>cutoff) continue;
+        var sum=0;
+        for(var c=B.start;c<=B.end;c++) sum+=U.toNum(row[c]);
+        if(d>=monthStart) monthly+=sum;
+        if(d>=week.start && d<=week.end) weekly+=sum;
+      }
+    }
+    return {monthly:monthly,weekly:weekly};
+  }
+
+  function aggregate04(rows){
+    var now=new Date();
+    var cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999);
+    var sum=0;
+    for(var r=1;r<rows.length;r++){
+      var row=rows[r]; if(!row||!row.length) continue;
+      var d=U.parseDate(row[0]); if(!d) continue;
+      if(d>cutoff) continue;
+      sum+=U.toNum(row[2]);
+    }
+    return sum;
+  }
+
+  function fetchCsv(url){
+    return fetch(url,{cache:'no-store',redirect:'follow'}).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.text();
+    });
+  }
+
+  function applyData(monthly,weekly,productReport){
+    if(typeof flipTo==='function') flipTo(Math.round(monthly));
+    var w=document.getElementById('kpi-weekly-inbound');
+    if(w) w.textContent=Math.round(weekly).toLocaleString('en-US');
+    var p=document.getElementById('kpi-product-report');
+    if(p) p.textContent=Math.round(productReport).toLocaleString('en-US');
+    // 内存同步 dashboardData（不 save 到 localStorage，避免覆盖编辑数据）
+    if(window.dashboardData){
+      if(window.dashboardData.summary) window.dashboardData.summary.monthlyTotal=Math.round(monthly);
+      if(Array.isArray(window.dashboardData.kpis)){
+        window.dashboardData.kpis.forEach(function(k){
+          if(k.label==='本周总进线量') k.value=Math.round(weekly);
+          else if(k.label==='产品回报数量') k.value=Math.round(productReport);
+        });
+      }
+    }
+  }
+
+  function doSync(){
+    if(btn.dataset.state==='syncing') return;
+    setState('syncing','同步中…');
+    Promise.all([fetchCsv(SHEET_01),fetchCsv(SHEET_04)]).then(function(texts){
+      var a01=aggregate01(U.parseCSV(texts[0]));
+      var pr=aggregate04(U.parseCSV(texts[1]));
+      applyData(a01.monthly,a01.weekly,pr);
+      var t=U.hhmm(new Date());
+      setState('success','最后同步 '+t);
+      setNote('最后同步 '+t,'ok');
+    }).catch(function(err){
+      console.error('[KPI sync] failed:',err);
+      var t=U.hhmm(new Date());
+      setState('error','同步失败 '+t);
+      setNote('同步失败 '+t,'err');
+    });
+  }
+  btn.addEventListener('click',doSync);
+})();
+
+// ── 投诉数量 / 投诉金额：localStorage 手动 inline 编辑 ──
+(function(){
+  var COUNT_KEY='kpi_complaint_count';
+  var AMOUNT_KEY='kpi_complaint_amount';
+
+  function readNum(key){
+    try{
+      var v=localStorage.getItem(key);
+      if(v==null) return 0;
+      var n=parseFloat(String(v).replace(/[,\s]/g,''));
+      return isNaN(n)?0:n;
+    }catch(e){return 0;}
+  }
+  function writeNum(key,n){
+    try{localStorage.setItem(key,String(Math.max(0,Math.round(n||0))));}catch(e){}
+  }
+
+  function renderDisplay(card){
+    var val=card.querySelector('.kpi-value');
+    if(!val) return;
+    if(val.querySelector('.kpi-edit-input')) return; // 正在编辑不覆盖
+    var key=card.dataset.lskey;
+    var n=Math.max(0,Math.round(readNum(key)));
+    val.textContent=(key===AMOUNT_KEY)?n.toLocaleString('en-US'):String(n);
+  }
+
+  function startEdit(card){
+    var val=card.querySelector('.kpi-value');
+    if(!val||val.querySelector('.kpi-edit-input')) return;
+    var key=card.dataset.lskey;
+    var raw=Math.max(0,Math.round(readNum(key)));
+    var original=val.textContent;
+    val.textContent='';
+    var input=document.createElement('input');
+    input.type='text';
+    input.className='kpi-edit-input';
+    input.value=String(raw);
+    input.setAttribute('inputmode','numeric');
+    val.appendChild(input);
+    input.focus();
+    input.select();
+    var done=false;
+    function finish(save){
+      if(done) return; done=true;
+      if(save){
+        var n=parseFloat(String(input.value).replace(/[,\s]/g,''));
+        if(isNaN(n)) n=0;
+        writeNum(key,n);
+      }
+      renderDisplay(card);
+    }
+    input.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();finish(true);}
+      else if(e.key==='Escape'){e.preventDefault();done=true;val.textContent=original;}
+    });
+    input.addEventListener('blur',function(){finish(true);});
+  }
+
+  var cards=document.querySelectorAll('.kpi-card.editable');
+  cards.forEach(function(card){
+    renderDisplay(card);
+    var val=card.querySelector('.kpi-value');
+    if(!val) return;
+    val.addEventListener('click',function(e){e.stopPropagation();startEdit(card);});
+  });
+
+  // 暴露：让 renderDashboard() 在最后呼叫，避免被 D.kpis 覆盖
+  window.__renderComplaintKpis=function(){cards.forEach(renderDisplay);};
+})();
+
 // Crystal Matrix — 粒子系统 v2.0
 (function(){
   var sc=document.getElementById('crystal-scene');
@@ -6845,14 +7066,13 @@ renderMarquee();
   var LS_KEY='bi_dashboard_01_data_v2';
 
   var DEFAULTS={
-    summary:{monthlyTotal:25894},
+    summary:{monthlyTotal:0},
     kpis:[
       {label:'客服总人数',value:28,color:'cyan'},
-      {label:'投诉数量',value:532,color:'orange'},
-      {label:'投诉金额',value:88300,color:'orange'},
-      {label:'本周总进线量',value:70080,color:'cyan'},
-      {label:'总回复量',value:25894,color:'cyan'},
-      {label:'产品回报数量',value:2127,color:'cyan'}
+      {label:'投诉数量',value:0,color:'orange'},
+      {label:'投诉金额',value:0,color:'orange'},
+      {label:'本周总进线量',value:0,color:'cyan'},
+      {label:'产品回报数量',value:0,color:'cyan'}
     ],
     shiftReplies:{
       shifts:[
@@ -6930,6 +7150,14 @@ renderMarquee();
     if(loaded.dailyTrend && /进线量/.test(loaded.dailyTrend.title||'')){
       loaded.dailyTrend.title=DEFAULTS.dailyTrend.title;
     }
+    // 迁移：旧版 6 项 KPI → 新版 5 项（移除「总回复量」）
+    if(!Array.isArray(loaded.kpis)||loaded.kpis.length!==5){
+      loaded.kpis=deepClone(DEFAULTS.kpis);
+    }
+    // 迁移：旧版硬编码 monthlyTotal=25894 → 0（等待同步）
+    if(loaded.summary && loaded.summary.monthlyTotal===25894){
+      loaded.summary.monthlyTotal=0;
+    }
     window.dashboardData=loaded;
   } else {
     window.dashboardData=deepClone(DEFAULTS);
@@ -6997,6 +7225,8 @@ renderMarquee();
       var titleEl=document.querySelector('[data-module="SYS-01"] .pt-text');
       if(titleEl) titleEl.textContent=dt.title;
     }
+    // 8. 投诉 KPI 改由 localStorage 主导（覆盖上方 D.kpis 写入）
+    if(typeof window.__renderComplaintKpis==='function') window.__renderComplaintKpis();
   }
 
   // 初始化渲染
@@ -7005,7 +7235,7 @@ renderMarquee();
   // ── 区块编辑按钮 ──
   var secMap=[
     {sel:'.hero-counter',panel:'summary',label:'编辑',title:'编辑：顶部主标题'},
-    {sel:'.kpi-row',panel:'kpi',label:'编辑',title:'编辑：KPI 六卡'},
+    {sel:'.kpi-row',panel:'kpi',label:'编辑',title:'编辑：KPI 五卡'},
     {sel:'[data-module="SYS-01"]',panel:'chart',label:'编辑',title:'编辑：每日回复量',parent:true},
     {sel:'[data-module="SYS-02"]',panel:'shift',label:'编辑',title:'编辑：各班别回复量',parent:true},
     {sel:'[data-module="SYS-03"]',panel:'stage',label:'编辑',title:'编辑：阶段回复量统计',parent:true},
@@ -7089,7 +7319,7 @@ renderMarquee();
       h+='</div>';
 
     } else if(currentPanel==='kpi'){
-      h+='<div class="de-group"><div class="de-group-title">KPI 六卡</div>';
+      h+='<div class="de-group"><div class="de-group-title">KPI 五卡</div>';
       D.kpis.forEach(function(k,i){
         h+='<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,195,255,0.05)">';
         h+=row('卡片'+(i+1)+' 名称',inp('de-kpi-n-'+i,k.label));
