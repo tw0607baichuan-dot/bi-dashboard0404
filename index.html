@@ -2664,6 +2664,8 @@ select.cyber-input {
 .pl-item-btn.btn-undo { color:var(--accent-orange); border-color:rgba(255,128,64,0.25); }
 .pl-item-btn.btn-undo:hover { background:rgba(255,128,64,0.1); border-color:rgba(255,128,64,0.5); box-shadow:0 0 14px rgba(255,128,64,0.2); }
 .pl-item-time { font-family:var(--font-display); font-size:13px; color:var(--accent-green); letter-spacing:0.5px; text-shadow:0 0 4px rgba(0,255,136,0.4); font-weight:600; }
+.pl-item-check { color:var(--accent-green); font-size:18px; font-weight:900; text-shadow:0 0 6px rgba(0,255,136,0.6); width:20px; text-align:center; flex-shrink:0; }
+.pl-item-status { margin-left:auto; font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:1.5px; color:var(--accent-green); padding:4px 12px; border:1px solid rgba(0,255,136,0.35); border-radius:2px; background:rgba(0,255,136,0.06); text-shadow:0 0 4px rgba(0,255,136,0.5); white-space:nowrap; }
 
 /* Tab switcher */
 .pl-tabs { display:flex; gap:4px; margin-bottom:8px; }
@@ -9258,22 +9260,29 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
 // ── Product Module — productMasterList + productDailyStatus ──
 (function(){
   var plDone=false;
-  var LS_MASTER='product_master_list';
-  var LS_DAILY='product_daily_status';
+  var LS_MASTER='product_master_list_v2';
+  var LS_DAILY='product_daily_status_v2';
   var _nextId=1;
 
-  // ── 默认产品数组（代码内建，GitHub Pages 首次打开即有资料） ──
+  // ── 默认产品数组（临时写死 68 项，2026-04-20 batch；月底改 Apps Script 自动同步） ──
   var DEFAULT_DAILY_CHECK_PRODUCTS=[
-    {id:1, name:'悦达 APP (Android)',   category:'APP',  mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'悦达品牌 Android 客户端'},
-    {id:2, name:'悦达 APP (iOS)',       category:'APP',  mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'悦达品牌 iOS 客户端'},
-    {id:3, name:'悦达 H5',             category:'H5',   mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'悦达品牌 H5 移动端页面'},
-    {id:4, name:'悦达后台',            category:'后台', mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'悦达品牌管理后台'},
-    {id:5, name:'鼎丰 APP (Android)',   category:'APP',  mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'鼎丰品牌 Android 客户端'},
-    {id:6, name:'鼎丰 APP (iOS)',       category:'APP',  mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'鼎丰品牌 iOS 客户端'},
-    {id:7, name:'鼎丰 H5',             category:'H5',   mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'鼎丰品牌 H5 移动端页面'},
-    {id:8, name:'鼎丰后台',            category:'后台', mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'鼎丰品牌管理后台'},
-    {id:9, name:'客服工单系统',        category:'系统', mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'内部客服工单管理系统'},
-    {id:10,name:'BI 数据看板',         category:'系统', mainUrl:'', backupUrl:'', h5Url:'', adminUrl:'', note:'CS-CMD-BI 数据看板系统'}
+    {id:1,name:'草榴社区'},{id:2,name:'91短视频'},{id:3,name:'91av'},{id:4,name:'91PORN'},
+    {id:5,name:'twitterap'},{id:6,name:'TikTok'},{id:7,name:'制片厂'},{id:8,name:'91抖音破解'},
+    {id:9,name:'黄色仓库'},{id:10,name:'51成人破解'},{id:11,name:'91鬼父'},{id:12,name:'小蓝'},
+    {id:13,name:'GTV'},{id:14,name:'GILIGILI'},{id:15,name:'搜同'},{id:16,name:'51动漫'},
+    {id:17,name:'51萝莉'},{id:18,name:'禁漫天堂'},{id:19,name:'51看片'},{id:20,name:'51av破解'},
+    {id:21,name:'小黄书'},{id:22,name:'逼哩逼哩'},{id:23,name:'懂色帝'},{id:24,name:'海角社区'},
+    {id:25,name:'海角网页版本'},{id:26,name:'暗网禁区'},{id:27,name:'妻友'},{id:28,name:'91暗网'},
+    {id:29,name:'91九色视频'},{id:30,name:'外网天堂'},{id:31,name:'推特射区'},{id:32,name:'Xvideo免费版'},
+    {id:33,name:'51糖心破解'},{id:34,name:'陌陌'},{id:35,name:'汤头条'},{id:36,name:'50度灰'},
+    {id:37,name:'91视频'},{id:38,name:'ai色色'},{id:39,name:'黑料社'},{id:40,name:'51短视频'},
+    {id:41,name:'VPN'},{id:42,name:'盒子-pornhub'},{id:43,name:'欲漫涩'},{id:44,name:'51快播'},
+    {id:45,name:'盒子-51快手破解'},{id:46,name:'91成人免费版'},{id:47,name:'茶馆'},{id:48,name:'滴滴'},
+    {id:49,name:'pilipili'},{id:50,name:'PornHub'},{id:51,name:'成人快手'},{id:52,name:'微性'},
+    {id:53,name:'51TikTok破解'},{id:54,name:'盒子-潘朵拉'},{id:55,name:'绿帽社'},{id:56,name:'妹团'},
+    {id:57,name:'撸先生'},{id:58,name:'果冻'},{id:59,name:'youtube'},{id:60,name:'soul'},
+    {id:61,name:'好色先生'},{id:62,name:'海角社区b'},{id:63,name:'萝莉岛gb'},{id:64,name:'水果派'},
+    {id:65,name:'不良少女'},{id:66,name:'成人DeepSeek'},{id:67,name:'17精选'},{id:68,name:'xvideo'}
   ];
 
   function loadJSON(key){try{var s=localStorage.getItem(key);return s?JSON.parse(s):null}catch(e){return null}}
@@ -9295,6 +9304,14 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
   // 确保 nextId
   productMasterList.forEach(function(p){if(p.id>=_nextId)_nextId=p.id+1});
 
+  // 临时写死：今日无状态时，自动 seed 全部已检（月底 Apps Script 接 sheet 后移除）
+  if(productDailyStatus.length===0){
+    productMasterList.forEach(function(p){
+      productDailyStatus.push({productId:p.id,checked:true,date:td,time:'09:00'});
+    });
+    saveJSON(LS_DAILY,productDailyStatus);
+  }
+
   function saveMaster(){saveJSON(LS_MASTER,productMasterList)}
   function saveDaily(){saveJSON(LS_DAILY,productDailyStatus)}
 
@@ -9314,14 +9331,15 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
   // ── 每日检测 ──
   function renderInspectItem(p){
     var checked=isChecked(p.id);
-    var s=getStatus(p.id);
     var html='<div class="pl-item" data-id="'+p.id+'">';
-    html+='<span class="pl-item-name">'+p.name+'</span>';
-    html+='<span class="pl-item-cat">'+(p.category||'APP')+'</span>';
     if(checked){
-      html+='<span class="pl-item-time">'+(s?s.time:'')+'</span>';
-      html+='<button class="pl-item-btn btn-undo">撤回</button>';
+      // 临时写死版：✓ + 产品名 + 正常 tag（撤回按钮代码保留但不渲染）
+      html+='<span class="pl-item-check">&#x2713;</span>';
+      html+='<span class="pl-item-name">'+p.name+'</span>';
+      html+='<span class="pl-item-status">正常</span>';
     } else {
+      html+='<span class="pl-item-name">'+p.name+'</span>';
+      html+='<span class="pl-item-cat">'+(p.category||'APP')+'</span>';
       html+='<button class="pl-item-btn btn-check">标记已检</button>';
     }
     html+='</div>';
@@ -9334,7 +9352,7 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
       if(isChecked(p.id)){ckHtml+=renderInspectItem(p);ckN++}
       else{ucHtml+=renderInspectItem(p);ucN++}
     });
-    document.getElementById('pl-uc-list').innerHTML=ucHtml||'<div style="padding:16px;color:var(--text-dim);text-align:center;font-size:12px">全部已检测</div>';
+    document.getElementById('pl-uc-list').innerHTML=ucHtml||'<div style="padding:32px 16px;color:var(--accent-green);text-align:center;font-size:14px;letter-spacing:1px;text-shadow:0 0 6px rgba(0,255,136,0.4)">&#x2713; 目前无异常</div>';
     document.getElementById('pl-ck-list').innerHTML=ckHtml||'<div style="padding:16px;color:var(--text-dim);text-align:center;font-size:12px">尚无已检测项目</div>';
     document.getElementById('pl-uc-count').textContent=ucN+' 项';
     document.getElementById('pl-ck-count').textContent=ckN+' 项';
