@@ -5830,8 +5830,8 @@ const DAILY_RE=[0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 const SHIFT={labels:['早班 (07-15)','中班 (15-23)','夜班 (23-07)'],values:[7248,11413,7233],colors:['#00f0ff','#0074ff','#9466ff']};
 const WEEKLY={labels:['4/1-7','4/8-14','4/15-21','4/22-28'],values:[0,0,0,0],states:['normal','normal','normal','normal']};
 const OPS={labels:['移转会员','恢复会员','封禁或禁言','升级会员','退预约金'],values:[531,380,175,139,131]};
-const GOOD_NEWS=[{time:'—',text:'本月回复总量 25,894'},{time:'—',text:'本周总进线量 70,080'},{time:'—',text:'产品回报数量 2,127'},{time:'—',text:'中班回复量最高，累计 11,413'},{time:'—',text:'阶段回复量 4/6\u201312 达 11,611'}];
-const BAD_NEWS=[{time:'—',level:'warning',text:'投诉数量 390'},{time:'—',level:'warning',text:'投诉金额 69,710'},{time:'—',level:'warning',text:'4/13\u201314 阶段数据暂缺，当前显示 0'},{time:'—',level:'warning',text:'营运分类处理中，移转会员 531 为当前最高项'},{time:'—',level:'warning',text:'如后续补齐逐日数据，请同步更新图表区'}];
+const GOOD_NEWS=[{time:'—',text:'等待同步中…'}];
+const BAD_NEWS=[{time:'—',level:'warning',text:'等待同步中…'}];
 
 // ── Chart config ──
 const GRID='rgba(0,160,255,0.035)';
@@ -6022,7 +6022,7 @@ window.__syncUtils=(function(){
     else {btnTxt.textContent='同步';}
     if(lastMsg!==undefined){
       last.textContent=lastMsg;
-      last.classList.remove('ok','err');
+      last.classList.remove('err');
       if(state==='success') last.classList.add('ok');
       else if(state==='error') last.classList.add('err');
     }
@@ -6124,6 +6124,7 @@ window.__syncUtils=(function(){
       if(!list.length) throw new Error('无有效日期资料');
       applyData(list);
       setState('success','最后同步 '+hhmm(new Date()));
+      if(typeof renderMarquees==="function") renderMarquees();
     }).catch(function(err){
       console.error('[SYS-01 sync] failed:',err);
       setState('error','同步失败 '+hhmm(new Date()));
@@ -6149,7 +6150,7 @@ window.__syncUtils=(function(){
     else {btnTxt.textContent='同步';}
     if(lastMsg!==undefined){
       last.textContent=lastMsg;
-      last.classList.remove('ok','err');
+      last.classList.remove('err');
       if(state==='success') last.classList.add('ok');
       else if(state==='error') last.classList.add('err');
     }
@@ -6204,6 +6205,7 @@ window.__syncUtils=(function(){
       if(sums[0]+sums[1]+sums[2]===0) throw new Error('本月无有效资料');
       applyData(sums);
       setState('success','最后同步 '+U.hhmm(new Date()));
+      if(typeof renderMarquees==="function") renderMarquees();
     }).catch(function(err){
       console.error('[SYS-02 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
@@ -6229,7 +6231,7 @@ window.__syncUtils=(function(){
     else {btnTxt.textContent='同步';}
     if(lastMsg!==undefined){
       last.textContent=lastMsg;
-      last.classList.remove('ok','err');
+      last.classList.remove('err');
       if(state==='success') last.classList.add('ok');
       else if(state==='error') last.classList.add('err');
     }
@@ -6293,6 +6295,7 @@ window.__syncUtils=(function(){
       aggregate(rows,weeks);
       applyData(weeks);
       setState('success','最后同步 '+U.hhmm(new Date()));
+      if(typeof renderMarquees==="function") renderMarquees();
     }).catch(function(err){
       console.error('[SYS-03 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
@@ -6332,7 +6335,7 @@ window.__syncUtils=(function(){
     else {btnTxt.textContent='同步';}
     if(lastMsg!==undefined){
       last.textContent=lastMsg;
-      last.classList.remove('ok','err');
+      last.classList.remove('err');
       if(state==='success') last.classList.add('ok');
       else if(state==='error') last.classList.add('err');
     }
@@ -6386,6 +6389,7 @@ window.__syncUtils=(function(){
       var totals=aggregate(rows);
       applyData(totals);
       setState('success','最后同步 '+U.hhmm(new Date()));
+      if(typeof renderMarquees==="function") renderMarquees();
     }).catch(function(err){
       console.error('[SYS-04 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
@@ -6416,7 +6420,7 @@ window.__syncUtils=(function(){
     else {btnTxt.textContent='总同步';}
     if(lastMsg!==undefined){
       last.textContent=lastMsg;
-      last.classList.remove('ok','err');
+      last.classList.remove('err');
       if(state==='success') last.classList.add('ok');
       else if(state==='error') last.classList.add('err');
     }
@@ -6506,6 +6510,7 @@ window.__syncUtils=(function(){
       applyData(a01.monthly,a01.weekly,pr);
       var t=U.hhmm(new Date());
       setState('success','最后同步 '+t);
+      if(typeof renderMarquees==="function") renderMarquees();
       setNote('最后同步 '+t,'ok');
     }).catch(function(err){
       console.error('[KPI sync] failed:',err);
@@ -6971,7 +6976,79 @@ function renderMarquee(){
   gT.innerHTML=gData.map(function(g){return '<div class="marquee-item"><span class="m-time">'+(g.time||'\u2014')+'</span><span class="m-text">'+g.text+'</span></div>'}).join('').repeat(2);
   bT.innerHTML=bData.map(function(b){return '<div class="marquee-item"><span class="m-time">'+(b.time||'\u2014')+'</span><span class="m-text '+(b.level||'')+'">'+b.text+'</span></div>'}).join('').repeat(2);
 }
-renderMarquee();
+// ── Marquee 动态构建（根据当前资料状态产生） ──
+function buildMarqueeData(){
+  var syncedCount=document.querySelectorAll('.sync-last.ok').length;
+  var placeholderGood=[{time:'—',text:'等待同步中…'}];
+  var placeholderBad=[{time:'—',level:'warning',text:'等待同步中…'}];
+  if(syncedCount===0) return {good:placeholderGood,bad:placeholderBad};
+
+  function fmt(n){return Number(n).toLocaleString('en-US')}
+  function readNum(el){if(!el)return 0;var n=parseFloat(String(el.textContent).replace(/[,\s]/g,''));return isNaN(n)?0:n}
+
+  var monthlyTotal=(typeof currentFlipValue==='number')?currentFlipValue:0;
+  var weeklyInbound=readNum(document.getElementById('kpi-weekly-inbound'));
+  var productReport=readNum(document.getElementById('kpi-product-report'));
+
+  var shiftBlocks=document.querySelectorAll('.cr-block');
+  var maxShiftName='',maxShiftValue=0;
+  shiftBlocks.forEach(function(blk){
+    var lbl=blk.querySelector('.cr-lbl'),val=blk.querySelector('.cr-val');
+    if(!lbl||!val)return;
+    var v=parseFloat(String(val.textContent).replace(/[,\s]/g,''));
+    if(isNaN(v))return;
+    if(v>maxShiftValue){maxShiftValue=v;maxShiftName=lbl.textContent.trim()}
+  });
+
+  var maxWeekLabel='',maxWeekValue=0,futureWeekCount=0;
+  if(typeof WEEKLY==='object'&&WEEKLY&&Array.isArray(WEEKLY.values)){
+    for(var i=0;i<WEEKLY.values.length;i++){
+      var st=WEEKLY.states&&WEEKLY.states[i];
+      if(st==='future'){futureWeekCount++;continue}
+      if(WEEKLY.values[i]>maxWeekValue){maxWeekValue=WEEKLY.values[i];maxWeekLabel=WEEKLY.labels[i]||''}
+    }
+  }
+
+  var topOpsName='',topOpsValue=0;
+  if(typeof OPS==='object'&&OPS&&Array.isArray(OPS.values)){
+    for(var j=0;j<OPS.values.length;j++){
+      if(OPS.values[j]>topOpsValue){topOpsValue=OPS.values[j];topOpsName=OPS.labels[j]||''}
+    }
+  }
+
+  var kpiCards=document.querySelectorAll('.kpi-row .kpi-card');
+  var complaintCount=kpiCards[1]?readNum(kpiCards[1].querySelector('.kpi-value')):0;
+  var complaintAmount=kpiCards[2]?readNum(kpiCards[2].querySelector('.kpi-value')):0;
+
+  var good=[];
+  if(monthlyTotal>0) good.push({time:'—',text:'✦ 本月回复总量 '+fmt(monthlyTotal)});
+  if(weeklyInbound>0) good.push({time:'—',text:'✦ 本周进线 '+fmt(weeklyInbound)});
+  if(productReport>0) good.push({time:'—',text:'✦ 产品回报 '+fmt(productReport)+' 件'});
+  if(maxShiftValue>0) good.push({time:'—',text:'✦ '+maxShiftName+' 表现最佳 · 累计 '+fmt(maxShiftValue)});
+  if(maxWeekValue>0) good.push({time:'—',text:'✦ 本月最高周 '+maxWeekLabel+' 达 '+fmt(maxWeekValue)});
+  good=good.slice(0,5);
+  if(!good.length) good=placeholderGood;
+
+  var bad=[];
+  if(complaintCount>0) bad.push({time:'—',level:'warning',text:'⚠ 投诉数量 '+fmt(complaintCount)+' 件'});
+  if(complaintAmount>0) bad.push({time:'—',level:'warning',text:'⚠ 投诉金额 NT$'+fmt(complaintAmount)});
+  if(topOpsValue>0) bad.push({time:'—',level:'warning',text:'⚠ 最高营运类别：'+topOpsName+' '+fmt(topOpsValue)+' 笔'});
+  if(futureWeekCount>0) bad.push({time:'—',level:'warning',text:'⚠ 本月第 '+futureWeekCount+' 周尚未开始'});
+  bad.push({time:'—',level:'warning',text:'⚠ 全站同步状态：'+syncedCount+'/5 已更新'});
+  bad=bad.slice(0,5);
+  if(!bad.length) bad=placeholderBad;
+
+  return {good:good,bad:bad};
+}
+
+function renderMarquees(){
+  var gT=document.getElementById('marquee-good'),bT=document.getElementById('marquee-bad');
+  if(!gT||!bT)return;
+  var md=buildMarqueeData();
+  gT.innerHTML=md.good.map(function(g){return '<div class="marquee-item"><span class="m-time">'+(g.time||'—')+'</span><span class="m-text">'+g.text+'</span></div>'}).join('').repeat(2);
+  bT.innerHTML=md.bad.map(function(b){return '<div class="marquee-item"><span class="m-time">'+(b.time||'—')+'</span><span class="m-text '+(b.level||'')+'">'+b.text+'</span></div>'}).join('').repeat(2);
+}
+renderMarquees();
 
 // ═══════════════════════════════════════════
 // 01 数据编辑系统 v2 — 右侧抽屉 + 区块独立编辑
