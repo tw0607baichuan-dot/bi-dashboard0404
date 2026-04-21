@@ -3523,8 +3523,8 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
   </section>
   <section class="kpi-row">
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">客服总人数</div><div class="kpi-value cyan">28</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange">532</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange">88,300</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange">390</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange">69,710</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan" id="kpi-weekly-inbound">0</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan" id="kpi-product-report">0</div></div>
     <div class="kpi-sync-cell"><span class="sync-last" id="kpi-sync-last">尚未同步</span><button type="button" class="sync-btn kpi-sync-btn" id="kpi-sync-btn" data-state="idle" title="从 Google Sheets 同步所有 KPI 与顶部总量"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">总同步</span></button></div>
@@ -5831,7 +5831,7 @@ const SHIFT={labels:['早班 (07-15)','中班 (15-23)','夜班 (23-07)'],values:
 const WEEKLY={labels:['4/1-7','4/8-14','4/15-21','4/22-28'],values:[0,0,0,0],states:['normal','normal','normal','normal']};
 const OPS={labels:['移转会员','恢复会员','封禁或禁言','升级会员','退预约金'],values:[531,380,175,139,131]};
 const GOOD_NEWS=[{time:'—',text:'本月回复总量 25,894'},{time:'—',text:'本周总进线量 70,080'},{time:'—',text:'产品回报数量 2,127'},{time:'—',text:'中班回复量最高，累计 11,413'},{time:'—',text:'阶段回复量 4/6\u201312 达 11,611'}];
-const BAD_NEWS=[{time:'—',level:'warning',text:'投诉数量 532'},{time:'—',level:'warning',text:'投诉金额 88,300'},{time:'—',level:'warning',text:'4/13\u201314 阶段数据暂缺，当前显示 0'},{time:'—',level:'warning',text:'营运分类处理中，移转会员 531 为当前最高项'},{time:'—',level:'warning',text:'如后续补齐逐日数据，请同步更新图表区'}];
+const BAD_NEWS=[{time:'—',level:'warning',text:'投诉数量 390'},{time:'—',level:'warning',text:'投诉金额 69,710'},{time:'—',level:'warning',text:'4/13\u201314 阶段数据暂缺，当前显示 0'},{time:'—',level:'warning',text:'营运分类处理中，移转会员 531 为当前最高项'},{time:'—',level:'warning',text:'如后续补齐逐日数据，请同步更新图表区'}];
 
 // ── Chart config ──
 const GRID='rgba(0,160,255,0.035)';
@@ -6983,8 +6983,8 @@ renderMarquee();
     summary:{monthlyTotal:0},
     kpis:[
       {label:'客服总人数',value:28,color:'cyan'},
-      {label:'投诉数量',value:532,color:'orange'},
-      {label:'投诉金额',value:88300,color:'orange'},
+      {label:'投诉数量',value:390,color:'orange'},
+      {label:'投诉金额',value:69710,color:'orange'},
       {label:'本周总进线量',value:0,color:'cyan'},
       {label:'产品回报数量',value:0,color:'cyan'}
     ],
@@ -7018,8 +7018,8 @@ renderMarquee();
         {time:'\u2014',text:'阶段回复量 4/6\u201312 达 11,611'}
       ],
       alert:[
-        {time:'\u2014',level:'warning',text:'投诉数量 532'},
-        {time:'\u2014',level:'warning',text:'投诉金额 88,300'},
+        {time:'\u2014',level:'warning',text:'投诉数量 390'},
+        {time:'\u2014',level:'warning',text:'投诉金额 69,710'},
         {time:'\u2014',level:'warning',text:'4/13\u201314 阶段数据暂缺，当前显示 0'},
         {time:'\u2014',level:'warning',text:'营运分类处理中，移转会员 531 为当前最高项'},
         {time:'\u2014',level:'warning',text:'如后续补齐逐日数据，请同步更新图表区'}
