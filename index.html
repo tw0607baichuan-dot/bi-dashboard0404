@@ -697,6 +697,24 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .panel-title::before { content:''; width:3px; height:14px; background:linear-gradient(180deg,var(--accent-cyan),var(--accent-purple)); border-radius:2px; box-shadow:0 0 6px rgba(0,240,255,0.5); }
 .panel-title::after { content:attr(data-module); color:var(--accent-purple); opacity:0.6; font-size:12px; margin-left:auto; font-family:var(--font-display); letter-spacing:1.5px; border:1px solid rgba(148,102,255,0.25); padding:2px 8px; border-radius:2px; }
 
+/* SYS-01 sync control — cyber cyan */
+.panel-title .sync-ctrl { margin-left:auto; display:inline-flex; align-items:center; gap:10px; font-family:var(--font-display); text-transform:none; letter-spacing:0; }
+.panel-title[data-module="SYS-01"]::after { margin-left:10px; }
+.sync-last { font-size:11px; letter-spacing:1.2px; color:var(--text-dim); text-transform:uppercase; line-height:1; font-family:var(--font-display); text-shadow:0 0 4px rgba(0,180,255,0.2); transition:color .2s,text-shadow .2s; }
+.sync-last.ok { color:var(--accent-cyan); text-shadow:0 0 6px rgba(0,240,255,0.45); }
+.sync-last.err { color:var(--accent-red); text-shadow:0 0 6px rgba(255,68,102,0.4); }
+.sync-btn { position:relative; display:inline-flex; align-items:center; gap:6px; padding:5px 13px; font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent-cyan); background:linear-gradient(180deg,rgba(0,60,120,0.38) 0%,rgba(0,30,72,0.58) 100%); border:1px solid rgba(0,240,255,0.45); border-radius:2px; cursor:pointer; outline:none; overflow:hidden; text-shadow:0 0 4px rgba(0,240,255,0.5); box-shadow:inset 0 0 8px rgba(0,240,255,0.12),0 0 0 1px rgba(0,240,255,0.04),0 0 10px rgba(0,200,255,0.18); transition:background .2s,box-shadow .2s,border-color .2s,color .2s; }
+.sync-btn::before { content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,240,255,0.28),transparent); transform:skewX(-20deg); transition:left .45s ease; pointer-events:none; }
+.sync-btn:hover::before { left:120%; }
+.sync-btn:hover { background:linear-gradient(180deg,rgba(0,90,160,0.55) 0%,rgba(0,40,96,0.72) 100%); border-color:var(--accent-cyan); box-shadow:inset 0 0 10px rgba(0,240,255,0.22),0 0 14px rgba(0,200,255,0.4); }
+.sync-btn:active { transform:translateY(1px); }
+.sync-btn[data-state="syncing"] { pointer-events:none; border-color:rgba(0,240,255,0.35); color:#bfeaff; }
+.sync-btn[data-state="syncing"] .sync-btn-ico { animation:sync-spin .9s linear infinite; }
+.sync-btn[data-state="success"] { border-color:rgba(0,255,136,0.6); color:var(--accent-green); text-shadow:0 0 6px rgba(0,255,136,0.55); box-shadow:inset 0 0 10px rgba(0,255,136,0.2),0 0 12px rgba(0,255,136,0.32); }
+.sync-btn[data-state="error"] { border-color:rgba(255,68,102,0.6); color:var(--accent-red); text-shadow:0 0 6px rgba(255,68,102,0.55); box-shadow:inset 0 0 10px rgba(255,68,102,0.2),0 0 12px rgba(255,68,102,0.32); }
+.sync-btn-ico { display:inline-block; font-size:14px; line-height:1; }
+@keyframes sync-spin { to { transform:rotate(-360deg); } }
+
 /* ══════════════════════════════════════
    5. Dual Marquee — system alert bus
    ══════════════════════════════════════ */
@@ -3492,7 +3510,7 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan">2,127</div></div>
   </section>
   <section class="charts-row">
-    <div class="panel"><div class="panel-title" data-module="SYS-01">每日进线量 vs 实际回复单量（近 14 天）</div><div class="chart-container" style="position:relative"><canvas id="chart-trend" width="920" height="280"></canvas><div class="chart-placeholder">逐日数据待补</div></div></div>
+    <div class="panel"><div class="panel-title" data-module="SYS-01"><span class="pt-text">每日回复量（近 14 天）</span><div class="sync-ctrl"><span class="sync-last" id="sync-last">尚未同步</span><button type="button" class="sync-btn" id="sync-btn" data-state="idle" title="从 Google Sheets 同步最新资料"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">同步</span></button></div></div><div class="chart-container" style="position:relative"><canvas id="chart-trend" width="920" height="280"></canvas><div class="chart-placeholder">逐日数据待补</div></div></div>
     <div class="panel"><div class="panel-title" data-module="SYS-02">各班别回复量</div>
     <div class="crystal-scene" id="crystal-scene">
       <!-- SVG 连接线 — 动态更新 -->
@@ -5911,21 +5929,145 @@ Chart.register({id:'doughnutCenter',afterDraw(chart){
 
 // ── Charts (responsive:false — layout is fixed 1920x1080, only transform scales) ──
 
-// 3. Trend — refined lines
+// 3. Trend — single line 每日回复量
 const trendChart=new Chart(document.getElementById('chart-trend'),{type:'line',data:{labels:DAYS_14,datasets:[
-  {label:'每日进线量',data:[...DAILY_IN],borderColor:'#00f0ff',
-    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(0,240,255,0.18)');g.addColorStop(0.5,'rgba(0,240,255,0.03)');g.addColorStop(1,'transparent');return g},
+  {label:'每日回复量',data:[...DAILY_RE],borderColor:'#00f0ff',
+    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(0,240,255,0.22)');g.addColorStop(0.5,'rgba(0,240,255,0.04)');g.addColorStop(1,'transparent');return g},
     fill:true,tension:0.4,borderWidth:2.5,pointRadius:3,pointHoverRadius:5,
-    pointBackgroundColor:'#00f0ff',pointBorderColor:'rgba(0,240,255,0.35)',pointBorderWidth:1},
-  {label:'实际回复单量',data:[...DAILY_RE],borderColor:'#9466ff',
-    backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,'rgba(148,102,255,0.10)');g.addColorStop(1,'transparent');return g},
-    fill:true,tension:0.4,borderWidth:1.5,borderDash:[5,3],pointRadius:2.5,pointHoverRadius:4,
-    pointBackgroundColor:'#9466ff',pointBorderColor:'rgba(148,102,255,0.3)',pointBorderWidth:1}
+    pointBackgroundColor:'#00f0ff',pointBorderColor:'rgba(0,240,255,0.35)',pointBorderWidth:1}
 ]},options:{responsive:false,
   plugins:{legend:{labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:12,weight:600}}},tooltip:TT},
   scales:{x:{grid:{color:GRID},ticks:{font:{size:12,weight:500},color:TICK}},y:{grid:{color:GRID},beginAtZero:true,suggestedMax:400,ticks:{font:{size:12,weight:500},color:TICK}}},
   interaction:{intersect:false,mode:'index'}}});
-pgRegInterval('page-overview',()=>{const d0=trendChart.data.datasets[0].data,d1=trendChart.data.datasets[1].data;d0[13]=Math.max(1,Math.round(DAILY_IN[13]+(Math.random()-0.5)*30));d1[13]=Math.max(1,Math.round(DAILY_RE[13]+(Math.random()-0.5)*25));trendChart.update('none')},5000);
+
+// ── SYS-01 同步：从 Google Sheets 拉最新资料 ──
+(function(){
+  var SHEET_URL='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
+  var btn=document.getElementById('sync-btn');
+  var last=document.getElementById('sync-last');
+  if(!btn||!last) return;
+  var btnTxt=btn.querySelector('.sync-btn-txt');
+
+  function pad2(n){return (n<10?'0':'')+n}
+  function hhmm(d){return pad2(d.getHours())+':'+pad2(d.getMinutes())}
+
+  function setState(state,lastMsg){
+    btn.dataset.state=state;
+    if(state==='syncing'){btnTxt.textContent='同步中';}
+    else if(state==='success'){btnTxt.textContent='已同步';setTimeout(function(){if(btn.dataset.state==='success'){btn.dataset.state='idle';btnTxt.textContent='同步';}},2200);}
+    else if(state==='error'){btnTxt.textContent='同步失败';setTimeout(function(){if(btn.dataset.state==='error'){btn.dataset.state='idle';btnTxt.textContent='同步';}},3500);}
+    else {btnTxt.textContent='同步';}
+    if(lastMsg!==undefined){
+      last.textContent=lastMsg;
+      last.classList.remove('ok','err');
+      if(state==='success') last.classList.add('ok');
+      else if(state==='error') last.classList.add('err');
+    }
+  }
+
+  function parseCSV(t){
+    var rows=[],row=[],field='',q=false;
+    for(var i=0;i<t.length;i++){var c=t[i];
+      if(q){
+        if(c==='"'){if(t[i+1]==='"'){field+='"';i++;}else q=false;}
+        else field+=c;
+      } else {
+        if(c==='"') q=true;
+        else if(c===','){row.push(field);field='';}
+        else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+        else if(c==='\r'){/* skip */}
+        else field+=c;
+      }
+    }
+    if(field.length||row.length){row.push(field);rows.push(row);}
+    return rows;
+  }
+
+  function parseDate(s){
+    if(s==null) return null;
+    s=String(s).trim();
+    if(!s) return null;
+    var m=s.match(/(\d{4})[\/\-年.](\d{1,2})[\/\-月.](\d{1,2})/);
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+    m=s.match(/^(\d{1,2})[\/\-月.](\d{1,2})/);
+    if(m){var n=new Date();return new Date(n.getFullYear(),+m[1]-1,+m[2]);}
+    var d=new Date(s);
+    return isNaN(d.getTime())?null:d;
+  }
+
+  function toNum(v){
+    if(v==null) return 0;
+    var n=parseFloat(String(v).replace(/[,\s]/g,''));
+    return isNaN(n)?0:n;
+  }
+
+  // 三班欄位：[日期欄, 第一個數值欄, 最後一個數值欄]
+  // A(0)=早班日期, B-F(1-5)=早班 5 人
+  // G(6)=中班日期, H-L(7-11)=中班 5 人
+  // M(12)=夜班日期, N-T(13-19)=夜班 7 人
+  var BLOCKS=[[0,1,5],[6,7,11],[12,13,19]];
+
+  function aggregate(rows){
+    var map=Object.create(null);
+    for(var r=1;r<rows.length;r++){
+      var row=rows[r]; if(!row||!row.length) continue;
+      for(var b=0;b<BLOCKS.length;b++){
+        var B=BLOCKS[b], d=parseDate(row[B[0]]);
+        if(!d) continue;
+        var sum=0;
+        for(var c=B[1];c<=B[2];c++) sum+=toNum(row[c]);
+        var key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+        if(map[key]) map[key].total+=sum;
+        else map[key]={date:d,total:sum};
+      }
+    }
+    var list=[];
+    for(var k in map) list.push(map[k]);
+    list.sort(function(a,b){return a.date-b.date});
+    return list;
+  }
+
+  function applyData(list){
+    var last14=list.slice(-14);
+    var labels=[], data=[];
+    last14.forEach(function(x){
+      labels.push((x.date.getMonth()+1)+'/'+x.date.getDate());
+      data.push(x.total);
+    });
+    while(labels.length<14){labels.unshift('—');data.unshift(0);}
+    trendChart.data.labels=labels;
+    trendChart.data.datasets[0].data=data;
+    trendChart.update('none');
+    var ph=document.querySelector('.chart-placeholder');
+    if(ph && data.some(function(v){return v>0})) ph.style.display='none';
+    try{
+      if(window.dashboardData && window.dashboardData.dailyTrend){
+        window.dashboardData.dailyTrend.rows=last14.map(function(x){
+          return {date:(x.date.getMonth()+1)+'/'+x.date.getDate(),reply:x.total};
+        });
+      }
+    }catch(e){}
+  }
+
+  function doSync(){
+    if(btn.dataset.state==='syncing') return;
+    setState('syncing','同步中…');
+    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.text();
+    }).then(function(text){
+      var rows=parseCSV(text);
+      var list=aggregate(rows);
+      if(!list.length) throw new Error('无有效日期资料');
+      applyData(list);
+      setState('success','最后同步 '+hhmm(new Date()));
+    }).catch(function(err){
+      console.error('[SYS-01 sync] failed:',err);
+      setState('error','同步失败 '+hhmm(new Date()));
+    });
+  }
+  btn.addEventListener('click',doSync);
+})();
 
 // Crystal Matrix — 粒子系统 v2.0
 (function(){
@@ -6434,7 +6576,7 @@ renderMarquee();
       ['4/13-14','早班',0],['4/13-14','中班',0],['4/13-14','夜班',0],['4/13-14','合计',0]
     ],
     dailyTrend:{
-      title:'每日进线量 vs 实际回复单量（近 14 天）',
+      title:'每日回复量（近 14 天）',
       rows:[],
       placeholderText:'逐日数据待补'
     }
@@ -6452,6 +6594,10 @@ renderMarquee();
     // 合并缺失字段，防止旧版数据结构不完整
     var def=deepClone(DEFAULTS);
     Object.keys(def).forEach(function(k){if(!(k in loaded))loaded[k]=def[k]});
+    // 迁移：旧版「每日进线量 vs 实际回复单量」 → 新版「每日回复量」
+    if(loaded.dailyTrend && /进线量/.test(loaded.dailyTrend.title||'')){
+      loaded.dailyTrend.title=DEFAULTS.dailyTrend.title;
+    }
     window.dashboardData=loaded;
   } else {
     window.dashboardData=deepClone(DEFAULTS);
@@ -6508,16 +6654,15 @@ renderMarquee();
     if(typeof trendChart!=='undefined'){
       var dt=D.dailyTrend;
       trendChart.data.labels=dt.rows.map(function(r){return r.date});
-      trendChart.data.datasets[0].data=dt.rows.map(function(r){return r.inbound});
-      trendChart.data.datasets[1].data=dt.rows.map(function(r){return r.reply});
+      trendChart.data.datasets[0].data=dt.rows.map(function(r){return r.reply});
       trendChart.update('none');
       var ph=document.querySelector('.chart-placeholder');
       if(ph){
-        var hasData=dt.rows.some(function(r){return r.inbound>0||r.reply>0});
+        var hasData=dt.rows.some(function(r){return r.reply>0});
         ph.style.display=hasData?'none':'flex';
         ph.textContent=dt.placeholderText||'逐日数据待补';
       }
-      var titleEl=document.querySelector('[data-module="SYS-01"]');
+      var titleEl=document.querySelector('[data-module="SYS-01"] .pt-text');
       if(titleEl) titleEl.textContent=dt.title;
     }
   }
@@ -6529,7 +6674,7 @@ renderMarquee();
   var secMap=[
     {sel:'.hero-counter',panel:'summary',label:'编辑',title:'编辑：顶部主标题'},
     {sel:'.kpi-row',panel:'kpi',label:'编辑',title:'编辑：KPI 六卡'},
-    {sel:'[data-module="SYS-01"]',panel:'chart',label:'编辑',title:'编辑：每日进线量 vs 实际回复量',parent:true},
+    {sel:'[data-module="SYS-01"]',panel:'chart',label:'编辑',title:'编辑：每日回复量',parent:true},
     {sel:'[data-module="SYS-02"]',panel:'shift',label:'编辑',title:'编辑：各班别回复量',parent:true},
     {sel:'[data-module="SYS-03"]',panel:'stage',label:'编辑',title:'编辑：阶段回复量统计',parent:true},
     {sel:'[data-module="SYS-04"]',panel:'ops',label:'编辑',title:'编辑：营运数据总览',parent:true},
@@ -6632,7 +6777,7 @@ renderMarquee();
       dt.rows.forEach(function(r,ci){
         h+='<div class="de-day-card"><div class="de-day-head"><span class="de-day-idx">#'+(ci+1)+'</span><button class="de-del-row" data-ridx="'+ci+'">删除</button></div>';
         h+=row('日期',inp('de-cd-'+ci,r.date));
-        h+='<div class="de-day-pair"><div><div class="de-day-lbl">进线量</div>'+inp('de-ci-'+ci,r.inbound)+'</div><div><div class="de-day-lbl">回复量</div>'+inp('de-cr-'+ci,r.reply)+'</div></div>';
+        h+=row('回复量',inp('de-cr-'+ci,r.reply));
         h+='</div>';
       });
       h+='</div>';
@@ -6701,7 +6846,7 @@ renderMarquee();
       var addBtn=document.getElementById('de-chart-add');
       if(addBtn) addBtn.addEventListener('click',function(){
         collectFormData();
-        D.dailyTrend.rows.push({date:'',inbound:0,reply:0});
+        D.dailyTrend.rows.push({date:'',reply:0});
         renderPanel();
       });
       deBody.querySelectorAll('.de-del-row[data-ridx]').forEach(function(b){
@@ -6764,7 +6909,7 @@ renderMarquee();
       var newRows=[];
       var cards=deBody.querySelectorAll('.de-day-card');
       cards.forEach(function(card,i){
-        newRows.push({date:gv('de-cd-'+i),inbound:gn('de-ci-'+i),reply:gn('de-cr-'+i)});
+        newRows.push({date:gv('de-cd-'+i),reply:gn('de-cr-'+i)});
       });
       dt.rows=newRows;
     } else if(currentPanel==='shift'){
@@ -6828,10 +6973,10 @@ renderMarquee();
     rows.push(['营运分类','数量']);
     D.exportOps.forEach(function(o){rows.push([o.name,o.value])});
     rows.push([]);
-    rows.push(['E. 每日进线量与实际回复量明细']);
-    rows.push(['日期','进线量','实际回复量']);
+    rows.push(['E. 每日回复量明细']);
+    rows.push(['日期','回复量']);
     if(D.dailyTrend&&D.dailyTrend.rows){
-      D.dailyTrend.rows.forEach(function(r){rows.push([r.date,r.inbound,r.reply])});
+      D.dailyTrend.rows.forEach(function(r){rows.push([r.date,r.reply])});
     }
     return rows;
   }
