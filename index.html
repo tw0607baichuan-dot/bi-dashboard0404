@@ -565,22 +565,6 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
   clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
   display:flex; flex-direction:column; justify-content:center;
 }
-/* KPI 可编辑卡：hover 显示 ✏️ 暗示 */
-.kpi-card.editable .kpi-value { cursor:pointer; position:relative; padding-right:20px; }
-.kpi-card.editable .kpi-value::after {
-  content:'\270E'; position:absolute; right:4px; top:50%; transform:translateY(-50%);
-  font-size:13px; color:var(--text-dim); opacity:0; transition:opacity .2s;
-  font-family:var(--font-body); text-shadow:none;
-}
-.kpi-card.editable:hover .kpi-value::after { opacity:0.75; }
-.kpi-edit-input {
-  font-family:var(--font-display); font-size:32px; font-weight:900;
-  color:inherit; background:rgba(0,20,40,0.55); border:1px solid rgba(0,240,255,0.55);
-  border-radius:2px; padding:0 6px; width:100%; height:40px; line-height:1;
-  outline:none; box-shadow:inset 0 0 8px rgba(0,240,255,0.15),0 0 10px rgba(0,200,255,0.2);
-  text-shadow:inherit;
-}
-.kpi-edit-input:focus { border-color:var(--accent-cyan); box-shadow:inset 0 0 10px rgba(0,240,255,0.25),0 0 14px rgba(0,200,255,0.35); }
 /* KPI 总同步按钮 cell：按钮 + 时间戳垂直排列 */
 .kpi-sync-cell {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -3539,8 +3523,8 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
   </section>
   <section class="kpi-row">
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">客服总人数</div><div class="kpi-value cyan">28</div></div>
-    <div class="kpi-card editable" data-lskey="kpi_complaint_count" title="点击编辑"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange" id="kpi-complaint-count">0</div></div>
-    <div class="kpi-card editable" data-lskey="kpi_complaint_amount" title="点击编辑"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange" id="kpi-complaint-amount">0</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange">532</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange">88,300</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan" id="kpi-weekly-inbound">0</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan" id="kpi-product-report">0</div></div>
     <div class="kpi-sync-cell"><span class="sync-last" id="kpi-sync-last">尚未同步</span><button type="button" class="sync-btn kpi-sync-btn" id="kpi-sync-btn" data-state="idle" title="从 Google Sheets 同步所有 KPI 与顶部总量"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">总同步</span></button></div>
@@ -6533,76 +6517,6 @@ window.__syncUtils=(function(){
   btn.addEventListener('click',doSync);
 })();
 
-// ── 投诉数量 / 投诉金额：localStorage 手动 inline 编辑 ──
-(function(){
-  var COUNT_KEY='kpi_complaint_count';
-  var AMOUNT_KEY='kpi_complaint_amount';
-
-  function readNum(key){
-    try{
-      var v=localStorage.getItem(key);
-      if(v==null) return 0;
-      var n=parseFloat(String(v).replace(/[,\s]/g,''));
-      return isNaN(n)?0:n;
-    }catch(e){return 0;}
-  }
-  function writeNum(key,n){
-    try{localStorage.setItem(key,String(Math.max(0,Math.round(n||0))));}catch(e){}
-  }
-
-  function renderDisplay(card){
-    var val=card.querySelector('.kpi-value');
-    if(!val) return;
-    if(val.querySelector('.kpi-edit-input')) return; // 正在编辑不覆盖
-    var key=card.dataset.lskey;
-    var n=Math.max(0,Math.round(readNum(key)));
-    val.textContent=(key===AMOUNT_KEY)?n.toLocaleString('en-US'):String(n);
-  }
-
-  function startEdit(card){
-    var val=card.querySelector('.kpi-value');
-    if(!val||val.querySelector('.kpi-edit-input')) return;
-    var key=card.dataset.lskey;
-    var raw=Math.max(0,Math.round(readNum(key)));
-    var original=val.textContent;
-    val.textContent='';
-    var input=document.createElement('input');
-    input.type='text';
-    input.className='kpi-edit-input';
-    input.value=String(raw);
-    input.setAttribute('inputmode','numeric');
-    val.appendChild(input);
-    input.focus();
-    input.select();
-    var done=false;
-    function finish(save){
-      if(done) return; done=true;
-      if(save){
-        var n=parseFloat(String(input.value).replace(/[,\s]/g,''));
-        if(isNaN(n)) n=0;
-        writeNum(key,n);
-      }
-      renderDisplay(card);
-    }
-    input.addEventListener('keydown',function(e){
-      if(e.key==='Enter'){e.preventDefault();finish(true);}
-      else if(e.key==='Escape'){e.preventDefault();done=true;val.textContent=original;}
-    });
-    input.addEventListener('blur',function(){finish(true);});
-  }
-
-  var cards=document.querySelectorAll('.kpi-card.editable');
-  cards.forEach(function(card){
-    renderDisplay(card);
-    var val=card.querySelector('.kpi-value');
-    if(!val) return;
-    val.addEventListener('click',function(e){e.stopPropagation();startEdit(card);});
-  });
-
-  // 暴露：让 renderDashboard() 在最后呼叫，避免被 D.kpis 覆盖
-  window.__renderComplaintKpis=function(){cards.forEach(renderDisplay);};
-})();
-
 // Crystal Matrix — 粒子系统 v2.0
 (function(){
   var sc=document.getElementById('crystal-scene');
@@ -7069,8 +6983,8 @@ renderMarquee();
     summary:{monthlyTotal:0},
     kpis:[
       {label:'客服总人数',value:28,color:'cyan'},
-      {label:'投诉数量',value:0,color:'orange'},
-      {label:'投诉金额',value:0,color:'orange'},
+      {label:'投诉数量',value:532,color:'orange'},
+      {label:'投诉金额',value:88300,color:'orange'},
       {label:'本周总进线量',value:0,color:'cyan'},
       {label:'产品回报数量',value:0,color:'cyan'}
     ],
@@ -7225,8 +7139,6 @@ renderMarquee();
       var titleEl=document.querySelector('[data-module="SYS-01"] .pt-text');
       if(titleEl) titleEl.textContent=dt.title;
     }
-    // 8. 投诉 KPI 改由 localStorage 主导（覆盖上方 D.kpis 写入）
-    if(typeof window.__renderComplaintKpis==='function') window.__renderComplaintKpis();
   }
 
   // 初始化渲染
