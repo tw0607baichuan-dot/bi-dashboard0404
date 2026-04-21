@@ -715,6 +715,11 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .sync-btn-ico { display:inline-block; font-size:14px; line-height:1; }
 @keyframes sync-spin { to { transform:rotate(-360deg); } }
 
+/* SYS-02 sync control — 中央核心内同步按钮 */
+.cr-sync-ctrl { position:relative; z-index:3; margin-top:10px; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.cr-sync-ctrl .sync-btn { padding:4px 10px; font-size:11px; letter-spacing:1.2px; }
+.cr-sync-ctrl .sync-last { font-size:10px; letter-spacing:1px; }
+
 /* ══════════════════════════════════════
    5. Dual Marquee — system alert bus
    ══════════════════════════════════════ */
@@ -3547,6 +3552,10 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
         <div class="cr-ring-inner"></div>
         <div class="cr-core-num">25,894</div>
         <div class="cr-core-label">TOTAL REPLIES</div>
+        <div class="cr-sync-ctrl">
+          <button type="button" class="sync-btn" id="sys02-sync-btn" data-state="idle" title="从 Google Sheets 同步班别资料"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">同步</span></button>
+          <span class="sync-last" id="sys02-sync-last">尚未同步</span>
+        </div>
       </div>
       <!-- 早班 — 左上 -->
       <div class="cr-block c-cyan" id="crBlk0" data-drag="1" style="left:3%;top:12%">
@@ -5940,6 +5949,46 @@ const trendChart=new Chart(document.getElementById('chart-trend'),{type:'line',d
   scales:{x:{grid:{color:GRID},ticks:{font:{size:12,weight:500},color:TICK}},y:{grid:{color:GRID},beginAtZero:true,suggestedMax:400,ticks:{font:{size:12,weight:500},color:TICK}}},
   interaction:{intersect:false,mode:'index'}}});
 
+// ── 同步共享工具函数（SYS-01 / SYS-02 共用）──
+window.__syncUtils=(function(){
+  function pad2(n){return (n<10?'0':'')+n}
+  function hhmm(d){return pad2(d.getHours())+':'+pad2(d.getMinutes())}
+  function parseCSV(t){
+    var rows=[],row=[],field='',q=false;
+    for(var i=0;i<t.length;i++){var c=t[i];
+      if(q){
+        if(c==='"'){if(t[i+1]==='"'){field+='"';i++;}else q=false;}
+        else field+=c;
+      } else {
+        if(c==='"') q=true;
+        else if(c===','){row.push(field);field='';}
+        else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+        else if(c==='\r'){/* skip */}
+        else field+=c;
+      }
+    }
+    if(field.length||row.length){row.push(field);rows.push(row);}
+    return rows;
+  }
+  function parseDate(s){
+    if(s==null) return null;
+    s=String(s).trim();
+    if(!s) return null;
+    var m=s.match(/(\d{4})[\/\-年.](\d{1,2})[\/\-月.](\d{1,2})/);
+    if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+    m=s.match(/^(\d{1,2})[\/\-月.](\d{1,2})/);
+    if(m){var n=new Date();return new Date(n.getFullYear(),+m[1]-1,+m[2]);}
+    var d=new Date(s);
+    return isNaN(d.getTime())?null:d;
+  }
+  function toNum(v){
+    if(v==null) return 0;
+    var n=parseFloat(String(v).replace(/[,\s]/g,''));
+    return isNaN(n)?0:n;
+  }
+  return {pad2:pad2,hhmm:hhmm,parseCSV:parseCSV,parseDate:parseDate,toNum:toNum};
+})();
+
 // ── SYS-01 同步：从 Google Sheets 拉最新资料 ──
 (function(){
   var SHEET_URL='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
@@ -6064,6 +6113,86 @@ const trendChart=new Chart(document.getElementById('chart-trend'),{type:'line',d
     }).catch(function(err){
       console.error('[SYS-01 sync] failed:',err);
       setState('error','同步失败 '+hhmm(new Date()));
+    });
+  }
+  btn.addEventListener('click',doSync);
+})();
+
+// ── SYS-02 同步：从 Google Sheets 拉班别回复量 ──
+(function(){
+  var SHEET_URL='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
+  var btn=document.getElementById('sys02-sync-btn');
+  var last=document.getElementById('sys02-sync-last');
+  if(!btn||!last) return;
+  var U=window.__syncUtils; if(!U) return;
+  var btnTxt=btn.querySelector('.sync-btn-txt');
+
+  function setState(state,lastMsg){
+    btn.dataset.state=state;
+    if(state==='syncing'){btnTxt.textContent='同步中';}
+    else if(state==='success'){btnTxt.textContent='已同步';setTimeout(function(){if(btn.dataset.state==='success'){btn.dataset.state='idle';btnTxt.textContent='同步';}},2200);}
+    else if(state==='error'){btnTxt.textContent='同步失败';setTimeout(function(){if(btn.dataset.state==='error'){btn.dataset.state='idle';btnTxt.textContent='同步';}},3500);}
+    else {btnTxt.textContent='同步';}
+    if(lastMsg!==undefined){
+      last.textContent=lastMsg;
+      last.classList.remove('ok','err');
+      if(state==='success') last.classList.add('ok');
+      else if(state==='error') last.classList.add('err');
+    }
+  }
+
+  // 三班栏位：早班 日期A(0) + B-F(1-5)、中班 日期G(6) + H-L(7-11)、夜班 日期M(12) + N-T(13-19)
+  var BLOCKS=[{date:0,start:1,end:5},{date:6,start:7,end:11},{date:12,start:13,end:19}];
+
+  function fmtNum(n){return Math.round(n).toLocaleString('en-US')}
+
+  function aggregate(rows){
+    var now=new Date();
+    var monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+    var cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999);
+    var sums=[0,0,0];
+    for(var r=1;r<rows.length;r++){
+      var row=rows[r]; if(!row||!row.length) continue;
+      for(var b=0;b<BLOCKS.length;b++){
+        var B=BLOCKS[b], d=U.parseDate(row[B.date]);
+        if(!d) continue;
+        if(d<monthStart||d>cutoff) continue;
+        for(var c=B.start;c<=B.end;c++) sums[b]+=U.toNum(row[c]);
+      }
+    }
+    return sums;
+  }
+
+  function applyData(sums){
+    var blocks=[document.getElementById('crBlk0'),document.getElementById('crBlk1'),document.getElementById('crBlk2')];
+    var max=Math.max(sums[0],sums[1],sums[2],1);
+    for(var i=0;i<3;i++){
+      if(!blocks[i]) continue;
+      var v=blocks[i].querySelector('.cr-val');
+      var bar=blocks[i].querySelector('.cr-bar-fill');
+      if(v) v.textContent=fmtNum(sums[i]);
+      if(bar) bar.style.width=(sums[i]/max*100).toFixed(1)+'%';
+    }
+    var total=sums[0]+sums[1]+sums[2];
+    var core=document.querySelector('#cr-core-el .cr-core-num');
+    if(core) core.textContent=fmtNum(total);
+  }
+
+  function doSync(){
+    if(btn.dataset.state==='syncing') return;
+    setState('syncing','同步中…');
+    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.text();
+    }).then(function(text){
+      var rows=U.parseCSV(text);
+      var sums=aggregate(rows);
+      if(sums[0]+sums[1]+sums[2]===0) throw new Error('本月无有效资料');
+      applyData(sums);
+      setState('success','最后同步 '+U.hhmm(new Date()));
+    }).catch(function(err){
+      console.error('[SYS-02 sync] failed:',err);
+      setState('error','同步失败 '+U.hhmm(new Date()));
     });
   }
   btn.addEventListener('click',doSync);
