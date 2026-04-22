@@ -1,0 +1,292 @@
+════════════════════════════════════════════════════════════════
+  BI Dashboard ── 项目结构说明
+  (给后续接手的 AI 与业主阅读，最后更新 2026-04-23)
+════════════════════════════════════════════════════════════════
+
+
+【0】一句话概要
+────────────────────────────────────────────────────────────────
+这是一个「客服指挥中心 BI 看板」，实际只有 *一个* 真正跑业务的
+HTML 档：index.html。里面用「分页切换」的方式塞了 6 个业务模组
+(总览 / 组员 / 排班 / 绩效 / 日报 / 产品)。资料来自 Google Sheets，
+透过「CSV 直连」加「Google Apps Script Web App」两条路进来。
+
+其它 demo-0X.html / concept-preview.html / prototype-*.html
+都是「视觉特效概念稿」，不是业务模组，不要改错档。
+
+
+【1】专案基本资料
+────────────────────────────────────────────────────────────────
+  专案名称      客服指挥中心 BI Dashboard (bi-dashboard0404)
+  GitHub        https://github.com/tw0607baichuan-dot/bi-dashboard0404
+  主分支        main
+  核心档案      index.html (唯一生产档，约 60 万 bytes)
+  线上地址      https://tw0607baichuan-dot.github.io/bi-dashboard0404/
+                (GitHub Pages 部署，main 分支 push 后自动更新)
+  主要语言      HTML + 原生 JS (无框架) + Chart.js + Canvas
+  介面语言      简体中文 (程式码注解 / UI 文字)
+  本地目录      /root/bi-dashboard0404
+
+
+【2】档案对应表 —— 哪个档对应哪个模组
+────────────────────────────────────────────────────────────────
+★ 重要观念：六个业务模组「全部」在 index.html 里面，不是分开六个
+  HTML 档。demo-0X 是视觉概念稿，不承载业务。
+
+  ┌─────────────────────────────┬──────────────────────────┬──────────────────────────────┐
+  │ 档名                        │ 对应模组                 │ 主要功能                     │
+  ├─────────────────────────────┼──────────────────────────┼──────────────────────────────┤
+  │ index.html                  │ 01+02+03+04+05+06        │ 全站看板主体 (六个分页)      │
+  │ index.html.save             │ (备份)                   │ vim 自动备份, 未入 git       │
+  │ index-backup-2026-04-01.html│ (备份)                   │ 4/1 历史快照, 未入 git       │
+  ├─────────────────────────────┼──────────────────────────┼──────────────────────────────┤
+  │ google-apps-script.gs       │ 全站用户系统 + 03 排班 API│ 云端同步 users / login_logs /│
+  │                             │                          │ action_logs + getLocalScheule│
+  │ LocalParser.gs              │ 03 出勤排班 (班表解析)   │ 把「早班/中班/夜班矩阵表」   │
+  │                             │                          │ 解析成 JSON 给前端吃         │
+  ├─────────────────────────────┼──────────────────────────┼──────────────────────────────┤
+  │ concept-preview.html        │ ✗ 非业务，视觉概念稿      │ 反应炉 vs 传送门 视觉比对     │
+  │ demo-01-rift.html           │ ✗ 非业务，视觉概念稿      │ "裂隙核心" 动画原型          │
+  │ demo-02-entangle.html       │ ✗ 非业务，视觉概念稿      │ "双核心纠缠场" 动画原型      │
+  │ demo-03-orbit.html          │ ✗ 非业务，视觉概念稿      │ "偏心引力井" 动画原型        │
+  │ demo-04-fountain.html       │ ✗ 非业务，视觉概念稿      │ "能量喷泉" 动画原型          │
+  │ demo-05-waterfall.html      │ ✗ 非业务，视觉概念稿      │ "数据瀑布井" 动画原型        │
+  │ preview-gate.html           │ ✗ 非业务，视觉概念稿      │ 传送门单元预览               │
+  │ preview-weekly.html         │ ✗ 非业务，视觉概念稿      │ 周视图预览                   │
+  │ prototype-2-crystal-matrix  │ ✗ 非业务，视觉概念稿      │ 水晶矩阵原型                 │
+  │ prototype-4-reactor.html    │ ✗ 非业务，视觉概念稿      │ 反应炉单元原型               │
+  │ prototype-5-balance-arm.html│ ✗ 非业务，视觉概念稿      │ 平衡臂原型                   │
+  │ 12345-1.png                 │ ✗ 参考图                  │ 设计图 / 截图                 │
+  └─────────────────────────────┴──────────────────────────┴──────────────────────────────┘
+
+  特别提醒：demo-0X 的档名编号 (01~05) 跟业务模组编号 (01~06)
+  没有任何对应关系。编号只是视觉稿的收录顺序，不要误以为
+  demo-01 = 模组 01。
+
+
+【3】六大业务模组 —— 在 index.html 中的关键定位
+────────────────────────────────────────────────────────────────
+
+■ 模组 01 — 总览看板 (page-overview)
+  容器 id        #page-overview
+  导航           .nav-item[data-page="page-overview"]
+  主要 DOM：
+    #hero-counter / #flip-digits      本月回复总量翻牌
+    #kpi-weekly-inbound              本周总进线量 KPI
+    #kpi-product-report              产品回报数量 KPI
+    #kpi-sync-btn / #kpi-sync-last   总同步按钮 / 最后同步时间
+    #chart-trend (canvas)            每日回复量折线图 (SYS-01)
+    [data-module="SYS-01"]           每日回复量面板
+    [data-module="SYS-02"]           各班别回复量面板
+    [data-module="SYS-03"]           阶段(周)回复量面板
+    [data-module="SYS-04"]           营运数据总览面板
+    #marquee-good / #marquee-bad    上下跑马灯 (好消息 / 警报)
+  主要函数区段 (关键字搜寻即可定位)：
+    SYS-01 同步 / SYS-02 同步 / SYS-03 同步 / SYS-04 同步
+    KPI 总同步
+    renderOpsTanks()                  SYS-04 营运数据圆柱
+
+■ 模组 02 — 组员档案 (page-members)
+  容器 id        #page-members
+  导航           .nav-item[data-page="page-members"]
+  主要 DOM：
+    .mem-kpi-row                     顶部 6 张 KPI (总人数/本地/远程/在职…)
+    #mem-stage                       宇宙战术舞台 (核心视觉区)
+    #stg-portals                     双传送门背景
+    .mem-link-svg                    组员连接线 SVG
+  关键函数：
+    renderShiftMembers(idx)          切换班次后重绘组员
+    addP(...) 一大堆                 个别组员资料录入 (写死在 JS 里)
+
+■ 模组 03 — 出勤排班 (page-attendance)
+  容器 id        #page-attendance
+  导航           .nav-item[data-page="page-attendance"]
+  主要 DOM：
+    #ak-date-big / #ak-weekday       日期锚点
+    #ak-morning / #ak-swing / #ak-night   三班别值班人数
+    #ak-yueda / #ak-dingfeng         悦达 / 鼎丰 人数
+    月度排班热力日历 (att-panel)     无固定 id，用 class 定位
+  关键函数：
+    initHeatCal()                    初始化热力日历
+    fetchLocalSchedule(cb)           从 GAS 拿班表 JSON
+    renderRoster(day)                依日期画当日值班人员
+  依赖：SCHEDULE_API_URL (Google Apps Script Web App)
+         + LocalParser.gs (云端解析 4月假表26 sheet)
+
+■ 模组 04 — 绩效质检 (page-performance)
+  容器 id        #page-performance
+  导航           .nav-item[data-page="page-performance"]
+  两个子视图     #pf-view-1 (绩效质检) / #pf-view-2 (奖金构成)
+                 切换用 .pf-sub-tab[data-pf-tab]
+  主要 DOM：
+    #pf-kpi-total / #pf-kpi-avg / #pf-kpi-err    顶部三卡
+    #pf-chart-error-type            错误类型分布图
+    #pf-focus-list                  质检关注摘要
+  关键函数：
+    initPF()  / initPFB()           两个子视图初始化
+
+■ 模组 05 — 需求日报 (page-daily)
+  容器 id        #page-daily
+  导航           .nav-item[data-page="page-daily"]
+  状态           ★★★ 重要：目前 nav 设成 display:none —— 这是
+                 「暂时隐藏、待恢复」的状态，业主已确认未来会重新
+                 启用此模组。接手的 AI 请勿以「看起来没用到」为由
+                 移除此页的 DOM、CSS 或 JS，也不要删 initDR()。
+                 要恢复时，只需把 nav-item 的 display:none 拿掉即可。
+  主要 DOM：
+    #dr-kpi-done / -pending / -missing / -requests / -issues
+    #dr-submit-grid                 日报提交状态格
+    #dr-notice-panel                提醒面板
+  关键函数：
+    initDR()                        初始化日报页
+
+■ 模组 06 — 产品连结 (page-products)
+  容器 id        #page-products
+  导航           .nav-item[data-page="page-products"]
+  主要 DOM：
+    #pl-kpi-total / -unchecked / -checked / -rate   顶部四卡
+    #pl-tab-inspect                 每日检测子页
+    #pl-uc-list  / #pl-uc-count    未检测区
+  关键函数：
+    initPL()                        初始化产品页
+  资料来源：目前 68 项产品已 hardcode 写死在 JS 中
+            (见 commit 183ff76 "SYS-06 hardcode 68 products")
+
+
+【4】资料流向 —— Google Sheets 怎么进到看板
+────────────────────────────────────────────────────────────────
+
+  有 *两条* 路径并存：
+
+  路径 A：CSV 直连 (不需要 Apps Script)
+  ─────────────────────────────────────────────────────
+  前端直接 fetch Google Sheet 的 CSV 汇出网址：
+
+    SYS-01 每日回复量    sheet 1lKjyN...dOLIFn1J0syvCLdjWzk  gid=1762805145
+    SYS-02 班别回复量    (同上)
+    SYS-03 阶段回复量    (同上)
+    SYS-04 营运数据      sheet 19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40  gid=860680192
+    KPI 总同步           同时拉 SHEET_01 + SHEET_04 聚合
+
+  好处：不用部署；坏处：只能「读」，不能写。
+
+  路径 B：Google Apps Script Web App (读 + 写)
+  ─────────────────────────────────────────────────────
+  index.html 内有两支 GAS Web App URL：
+
+    SheetSync.init(URL_A, key)       →  google-apps-script.gs
+      用途：users / login_logs / action_logs 云端同步
+      API key：bi-dashboard-sync-2026-secure-01
+      动作：getUsers / upsertUser / addLoginLog / addActionLog
+
+    SCHEDULE_API_URL = URL_B         →  google-apps-script.gs
+      用途：拿「4月假表26」这个矩阵班表
+      动作：?action=getLocalSchedule&sheet=4月假表26
+      内部流程：GAS 收到请求 → 呼叫 LocalParser.parse(sheet)
+               → 把「日期 × 早/中/夜班 × 人名 → 班/休/事假」
+                 这个二维矩阵解析成 JSON → 回传前端
+
+  LocalParser.gs 做什么？
+  ─────────────────────────────────────────────────────
+  专门解析业主手写的班表 Excel 格式 (「4月假表26」这类 sheet)：
+    - 自动侦测表头行 (含「早班/中班/夜班」+「值班人数」关键字)
+    - 自动切分三个班次区块，提取该区块下的人名列
+    - 逐日读取每人的「班/休/事假/特休/病假/迟」
+    - 对应到标准状态：on_duty / day_off / leave / late
+    - 产出 { daily: {1:{morning:{...}, swing:{...}}}, summary:{...} }
+
+  资料流向图：
+    ┌──────────────┐
+    │ Google Sheet │  (业主手写班表 / 回复量统计)
+    └──────┬───────┘
+           │
+      ┌────┴────┐
+      │         │
+   CSV 汇出   GAS Web App
+      │         │
+      │      ┌──┴──────────────┐
+      │      │ google-apps-    │
+      │      │ script.gs       │
+      │      │  +              │
+      │      │ LocalParser.gs  │
+      │      └──┬──────────────┘
+      │         │  (JSON)
+      └────┬────┘
+           ▼
+    ┌─────────────┐
+    │ index.html  │  →  六个分页的图表 / KPI / 跑马灯
+    └─────────────┘
+
+
+【5】给其他 AI 接手时的使用说明 (业主不写程式码，请照做)
+────────────────────────────────────────────────────────────────
+
+  A. 业主是谁、怎么沟通
+     ─────────────────────────────
+     - 业主不会写程式码，要用「白话」沟通、不要直接贴一串 code。
+     - 业主沟通时混用繁体 / 简体中文；回覆保持中文即可。
+     - 业主的指令通常是「改数字」「换颜色」「加一个按钮」这种
+       视觉 / 资料层面的需求，很少涉及架构重构。
+
+  B. 看到任何需求，请先这样判断
+     ─────────────────────────────
+     1. 先问自己：这是「01~06 六个模组」中的哪一个？
+        → 一定是在 index.html 里面改，不要去动 demo-0X。
+     2. 确认是哪一页后，用 #page-xxx 搜寻到对应区段。
+     3. 再看需求是：
+        (a) 改文字 / 数字 / 颜色  →  直接改 HTML / style。
+        (b) 改资料来源           →  查本档「第 4 节 资料流向」。
+        (c) 改班表解析逻辑       →  改 LocalParser.gs，不是前端。
+        (d) 改用户 / 登入 / 日志 →  改 google-apps-script.gs。
+
+  C. 常见误区 (前任 AI 踩过的雷)
+     ─────────────────────────────
+     - 误把 demo-01-rift.html 当成「模组 01 总览」去改 → 完全错档。
+     - 想要「做一个新的 HTML」→ 错，直接在 index.html 加分页。
+     - 改了 LocalParser.gs 但忘了它跑在 Google Apps Script 端，
+       不是 npm 部署，要去 script.google.com 重新贴上并发布。
+     - index.html 有 60 万 bytes 非常大，直接全档读会爆，
+       请用 grep/sed 定位 + Read 工具带 offset/limit。
+
+  D. 近期业主决策 (看 git log 就知道)
+     ─────────────────────────────
+     - 2026-04-20：模组 06 的 68 项产品已写死 (hardcode)，
+       不再从 sheet 拉 → 不要再「补回同步」。
+     - 投诉数量 / 投诉金额 已固定写死 390 / 69710，
+       不再从 localStorage 编辑。
+     - 跑马灯会跟着所有资料源自动同步。
+
+  E. 修改前的自保 SOP
+     ─────────────────────────────
+     1. 用 git status 确认干净。
+     2. 修改只在 index.html 或 *.gs 里。
+     3. 改完先 grep 搜旧值，确保没有漏改。
+     4. 业主会要求「我先看看」→ 要等业主看过再 commit。
+     5. commit message 沿用现有风格 (feat / refactor / fix)。
+
+  F. 给业主本人 (你) 的使用提醒
+     ─────────────────────────────
+     这份文件你自己也要留一份，遇到下列情况翻开用：
+
+     1. 找新 AI 帮忙时
+        → 开场白先说「请先读 GitHub 仓库根目录的 项目结构说明.txt」
+
+     2. 自己忘了某个功能在哪里
+        → 翻【3】，搜模组名称就能找到对应 DOM ID
+
+     3. 要 AI 改东西时，照这个模板说：
+        ┌────────────────────────────────────────────┐
+        │ 我要改的是: 模组 XX (例: 03 出勤排班)       │
+        │ 档案位置: index.html                        │
+        │ DOM 定位: #page-xxx (例: #page-attendance) │
+        │ 改什么: [具体描述]                          │
+        │ 注意: 我不写 code, 请给我可复制的命令       │
+        └────────────────────────────────────────────┘
+
+     4. 每次改完 push 前，要求 AI 让你先预览，你确认再 push。
+
+
+════════════════════════════════════════════════════════════════
+  本文件由 Claude 阅读全专案后产出，未修改任何程式码。
+  如资料流向或 GAS URL 已变动，请以 index.html 现况为准。
+════════════════════════════════════════════════════════════════
