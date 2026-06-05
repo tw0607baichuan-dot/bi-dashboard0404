@@ -578,6 +578,32 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 .hero-sync-note.ok { color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.4); animation:none; }
 .hero-sync-note.err { color:var(--accent-red); text-shadow:0 0 5px rgba(255,68,102,0.4); animation:none; }
 @keyframes hero-sync-blink { 0%,100% { opacity:0.45; } 50% { opacity:1; } }
+/* ── SYNC ALL：顶栏全部同步按钮 + 全屏同步遮罩 ── */
+.header-syncall-group { display:flex; flex-direction:column; align-items:center; gap:5px; padding-right:16px; border-right:1px solid rgba(0,195,255,0.15); }
+.sync-btn.header-syncall-btn { padding:7px 16px; font-size:13px; letter-spacing:2px; }
+.header-syncall-note { font-family:var(--font-display); font-size:9px; letter-spacing:1px; color:var(--text-dim); opacity:0.75; white-space:nowrap; transition:color .3s; }
+.header-syncall-note.ok { color:var(--accent-cyan); text-shadow:0 0 5px rgba(0,240,255,0.4); opacity:1; }
+.header-syncall-note.err { color:var(--accent-red); text-shadow:0 0 5px rgba(255,68,102,0.4); opacity:1; }
+.syncall-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(0,14,26,0.85); backdrop-filter:blur(3px); pointer-events:auto; opacity:0; visibility:hidden; transition:opacity .4s ease,visibility .4s ease; }
+.syncall-overlay.show { opacity:1; visibility:visible; }
+.syncall-box { display:flex; flex-direction:column; align-items:center; gap:16px; padding:44px 72px; background:var(--bg-card); border:1px solid rgba(0,240,255,0.35); border-radius:4px; box-shadow:0 0 30px rgba(0,200,255,0.18),inset 0 0 24px rgba(0,240,255,0.05); position:relative; }
+.syncall-box::before,.syncall-box::after { content:''; position:absolute; width:16px; height:16px; border-color:var(--accent-cyan); border-style:solid; opacity:0.7; }
+.syncall-box::before { top:8px; left:8px; border-width:2px 0 0 2px; }
+.syncall-box::after { bottom:8px; right:8px; border-width:0 2px 2px 0; }
+.syncall-spinner { width:64px; height:64px; border:3px solid rgba(0,240,255,0.15); border-top-color:var(--accent-cyan); border-radius:50%; animation:syncall-spin .9s linear infinite; box-shadow:0 0 18px rgba(0,240,255,0.2); }
+@keyframes syncall-spin { to { transform:rotate(360deg); } }
+.syncall-overlay.failed .syncall-spinner { border-top-color:var(--accent-red); animation-play-state:paused; box-shadow:0 0 18px rgba(255,68,102,0.2); }
+.syncall-title { font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:5px; color:var(--accent-cyan); text-shadow:0 0 8px rgba(0,240,255,0.6),0 0 22px rgba(0,240,255,0.2); }
+.syncall-sub { font-size:13px; color:var(--text-secondary); letter-spacing:1px; }
+.syncall-progress { display:flex; gap:16px; font-family:var(--font-display); font-size:12px; letter-spacing:1px; }
+.syncall-progress .sp-item { color:var(--text-dim); transition:color .3s,text-shadow .3s; }
+.syncall-progress .sp-item[data-st="run"] { color:var(--accent-cyan); text-shadow:0 0 6px rgba(0,240,255,0.45); animation:hero-sync-blink 1.2s ease-in-out infinite; }
+.syncall-progress .sp-item[data-st="ok"] { color:var(--accent-green); text-shadow:0 0 6px rgba(0,255,136,0.45); }
+.syncall-progress .sp-item[data-st="fail"] { color:var(--accent-red); text-shadow:0 0 6px rgba(255,68,102,0.45); }
+.syncall-fail-msg { display:none; font-family:var(--font-display); font-size:13px; letter-spacing:2px; color:var(--accent-red); text-shadow:0 0 6px rgba(255,68,102,0.5); }
+.syncall-close-btn { display:none; }
+.syncall-overlay.failed .syncall-fail-msg { display:block; }
+.syncall-overlay.failed .syncall-close-btn { display:inline-flex; }
 .kpi-card:hover { border-color:rgba(0,240,255,0.55); box-shadow:0 5px 20px var(--glow-med),0 1px 40px var(--glow-soft),inset 0 -16px 35px rgba(0,200,255,0.035); transform:translateY(-2px); }
 .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent-cyan),var(--accent-purple),transparent); opacity:0.7; }
 .kpi-card::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,200,255,0.03),transparent); animation:cardSweep 8s ease-in-out infinite; pointer-events:none; }
@@ -3504,6 +3530,10 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
       <div class="header-status"><span class="header-status-dot"></span>SYSTEM ONLINE</div>
       <div class="header-status-label">ALL SERVICES NOMINAL</div>
     </div>
+    <div class="header-syncall-group">
+      <button type="button" class="sync-btn header-syncall-btn" id="syncall-btn" data-state="idle" title="同时同步 KPI 与 SYS-01~04 全部模块"><span class="sync-btn-ico">⟳</span><span class="sync-btn-txt">全部同步</span></button>
+      <div class="header-syncall-note" id="syncall-note">尚未全部同步</div>
+    </div>
     <div class="header-clock-group">
       <div class="header-clock-label">REALTIME</div>
       <div class="header-clock" id="clock" data-time="--:--:--">--:--:--</div>
@@ -4267,6 +4297,24 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
       <div class="tfa-hint" style="color:var(--accent-orange)">用户下次登入时将被强制修改密码</div>
       <button class="cyber-btn" onclick="hideModal('temp-pw-modal')">确认关闭</button>
     </div>
+  </div>
+</div>
+
+<!-- SYNC ALL: 全屏同步遮罩 -->
+<div class="syncall-overlay" id="syncall-overlay">
+  <div class="syncall-box">
+    <div class="syncall-spinner"></div>
+    <div class="syncall-title">SYNCHRONIZING / 同步中</div>
+    <div class="syncall-sub">正在更新各模块资料，请稍候...</div>
+    <div class="syncall-progress" id="syncall-progress">
+      <span class="sp-item" data-mod="KPI" data-st="wait">KPI ⏳</span>
+      <span class="sp-item" data-mod="SYS-01" data-st="wait">SYS-01 ⏳</span>
+      <span class="sp-item" data-mod="SYS-02" data-st="wait">SYS-02 ⏳</span>
+      <span class="sp-item" data-mod="SYS-03" data-st="wait">SYS-03 ⏳</span>
+      <span class="sp-item" data-mod="SYS-04" data-st="wait">SYS-04 ⏳</span>
+    </div>
+    <div class="syncall-fail-msg" id="syncall-fail-msg">部分模块同步失败</div>
+    <button type="button" class="sync-btn syncall-close-btn" id="syncall-close-btn"><span class="sync-btn-txt">关闭</span></button>
   </div>
 </div>
 
@@ -6115,9 +6163,9 @@ window.__syncUtils=(function(){
   }
 
   function doSync(){
-    if(btn.dataset.state==='syncing') return;
+    if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
@@ -6127,12 +6175,16 @@ window.__syncUtils=(function(){
       applyData(list);
       setState('success','最后同步 '+hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
+      return {ok:true};
     }).catch(function(err){
       console.error('[SYS-01 sync] failed:',err);
       setState('error','同步失败 '+hhmm(new Date()));
+      return {ok:false,error:err};
     });
   }
   btn.addEventListener('click',doSync);
+  window.__syncAllFns=window.__syncAllFns||{};
+  window.__syncAllFns['SYS-01']=doSync;
 })();
 
 // ── SYS-02 同步：从 Google Sheets 拉班别回复量 ──
@@ -6196,9 +6248,9 @@ window.__syncUtils=(function(){
   }
 
   function doSync(){
-    if(btn.dataset.state==='syncing') return;
+    if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
@@ -6208,12 +6260,16 @@ window.__syncUtils=(function(){
       applyData(sums);
       setState('success','最后同步 '+U.hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
+      return {ok:true};
     }).catch(function(err){
       console.error('[SYS-02 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
+      return {ok:false,error:err};
     });
   }
   btn.addEventListener('click',doSync);
+  window.__syncAllFns=window.__syncAllFns||{};
+  window.__syncAllFns['SYS-02']=doSync;
 })();
 
 // ── SYS-03 同步：从 Google Sheets 拉阶段（周）回复量 ──
@@ -6286,9 +6342,9 @@ window.__syncUtils=(function(){
   }
 
   function doSync(){
-    if(btn.dataset.state==='syncing') return;
+    if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
@@ -6298,12 +6354,16 @@ window.__syncUtils=(function(){
       applyData(weeks);
       setState('success','最后同步 '+U.hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
+      return {ok:true};
     }).catch(function(err){
       console.error('[SYS-03 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
+      return {ok:false,error:err};
     });
   }
   btn.addEventListener('click',doSync);
+  window.__syncAllFns=window.__syncAllFns||{};
+  window.__syncAllFns['SYS-03']=doSync;
 })();
 
 // ── SYS-04 同步：从 Google Sheets 拉营运数据（当月加总） ──
@@ -6381,9 +6441,9 @@ window.__syncUtils=(function(){
   }
 
   function doSync(){
-    if(btn.dataset.state==='syncing') return;
+    if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
@@ -6392,12 +6452,16 @@ window.__syncUtils=(function(){
       applyData(totals);
       setState('success','最后同步 '+U.hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
+      return {ok:true};
     }).catch(function(err){
       console.error('[SYS-04 sync] failed:',err);
       setState('error','同步失败 '+U.hhmm(new Date()));
+      return {ok:false,error:err};
     });
   }
   btn.addEventListener('click',doSync);
+  window.__syncAllFns=window.__syncAllFns||{};
+  window.__syncAllFns['SYS-04']=doSync;
 })();
 
 // ── KPI 总同步：并行拉 SYS-01 + SYS-04，更新顶部 flip / 本周总进线量 / 产品回报数量 ──
@@ -6504,9 +6568,9 @@ window.__syncUtils=(function(){
   }
 
   function doSync(){
-    if(btn.dataset.state==='syncing') return;
+    if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    Promise.all([fetchCsv(SHEET_01),fetchCsv(SHEET_04)]).then(function(texts){
+    return Promise.all([fetchCsv(SHEET_01),fetchCsv(SHEET_04)]).then(function(texts){
       var a01=aggregate01(U.parseCSV(texts[0]));
       var pr=aggregate04(U.parseCSV(texts[1]));
       applyData(a01.monthly,a01.weekly,pr);
@@ -6514,14 +6578,18 @@ window.__syncUtils=(function(){
       setState('success','最后同步 '+t);
       if(typeof renderMarquees==="function") renderMarquees();
       setNote('最后同步 '+t,'ok');
+      return {ok:true};
     }).catch(function(err){
       console.error('[KPI sync] failed:',err);
       var t=U.hhmm(new Date());
       setState('error','同步失败 '+t);
       setNote('同步失败 '+t,'err');
+      return {ok:false,error:err};
     });
   }
   btn.addEventListener('click',doSync);
+  window.__syncAllFns=window.__syncAllFns||{};
+  window.__syncAllFns['KPI']=doSync;
 })();
 
 // Crystal Matrix — 粒子系统 v2.0
@@ -9612,6 +9680,88 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
     document.getElementById('mem-modal-body').innerHTML=html;
     document.getElementById('mem-modal').classList.add('active');
   });
+})();
+
+// ── SYNC ALL：顶栏全部同步 + 进入看板自动同步 + 全屏遮罩 ──
+(function(){
+  var MODULES=['KPI','SYS-01','SYS-02','SYS-03','SYS-04'];
+  var ICONS={wait:'⏳',run:'⟳',ok:'✓',fail:'✗'};
+  var AUTO_KEY='syncall-last-auto';
+  var AUTO_COOLDOWN=5*60*1000; // 5 分钟内重进同 tab 不再自动同步
+  var btn=document.getElementById('syncall-btn');
+  var note=document.getElementById('syncall-note');
+  var overlay=document.getElementById('syncall-overlay');
+  var failMsg=document.getElementById('syncall-fail-msg');
+  var closeBtn=document.getElementById('syncall-close-btn');
+  if(!btn||!overlay) return;
+  var U=window.__syncUtils; if(!U) return;
+  var running=false;
+  var lastAllDone=null;
+
+  function setItem(mod,st){
+    var el=overlay.querySelector('.sp-item[data-mod="'+mod+'"]');
+    if(el){el.dataset.st=st;el.textContent=mod+' '+ICONS[st];}
+  }
+  function updateNote(){
+    if(!lastAllDone) return;
+    var mins=Math.floor((Date.now()-lastAllDone.getTime())/60000);
+    note.textContent='最后全部同步：'+U.hhmm(lastAllDone)+' · '+(mins<1?'刚刚':mins+' 分钟前');
+  }
+  setInterval(updateNote,30000);
+
+  function syncAll(){
+    if(running) return;
+    var fns=window.__syncAllFns||{};
+    running=true;
+    btn.dataset.state='syncing';
+    overlay.classList.remove('failed');
+    MODULES.forEach(function(m){setItem(m,fns[m]?'run':'fail');});
+    overlay.classList.add('show');
+    var tasks=MODULES.map(function(m){
+      if(!fns[m]) return Promise.resolve({mod:m,ok:false});
+      // 重用各模块原本的 doSync（已 return Promise，resolve {ok:bool}）
+      return fns[m]().then(function(r){
+        var ok=!!(r&&r.ok);
+        setItem(m,ok?'ok':'fail');
+        return {mod:m,ok:ok};
+      },function(){setItem(m,'fail');return {mod:m,ok:false};});
+    });
+    Promise.allSettled(tasks).then(function(results){
+      running=false;
+      btn.dataset.state='idle';
+      var failed=[];
+      results.forEach(function(r){
+        var v=(r.status==='fulfilled')?r.value:null;
+        if(!v||!v.ok) failed.push(v?v.mod:'?');
+      });
+      if(failed.length===0){
+        lastAllDone=new Date();
+        updateNote();
+        note.classList.remove('err');note.classList.add('ok');
+        setTimeout(function(){overlay.classList.remove('show');},500);
+      } else {
+        failMsg.textContent='部分模块同步失败：'+failed.join(' / ');
+        overlay.classList.add('failed');
+        note.textContent='部分同步失败 '+U.hhmm(new Date());
+        note.classList.remove('ok');note.classList.add('err');
+      }
+    });
+  }
+  btn.addEventListener('click',syncAll);
+  if(closeBtn) closeBtn.addEventListener('click',function(){overlay.classList.remove('show');overlay.classList.remove('failed');});
+
+  // 进入看板自动同步：load 完延迟 1 秒触发；sessionStorage 防呆（手动按钮不受限）
+  function autoSync(){
+    var now=Date.now();
+    try{
+      var last=parseInt(sessionStorage.getItem(AUTO_KEY)||'0',10);
+      if(last&&now-last<AUTO_COOLDOWN){console.log('[SyncAll] auto-sync skipped (5min cooldown)');return;}
+      sessionStorage.setItem(AUTO_KEY,String(now));
+    }catch(e){}
+    syncAll();
+  }
+  if(document.readyState==='complete') setTimeout(autoSync,1000);
+  else window.addEventListener('load',function(){setTimeout(autoSync,1000);});
 })();
 </script>
 
