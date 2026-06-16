@@ -10121,5 +10121,553 @@ var AuthGate = (function(){
 window.logout = function(){ AuthGate.logout(); };
 </script>
 
+<!-- ════════════════════════════════════════════════════════════════
+     [Phase2-B2] 退费数据分析子页 (Refunds Analytics SubPage)
+     - 真实实作 SP.registerSubpage:注入退费子页到 page-overview 的 nav-children
+     - 5 区块:KPI / 每日趋势 / 支付方式 / 平台 Top10 / 金额分布(+ 洞察条)
+     - 控件栏:时间预设 + 自订 + 对比开关 + 刷新 + 上传
+     - sp- 前缀 toast + 上传 modal
+     - 默认范围策略(修正版 A):依 latest 落点挑「会涵盖它」的预设按钮,按钮语义永远诚实
+     ════════════════════════════════════════════════════════════════ -->
+<style id="sp-rf-styles">
+#page-refunds .dashboard { padding:18px 24px 40px; display:flex; flex-direction:column; gap:16px; }
+.sp-rf-controls { display:flex; align-items:center; flex-wrap:wrap; gap:12px;
+  background:linear-gradient(160deg,rgba(0,80,200,0.06),transparent 50%),var(--bg-card);
+  border:1px solid var(--border-mech); border-radius:4px; padding:12px 16px; }
+.sp-rf-presets { display:flex; gap:6px; }
+.sp-rf-presets button, .sp-rf-custom button, .sp-rf-refresh, .sp-rf-upload {
+  font-family:inherit; cursor:pointer; padding:7px 14px; border-radius:3px; font-size:13px;
+  background:rgba(0,20,44,0.6); color:var(--text-secondary);
+  border:1px solid rgba(0,195,255,0.28); transition:all .18s ease; }
+.sp-rf-presets button:hover, .sp-rf-refresh:hover, .sp-rf-upload:hover { border-color:var(--accent-cyan); color:var(--text-primary); }
+.sp-rf-presets button.active { background:linear-gradient(180deg,rgba(0,240,255,0.18),rgba(0,116,255,0.1));
+  border-color:var(--accent-cyan); color:var(--accent-cyan); box-shadow:0 0 14px rgba(0,240,255,0.25); }
+.sp-rf-custom { display:flex; align-items:center; gap:8px; color:var(--text-dim); font-size:13px; }
+.sp-rf-custom input[type=date] { font-family:inherit; background:rgba(0,12,28,0.8); color:var(--text-primary);
+  border:1px solid rgba(0,195,255,0.28); border-radius:3px; padding:6px 8px; color-scheme:dark; }
+.sp-rf-compare-wrap { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.sp-rf-compare-toggle { display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:13px; cursor:pointer; user-select:none; }
+.sp-rf-compare-toggle input { accent-color:var(--accent-cyan); width:15px; height:15px; cursor:pointer; }
+#sp-rf-compare-sel { font-family:inherit; background:rgba(0,12,28,0.8); color:var(--text-primary);
+  border:1px solid rgba(0,195,255,0.28); border-radius:3px; padding:6px 8px; font-size:13px; }
+.sp-rf-upload { border-color:rgba(0,255,136,0.4); color:var(--accent-green); }
+.sp-rf-upload:hover { border-color:var(--accent-green); box-shadow:0 0 14px rgba(0,255,136,0.25); }
+.sp-rf-insights { display:flex; flex-wrap:wrap; gap:10px; }
+.sp-rf-insight { display:flex; align-items:center; gap:8px; font-size:13px; padding:8px 14px; border-radius:3px;
+  background:var(--bg-card); border:1px solid var(--border-mech); color:var(--text-secondary); }
+.sp-rf-insight .sp-rf-ins-ico { font-size:14px; }
+.sp-rf-insight.good { border-color:rgba(0,255,136,0.4); color:var(--accent-green); }
+.sp-rf-insight.bad  { border-color:rgba(255,68,102,0.4); color:var(--accent-red); }
+.sp-rf-insight.warn { border-color:rgba(255,128,64,0.4); color:var(--accent-orange); }
+.sp-rf-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+#page-refunds .sp-rf-kpi { position:relative; background:var(--bg-card); border:1px solid var(--border-mech);
+  border-radius:4px; padding:16px 14px; display:flex; flex-direction:column; gap:6px; }
+.sp-rf-kpi .sp-rf-kpi-label { font-size:12px; color:var(--text-dim); letter-spacing:.5px; }
+.sp-rf-kpi .sp-rf-kpi-val { font-size:26px; font-weight:700; color:var(--accent-cyan); font-variant-numeric:tabular-nums; }
+.sp-rf-kpi .sp-rf-kpi-delta { font-size:12px; font-variant-numeric:tabular-nums; }
+.sp-rf-kpi .sp-rf-kpi-delta.down { color:var(--accent-green); }
+.sp-rf-kpi .sp-rf-kpi-delta.up { color:var(--accent-red); }
+.sp-rf-kpi .sp-rf-kpi-delta.flat { color:var(--text-dim); }
+#page-refunds .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+#page-refunds .panel { background:var(--bg-card); border:1px solid var(--border-mech); border-radius:4px; padding:14px 16px; }
+#page-refunds .panel-title { font-size:14px; color:var(--text-primary); margin-bottom:10px; letter-spacing:.5px;
+  border-bottom:1px solid rgba(0,195,255,0.15); padding-bottom:8px; }
+.sp-rf-chart { width:100%; height:300px; }
+#sp-rf-trend-wrap { position:relative; height:300px; }
+.sp-rf-empty { text-align:center; color:var(--text-dim); padding:60px 20px; font-size:15px;
+  border:1px dashed rgba(0,195,255,0.25); border-radius:4px; background:rgba(0,12,28,0.4); }
+.sp-rf-rangelabel { text-align:right; color:var(--text-dim); font-size:12px; letter-spacing:.5px; }
+/* sp- toast */
+#sp-toast-container { position:fixed; right:22px; bottom:22px; z-index:11000; display:flex; flex-direction:column; gap:10px; }
+.sp-toast { min-width:240px; max-width:380px; padding:12px 16px; border-radius:4px; font-size:13px; line-height:1.5;
+  background:linear-gradient(160deg,rgba(8,14,30,0.98),rgba(4,8,18,0.98)); color:var(--text-primary);
+  border:1px solid var(--border-mech); box-shadow:0 8px 30px rgba(0,0,0,0.5); animation:spToastIn .25s ease-out; }
+.sp-toast.ok { border-color:rgba(0,255,136,0.5); }
+.sp-toast.error { border-color:rgba(255,68,102,0.55); }
+.sp-toast.info { border-color:rgba(0,195,255,0.5); }
+.sp-toast .sp-toast-ico { margin-right:8px; font-weight:700; }
+.sp-toast.ok .sp-toast-ico { color:var(--accent-green); }
+.sp-toast.error .sp-toast-ico { color:var(--accent-red); }
+.sp-toast.info .sp-toast-ico { color:var(--accent-cyan); }
+.sp-toast.sp-toast-out { animation:spToastOut .3s ease-in forwards; }
+@keyframes spToastIn { 0%{opacity:0;transform:translateX(40px)} 100%{opacity:1;transform:translateX(0)} }
+@keyframes spToastOut { 0%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(40px)} }
+/* upload modal extras */
+#sp-rf-upload-modal .sp-rf-drop { border:1px dashed rgba(0,195,255,0.4); border-radius:4px; padding:22px 16px;
+  text-align:center; color:var(--text-dim); font-size:13px; cursor:pointer; transition:all .18s; }
+#sp-rf-upload-modal .sp-rf-drop:hover, #sp-rf-upload-modal .sp-rf-drop.drag { border-color:var(--accent-cyan); color:var(--text-secondary); background:rgba(0,195,255,0.05); }
+#sp-rf-upload-modal .sp-rf-fname { margin-top:10px; color:var(--accent-cyan); font-size:13px; word-break:break-all; }
+#sp-rf-upload-modal .sp-rf-hint { color:var(--text-dim); font-size:12px; margin-top:8px; line-height:1.6; }
+#sp-rf-upload-modal .sp-rf-submit { width:100%; margin-top:14px; padding:10px; font-family:inherit; cursor:pointer;
+  background:linear-gradient(180deg,rgba(0,255,136,0.18),rgba(0,116,255,0.08)); color:var(--accent-green);
+  border:1px solid rgba(0,255,136,0.45); border-radius:3px; font-size:14px; }
+#sp-rf-upload-modal .sp-rf-submit:disabled { opacity:.5; cursor:not-allowed; }
+@media(max-width:1280px){ .sp-rf-kpis{grid-template-columns:repeat(3,1fr)} #page-refunds .charts-row{grid-template-columns:1fr} }
+</style>
+
+<!-- 退费上传 Modal(复用既有 .modal-overlay / .cyber-modal) -->
+<div class="modal-overlay" id="sp-rf-upload-modal">
+  <div class="cyber-modal">
+    <button class="modal-close" onclick="hideModal('sp-rf-upload-modal')">&times;</button>
+    <div class="modal-header"><h2>上传退费 Excel</h2><span class="modal-sub">REFUNDS UPLOAD</span></div>
+    <div class="modal-body">
+      <div class="sp-rf-drop" id="sp-rf-drop">点击选择或拖入 .xlsx 档案<br><span style="font-size:12px;opacity:.7">档名需含产品线与周次</span></div>
+      <input type="file" id="sp-rf-file" accept=".xlsx,.xls" style="display:none">
+      <div class="sp-rf-fname" id="sp-rf-fname"></div>
+      <div class="sp-rf-hint">系统会依档名解析产品线 / 周次,内容重复(MD5)会被拒绝,同产品线同周旧版会自动归档。</div>
+      <button class="sp-rf-submit" id="sp-rf-submit" disabled>开始上传</button>
+    </div>
+  </div>
+</div>
+
+<div id="sp-toast-container"></div>
+
+<script>
+/* ── sp- toast ── */
+function spToast(msg, type, ms){
+  type = type || 'info'; ms = ms || 3600;
+  var box = document.getElementById('sp-toast-container');
+  if(!box) return;
+  var ico = type==='ok' ? '✓' : (type==='error' ? '✕' : 'ℹ');
+  var el = document.createElement('div');
+  el.className = 'sp-toast ' + type;
+  el.innerHTML = '<span class="sp-toast-ico">'+ico+'</span>'+String(msg);
+  box.appendChild(el);
+  setTimeout(function(){ el.classList.add('sp-toast-out'); setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 320); }, ms);
+}
+
+/* ── 把 Phase1 的 registerSubpage stub 升级成真实实作 ── */
+SP.registerSubpage = function(cfg){
+  this._subpages[cfg.id] = cfg;
+  // 1) 建页面节点并挂进 .app-main(与其它 .page 同层)
+  var main = document.querySelector('.app-main');
+  if(main && !document.getElementById(cfg.id)){
+    var pageEl = document.createElement('div');
+    pageEl.className = 'page';
+    pageEl.id = cfg.id;
+    if(cfg.dataAccess) pageEl.setAttribute('data-access', cfg.dataAccess);
+    pageEl.innerHTML = cfg.html || '';
+    main.appendChild(pageEl);
+  }
+  // 2) 注入 nav-child 到父 group 的 .nav-children
+  var group = document.querySelector('.nav-group[data-page="'+cfg.parent+'"]');
+  if(group){
+    var children = group.querySelector('.nav-children');
+    if(children && !children.querySelector('.nav-child[data-page="'+cfg.id+'"]')){
+      var child = document.createElement('div');
+      child.className = 'nav-child nav-item';
+      child.setAttribute('data-page', cfg.id);
+      child.innerHTML = '<span class="nav-idx">'+(cfg.idx||'')+'</span>'+cfg.title;
+      // 点子项:切页 + 高亮(自带 stopPropagation,避免触发父项 toggle)
+      child.addEventListener('click', function(e){
+        e.stopPropagation();
+        SP.switchToPage(cfg.id);
+        if(typeof updateNavActive==='function') updateNavActive(cfg.id);
+        // 父项保留 active 视觉脉络
+        document.querySelectorAll('.nav-parent[data-page="'+cfg.parent+'"]').forEach(function(p){ p.classList.add('active'); });
+        if(typeof cfg.onActivate==='function') cfg.onActivate();
+      });
+      children.appendChild(child);
+      // 确保父 group 展开,子项可见
+      group.setAttribute('data-expanded','true');
+      children.style.display = 'block';
+      if(typeof updateNavArrows==='function') updateNavArrows();
+    }
+  }
+  console.log('[SP] registered (real):', cfg.id);
+};
+
+/* ════════ 退费分析模块 ════════ */
+var SP_REFUNDS = (function(){
+  var API = '/api/refunds';
+  var ECH = {}; // echarts 实例
+  var trendChart = null;
+  var st = { range:'last-week', start:null, end:null, compare:false, compareTarget:'last-week', loaded:false };
+
+  // range → 预设的 compare 目标
+  var CMP_DEFAULT = { 'last-week':'last-week', week:'last-week', month:'last-month', quarter:'last-quarter', year:'last-year', custom:'yoy' };
+
+  function money(n){ return '¥' + Number(n||0).toLocaleString('zh-CN'); }
+  function intf(n){ return Number(n||0).toLocaleString('zh-CN'); }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function iso(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+  // X-User-Role 映射(中文角色 → 后端 ALLOWED_ROLES)
+  function currentUser(){
+    try { return (typeof AuthManager!=='undefined' && AuthManager.getCurrentUser) ? AuthManager.getCurrentUser() : null; }
+    catch(e){ return null; }
+  }
+  function mapRole(r){
+    var m = { 'superadmin':'superadmin','超级管理员':'superadmin','主管':'manager','manager':'manager',
+              '组长':'leader','leader':'leader','维护':'maintainer','maintainer':'maintainer' };
+    return m[r] || (r||'');
+  }
+
+  /* ── 默认范围策略(修正版 A):挑会涵盖 latest 的最小预设 ── */
+  function pickDefaultRange(latestStr){
+    if(!latestStr) return 'last-week';
+    var today = new Date();
+    var latest = new Date(latestStr + 'T00:00:00');
+    var dow = (today.getDay()+6)%7; // 周一=0
+    var thisMonday = new Date(today); thisMonday.setDate(today.getDate()-dow); thisMonday.setHours(0,0,0,0);
+    var lastWeekStart = new Date(thisMonday); lastWeekStart.setDate(thisMonday.getDate()-7);   // 上周一
+    var lastWeekEnd = new Date(thisMonday); lastWeekEnd.setDate(thisMonday.getDate()-1); lastWeekEnd.setHours(23,59,59,999); // 上周日
+    var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    var q = Math.floor(today.getMonth()/3)*3;
+    var quarterStart = new Date(today.getFullYear(), q, 1);
+    var yearStart = new Date(today.getFullYear(), 0, 1);
+    // 由小到大,挑第一个涵盖 latest 的预设(最小为「上周」)
+    if(latest >= lastWeekStart && latest <= lastWeekEnd) return 'last-week';
+    if(latest >= monthStart && latest <= today) return 'month';
+    if(latest >= quarterStart && latest <= today) return 'quarter';
+    if(latest >= yearStart && latest <= today) return 'year';
+    return 'custom'; // latest 落在本年之外 → 用自订涵盖其当周(语义诚实)
+  }
+  function weekOf(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    var dow = (d.getDay()+6)%7;
+    var s = new Date(d); s.setDate(d.getDate()-dow);
+    var e = new Date(s); e.setDate(s.getDate()+6);
+    return { start: iso(s), end: iso(e) };
+  }
+
+  function setActivePreset(range){
+    document.querySelectorAll('#page-refunds .sp-rf-presets button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-range')===range);
+    });
+    var cust = document.getElementById('sp-rf-custom');
+    if(cust) cust.style.display = (range==='custom') ? 'flex' : 'none';
+  }
+
+  function buildQuery(){
+    var p = new URLSearchParams();
+    p.set('range', st.range);
+    if(st.range==='custom'){
+      if(st.start) p.set('start_date', st.start);
+      if(st.end) p.set('end_date', st.end);
+    }
+    p.set('compare', st.compare ? st.compareTarget : 'none');
+    return p.toString();
+  }
+
+  function load(){
+    var url = API + '/data?' + buildQuery();
+    fetch(url).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(res){
+        if(!res.ok){ spToast((res.j && res.j.message) || '载入失败', 'error'); return; }
+        render(res.j);
+      })
+      .catch(function(e){ spToast('网络错误:'+e.message, 'error'); });
+  }
+
+  /* ── 渲染 5 区块 ── */
+  function render(data){
+    var empty = document.getElementById('sp-rf-empty');
+    var hasData = data.has_data;
+    document.querySelectorAll('#page-refunds .charts-row, #page-refunds .sp-rf-kpis, #page-refunds .sp-rf-insights')
+      .forEach(function(el){ el.style.display = hasData ? '' : 'none'; });
+    if(empty) empty.style.display = hasData ? 'none' : 'block';
+
+    var lbl = document.getElementById('sp-rf-rangelabel');
+    if(lbl) lbl.textContent = data.range ? ('范围:' + data.range.label + (data.compare ? '  ·  对比:' + data.compare.label : '')) : '';
+    if(!hasData) return;
+
+    renderInsights(data.insights || []);
+    renderKpis(data.current.kpi, data.compare ? data.compare.kpi : null);
+    renderTrend(data.current.trend || []);
+    renderPayment(data.current.payment_breakdown || []);
+    renderPlatform(data.current.platform_top10 || []);
+    renderTiers(data.current.amount_tiers || []);
+  }
+
+  function renderInsights(list){
+    var box = document.getElementById('sp-rf-insights');
+    if(!box) return;
+    if(!list.length){ box.innerHTML=''; return; }
+    box.innerHTML = list.map(function(i){
+      var cls = (i.level==='good') ? 'good' : (i.level==='bad' ? 'bad' : (i.level==='warn' ? 'warn' : ''));
+      return '<div class="sp-rf-insight '+cls+'"><span class="sp-rf-ins-ico">'+(i.icon||'•')+'</span>'+i.text+'</div>';
+    }).join('');
+  }
+
+  function renderKpis(kpi, prev){
+    var box = document.getElementById('sp-rf-kpis');
+    if(!box) return;
+    var metrics = [
+      {k:'total_amount', label:'退费总额', fmt:money},
+      {k:'total_orders', label:'退费笔数', fmt:intf},
+      {k:'avg_per_order', label:'笔均退费', fmt:money},
+      {k:'daily_avg_amount', label:'日均金额', fmt:money},
+      {k:'daily_avg_orders', label:'日均笔数', fmt:intf}
+    ];
+    box.innerHTML = metrics.map(function(m){
+      var cur = kpi[m.k];
+      var delta = '';
+      if(prev){
+        var pv = prev[m.k];
+        if(pv){
+          var pct = ((cur-pv)/Math.abs(pv))*100;
+          var dir = pct<0 ? 'down' : (pct>0 ? 'up' : 'flat'); // 退费下降=好(绿)
+          var arrow = pct<0 ? '▼' : (pct>0 ? '▲' : '–');
+          delta = '<div class="sp-rf-kpi-delta '+dir+'">'+arrow+' '+Math.abs(pct).toFixed(1)+'% vs 对比期</div>';
+        } else {
+          delta = '<div class="sp-rf-kpi-delta flat">对比期为 0</div>';
+        }
+      }
+      return '<div class="sp-rf-kpi"><div class="sp-rf-kpi-label">'+m.label+'</div>'+
+             '<div class="sp-rf-kpi-val">'+m.fmt(cur)+'</div>'+delta+'</div>';
+    }).join('');
+  }
+
+  function renderTrend(trend){
+    var canvas = document.getElementById('sp-rf-trend');
+    if(!canvas || typeof Chart==='undefined') return;
+    var labels = trend.map(function(t){ return t.date.slice(5); });
+    if(trendChart){ trendChart.destroy(); trendChart = null; }
+    trendChart = new Chart(canvas, {
+      type:'line',
+      data:{ labels:labels, datasets:[
+        { label:'退费金额', data:trend.map(function(t){return t.amount;}), yAxisID:'y',
+          borderColor:'#00f0ff', backgroundColor:'rgba(0,240,255,0.12)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'退费笔数', data:trend.map(function(t){return t.orders;}), yAxisID:'y1',
+          borderColor:'#ff8040', backgroundColor:'rgba(255,128,64,0.05)', fill:false, tension:0.3, pointRadius:2 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#b0c8e4', boxWidth:12 } } },
+        scales:{
+          x:{ ticks:{ color:'#8aa0c0', maxRotation:0, autoSkip:true }, grid:{ color:'rgba(0,195,255,0.06)' } },
+          y:{ position:'left', ticks:{ color:'#00f0ff' }, grid:{ color:'rgba(0,195,255,0.06)' } },
+          y1:{ position:'right', ticks:{ color:'#ff8040' }, grid:{ drawOnChartArea:false } }
+        } }
+    });
+  }
+
+  function ech(id){
+    var el = document.getElementById(id);
+    if(!el || typeof echarts==='undefined') return null;
+    if(ECH[id]){ ECH[id].dispose(); }
+    ECH[id] = echarts.init(el);
+    return ECH[id];
+  }
+
+  function renderPayment(rows){
+    var c = ech('sp-rf-payment'); if(!c) return;
+    var palette = ['#00f0ff','#9466ff','#00ff88','#ff8040','#ffdd00','#ff4466'];
+    c.setOption({
+      tooltip:{ trigger:'item', formatter:'{b}: ¥{c} ({d}%)' },
+      legend:{ bottom:0, textStyle:{ color:'#b0c8e4' } },
+      color:palette,
+      series:[{ type:'pie', radius:['42%','68%'], center:['50%','45%'],
+        label:{ color:'#f4f9ff', formatter:'{b}\n{d}%' },
+        data: rows.map(function(r){ return { name:r.type, value:r.amount }; }) }]
+    });
+  }
+
+  function renderPlatform(rows){
+    var c = ech('sp-rf-platform'); if(!c) return;
+    var sorted = rows.slice().sort(function(a,b){ return a.amount-b.amount; });
+    c.setOption({
+      grid:{ left:90, right:30, top:14, bottom:24 },
+      tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter:function(p){ return p[0].name+': ¥'+p[0].value; } },
+      xAxis:{ type:'value', axisLabel:{ color:'#8aa0c0' }, splitLine:{ lineStyle:{ color:'rgba(0,195,255,0.08)' } } },
+      yAxis:{ type:'category', data:sorted.map(function(r){return r.platform_id;}), axisLabel:{ color:'#b0c8e4' } },
+      series:[{ type:'bar', data:sorted.map(function(r){return r.amount;}), barWidth:'55%',
+        itemStyle:{ color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#0074ff'},{offset:1,color:'#00f0ff'}]) } }]
+    });
+  }
+
+  function renderTiers(rows){
+    var c = ech('sp-rf-tiers'); if(!c) return;
+    c.setOption({
+      grid:{ left:50, right:20, top:14, bottom:30 },
+      tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter:function(p){ return '≤'+p[0].name+' 元: '+p[0].value+' 笔'; } },
+      xAxis:{ type:'category', data:rows.map(function(r){return r.tier;}), axisLabel:{ color:'#8aa0c0' },
+        name:'金额档(元)', nameTextStyle:{ color:'#8aa0c0' } },
+      yAxis:{ type:'value', axisLabel:{ color:'#8aa0c0' }, splitLine:{ lineStyle:{ color:'rgba(0,195,255,0.08)' } } },
+      series:[{ type:'bar', data:rows.map(function(r){return r.count;}), barWidth:'55%',
+        itemStyle:{ color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#9466ff'},{offset:1,color:'#0074ff'}]) } }]
+    });
+  }
+
+  /* ── 上传 ── */
+  function openUpload(){
+    var u = currentUser();
+    var role = mapRole(u && u.role);
+    if(['superadmin','manager','maintainer','leader'].indexOf(role) === -1){
+      spToast('当前角色无上传权限', 'error'); return;
+    }
+    document.getElementById('sp-rf-fname').textContent = '';
+    document.getElementById('sp-rf-file').value = '';
+    document.getElementById('sp-rf-submit').disabled = true;
+    showModal('sp-rf-upload-modal');
+  }
+  function doUpload(){
+    var input = document.getElementById('sp-rf-file');
+    if(!input.files || !input.files[0]){ spToast('请先选择档案','error'); return; }
+    var u = currentUser();
+    var role = mapRole(u && u.role);
+    var fd = new FormData(); fd.append('file', input.files[0]);
+    var btn = document.getElementById('sp-rf-submit');
+    btn.disabled = true; btn.textContent = '上传中…';
+    // X-User-Name 一律用 username(英文登入 id),不可用 displayName/name(中文 → fetch headers 非 ISO-8859-1 会炸)
+    fetch(API + '/upload', { method:'POST', headers:{ 'X-User-Role':role, 'X-User-Name': (u && u.username) || role }, body:fd })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, j:j}; }); })
+      .then(function(res){
+        btn.disabled = false; btn.textContent = '开始上传';
+        if(res.ok){
+          spToast(res.j.message || '上传成功', 'ok', 4500);
+          hideModal('sp-rf-upload-modal');
+          // 重新挑默认范围(latest 可能改变)并刷新
+          initRangeThenLoad();
+        } else {
+          spToast((res.j && res.j.message) || ('上传失败 ('+res.status+')'), 'error', 5000);
+        }
+      })
+      .catch(function(e){ btn.disabled=false; btn.textContent='开始上传'; spToast('网络错误:'+e.message,'error'); });
+  }
+
+  /* ── 依 health-data 决定默认范围,再载入 ── */
+  function initRangeThenLoad(){
+    fetch(API + '/health-data').then(function(r){ return r.json(); }).then(function(h){
+      if(h && h.has_data && h.latest){
+        var rng = pickDefaultRange(h.latest);
+        st.range = rng;
+        st.compareTarget = CMP_DEFAULT[rng] || 'yoy';
+        if(rng==='custom'){ var w = weekOf(h.latest); st.start=w.start; st.end=w.end;
+          var si=document.getElementById('sp-rf-start'), ei=document.getElementById('sp-rf-end');
+          if(si) si.value=w.start; if(ei) ei.value=w.end; }
+      } else {
+        st.range = 'last-week';
+      }
+      setActivePreset(st.range);
+      syncCompareSelUI();
+      load();
+    }).catch(function(){ setActivePreset(st.range); load(); });
+  }
+
+  function syncCompareSelUI(){
+    var sel = document.getElementById('sp-rf-compare-sel');
+    var chk = document.getElementById('sp-rf-compare-chk');
+    if(chk) chk.checked = st.compare;
+    if(sel){ sel.style.display = st.compare ? '' : 'none'; sel.value = st.compareTarget; }
+  }
+
+  function wire(){
+    // 时间预设
+    document.querySelectorAll('#page-refunds .sp-rf-presets button').forEach(function(b){
+      b.addEventListener('click', function(){
+        var rng = b.getAttribute('data-range');
+        st.range = rng;
+        st.compareTarget = CMP_DEFAULT[rng] || 'yoy';
+        setActivePreset(rng);
+        syncCompareSelUI();
+        if(rng!=='custom') load(); // custom 等按「套用」
+      });
+    });
+    // 自订套用
+    var apply = document.getElementById('sp-rf-apply');
+    if(apply) apply.addEventListener('click', function(){
+      var s = document.getElementById('sp-rf-start').value, e = document.getElementById('sp-rf-end').value;
+      if(!s || !e){ spToast('请选择起讫日期','error'); return; }
+      if(s > e){ spToast('结束日期早于开始日期','error'); return; }
+      st.range='custom'; st.start=s; st.end=e; load();
+    });
+    // 对比开关
+    var chk = document.getElementById('sp-rf-compare-chk');
+    if(chk) chk.addEventListener('change', function(){ st.compare = chk.checked; syncCompareSelUI(); load(); });
+    var sel = document.getElementById('sp-rf-compare-sel');
+    if(sel) sel.addEventListener('change', function(){ st.compareTarget = sel.value; if(st.compare) load(); });
+    // 刷新
+    var rf = document.getElementById('sp-rf-refresh');
+    if(rf) rf.addEventListener('click', function(){ load(); spToast('已刷新','info',1500); });
+    // 上传
+    var ub = document.getElementById('sp-rf-upload-btn');
+    if(ub) ub.addEventListener('click', openUpload);
+    var drop = document.getElementById('sp-rf-drop'), file = document.getElementById('sp-rf-file');
+    if(drop && file){
+      drop.addEventListener('click', function(){ file.click(); });
+      drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('drag'); });
+      drop.addEventListener('dragleave', function(){ drop.classList.remove('drag'); });
+      drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('drag');
+        if(e.dataTransfer.files && e.dataTransfer.files[0]){ file.files = e.dataTransfer.files; onFilePicked(); } });
+      file.addEventListener('change', onFilePicked);
+    }
+    var sub = document.getElementById('sp-rf-submit');
+    if(sub) sub.addEventListener('click', doUpload);
+    window.addEventListener('resize', function(){
+      Object.keys(ECH).forEach(function(k){ if(ECH[k]) ECH[k].resize(); });
+      if(trendChart) trendChart.resize();
+    });
+  }
+  function onFilePicked(){
+    var file = document.getElementById('sp-rf-file');
+    var name = (file.files && file.files[0]) ? file.files[0].name : '';
+    document.getElementById('sp-rf-fname').textContent = name ? ('已选:'+name) : '';
+    document.getElementById('sp-rf-submit').disabled = !name;
+  }
+
+  function onActivate(){
+    if(st.loaded) return; // 首次进入才载入
+    st.loaded = true;
+    wire();
+    initRangeThenLoad();
+  }
+
+  var PAGE_HTML =
+    '<header class="header">'+
+      '<div><div class="header-title"><span class="ht-main">退费数据分析</span><span class="ht-sub">REFUNDS ANALYTICS</span></div></div>'+
+      '<div class="header-right"><div class="header-status-group"><div class="header-status"><span class="header-status-dot"></span>DATA MODULE</div><div class="header-status-label">REFUNDS / SQLite</div></div></div>'+
+    '</header>'+
+    '<div class="dashboard">'+
+      '<section class="sp-rf-controls">'+
+        '<div class="sp-rf-presets">'+
+          '<button data-range="last-week">上周</button>'+
+          '<button data-range="month">本月</button>'+
+          '<button data-range="quarter">本季</button>'+
+          '<button data-range="year">本年</button>'+
+          '<button data-range="custom">自订</button>'+
+        '</div>'+
+        '<div class="sp-rf-custom" id="sp-rf-custom" style="display:none">'+
+          '<input type="date" id="sp-rf-start"> ~ <input type="date" id="sp-rf-end">'+
+          '<button id="sp-rf-apply">套用</button>'+
+        '</div>'+
+        '<div class="sp-rf-compare-wrap">'+
+          '<label class="sp-rf-compare-toggle"><input type="checkbox" id="sp-rf-compare-chk">对比</label>'+
+          '<select id="sp-rf-compare-sel" style="display:none">'+
+            '<option value="last-week">上周</option><option value="last-month">上月</option>'+
+            '<option value="last-quarter">上季</option><option value="last-year">去年</option>'+
+            '<option value="yoy">去年同期</option>'+
+          '</select>'+
+          '<button class="sp-rf-refresh" id="sp-rf-refresh">⟳ 刷新</button>'+
+          '<button class="sp-rf-upload" id="sp-rf-upload-btn">⬆ 上传 Excel</button>'+
+        '</div>'+
+      '</section>'+
+      '<section class="sp-rf-insights" id="sp-rf-insights"></section>'+
+      '<section class="sp-rf-kpis kpi-row" id="sp-rf-kpis"></section>'+
+      '<section class="charts-row">'+
+        '<div class="panel"><div class="panel-title">每日退费趋势</div><div id="sp-rf-trend-wrap"><canvas id="sp-rf-trend"></canvas></div></div>'+
+        '<div class="panel"><div class="panel-title">支付方式占比</div><div id="sp-rf-payment" class="sp-rf-chart"></div></div>'+
+      '</section>'+
+      '<section class="charts-row">'+
+        '<div class="panel"><div class="panel-title">平台 Top10(退费金额)</div><div id="sp-rf-platform" class="sp-rf-chart"></div></div>'+
+        '<div class="panel"><div class="panel-title">退费金额分布</div><div id="sp-rf-tiers" class="sp-rf-chart"></div></div>'+
+      '</section>'+
+      '<div class="sp-rf-empty" id="sp-rf-empty" style="display:none">尚无退费资料,请点右上「上传 Excel」汇入档案</div>'+
+      '<div class="sp-rf-rangelabel" id="sp-rf-rangelabel"></div>'+
+    '</div>';
+
+  function register(){
+    SP.registerSubpage({
+      id:'page-refunds', parent:'page-overview', title:'退费数据分析', idx:'1·1',
+      dataAccess:'组员', html:PAGE_HTML, onActivate:onActivate
+    });
+  }
+  return { register:register };
+})();
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_REFUNDS.register);
+else SP_REFUNDS.register();
+</script>
+
 </body>
 </html>
