@@ -162,6 +162,21 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 }
 .nav-item:hover .nav-idx { opacity:0.65; color:var(--text-secondary); }
 .nav-item.active .nav-idx { color:var(--accent-cyan); opacity:1; font-size:12px; text-shadow:0 0 3px rgba(0,240,255,0.4); }
+/* ─── Phase 1: 两层嵌套导航(父/子)骨架 ─── */
+.nav-group { display:flex; flex-direction:column; }
+.nav-parent { position:relative; }
+.nav-children { padding-left:16px; background:rgba(0,10,24,0.35); }
+.nav-child {
+  display:block; padding:6px 8px; color:#6a8aa8; font-size:11px;
+  letter-spacing:1px; cursor:pointer; user-select:none;
+  border-left:1px solid rgba(0,195,255,0.15);
+  transition:color 0.2s,border-color 0.2s,background 0.2s;
+}
+.nav-child:hover { color:var(--accent-cyan); border-left-color:var(--accent-cyan); }
+.nav-child.active {
+  color:var(--accent-cyan); background:rgba(0,240,255,0.08);
+  border-left-color:var(--accent-cyan);
+}
 .sidebar-footer {
   padding:12px 20px; border-top:1px solid rgba(0,195,255,0.08);
   font-family:var(--font-display); font-size:9px; letter-spacing:2px;
@@ -3490,12 +3505,30 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
 <aside class="sidebar">
   <div class="sidebar-brand"><div class="sidebar-brand-text">CS CMD</div><div class="sidebar-brand-sub">v1.0</div></div>
   <nav class="sidebar-nav">
-    <div class="nav-item active" data-page="page-overview"><span class="nav-glow"></span><span class="nav-idx">01</span>总览看板</div>
-    <div class="nav-item" data-page="page-members"><span class="nav-glow"></span><span class="nav-idx">02</span>组员档案</div>
-    <div class="nav-item" data-page="page-attendance"><span class="nav-glow"></span><span class="nav-idx">03</span>出勤排班</div>
-    <div class="nav-item" data-page="page-performance"><span class="nav-glow"></span><span class="nav-idx">04</span>绩效质检</div>
-    <div class="nav-item" data-page="page-daily" style="display:none"><span class="nav-glow"></span><span class="nav-idx">05</span>需求日报</div>
-    <div class="nav-item" data-page="page-products"><span class="nav-glow"></span><span class="nav-idx">06</span>产品连结</div>
+    <div class="nav-group" data-page="page-overview" data-expanded="true">
+      <div class="nav-parent nav-item active" data-page="page-overview"><span class="nav-glow"></span><span class="nav-idx">01</span>总览看板</div>
+      <div class="nav-children"></div>
+    </div>
+    <div class="nav-group" data-page="page-members" data-expanded="false">
+      <div class="nav-parent nav-item" data-page="page-members"><span class="nav-glow"></span><span class="nav-idx">02</span>组员档案</div>
+      <div class="nav-children" style="display:none"></div>
+    </div>
+    <div class="nav-group" data-page="page-attendance" data-expanded="false">
+      <div class="nav-parent nav-item" data-page="page-attendance"><span class="nav-glow"></span><span class="nav-idx">03</span>出勤排班</div>
+      <div class="nav-children" style="display:none"></div>
+    </div>
+    <div class="nav-group" data-page="page-performance" data-expanded="false">
+      <div class="nav-parent nav-item" data-page="page-performance"><span class="nav-glow"></span><span class="nav-idx">04</span>绩效质检</div>
+      <div class="nav-children" style="display:none"></div>
+    </div>
+    <div class="nav-group" data-page="page-daily" data-expanded="false" style="display:none">
+      <div class="nav-parent nav-item" data-page="page-daily"><span class="nav-glow"></span><span class="nav-idx">05</span>需求日报</div>
+      <div class="nav-children" style="display:none"></div>
+    </div>
+    <div class="nav-group" data-page="page-products" data-expanded="false">
+      <div class="nav-parent nav-item" data-page="page-products"><span class="nav-glow"></span><span class="nav-idx">06</span>产品连结</div>
+      <div class="nav-children" style="display:none"></div>
+    </div>
   </nav>
   <div class="system-entry" id="system-entry">
     <div class="se-header"><span class="se-title">系统入口</span><span class="se-subtitle">SYSTEM ACCESS</span></div>
@@ -5821,17 +5854,17 @@ function pgSwitch(pageId){
   // resume new page intervals
   (_pgIntervals[pageId]||[]).forEach(function(e){e.id=setInterval(e.fn,e.ms)});
 }
-// ── Nav ──
-document.querySelectorAll('.nav-item').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    var pid=btn.getAttribute('data-page');
-    document.getElementById(pid).classList.add('active');
-    pgSwitch(pid);
-  });
-});
+// ── Nav ── [Phase1] 旧的平铺 .nav-item click handler 已停用,由 window.SP + initSidebarNav 统一接管(见档尾 Phase1 区块)。注释保留不删以便回溯。
+// document.querySelectorAll('.nav-item').forEach(btn=>{
+//   btn.addEventListener('click',()=>{
+//     document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+//     btn.classList.add('active');
+//     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+//     var pid=btn.getAttribute('data-page');
+//     document.getElementById(pid).classList.add('active');
+//     pgSwitch(pid);
+//   });
+// });
 // ── Clock ──
 var _clockStartTime=Date.now();
 function updateClock(){
@@ -9763,6 +9796,147 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
   if(document.readyState==='complete') setTimeout(autoSync,1000);
   else window.addEventListener('load',function(){setTimeout(autoSync,1000);});
 })();
+
+/* ══════════════════════════════════════════════════════════════
+   [Phase1] SP (SubPage) 通用框架 — 空架构骨架
+   - 命名空间统一走 window.SP,不污染全局
+   - switchToPage 复用既有 pgSwitch(pid) 做定时器暂停/恢复
+   - 子分页内容(registerSubpage 实作)留待 Phase 2
+   ══════════════════════════════════════════════════════════════ */
+window.SP = window.SP || {
+  _subpages: {},
+  _state: { activeTimeRange: 'week', compareMode: false, compareTarget: null },
+  _listeners: [],
+
+  registerSubpage(config) {
+    // Phase 2 实作:把子分页 config 存起来并渲染到对应 .nav-children
+    this._subpages[config.id] = config;
+    console.log('[SP] registered:', config.id);
+  },
+
+  switchToPage(pageId) {
+    // 切换 .page 显示 + nav-item active 状态,并复用既有 pgSwitch 做定时器管理
+    var target = document.getElementById(pageId);
+    if (!target) { console.warn('[SP] switchToPage: page not found:', pageId); return; }
+    console.log('[Phase1] switchToPage called:', pageId);
+    document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.nav-parent[data-page="'+pageId+'"]').forEach(function(p){ p.classList.add('active'); });
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    target.classList.add('active');
+    if (typeof pgSwitch === 'function') pgSwitch(pageId);  // 既有定时器暂停/恢复机制
+  },
+
+  toggleNavGroup(pageId) {
+    // 展开/折叠某 nav-group 的子菜单
+    var group = document.querySelector('.nav-group[data-page="'+pageId+'"]');
+    if (!group) return;
+    var expanded = group.getAttribute('data-expanded') === 'true';
+    group.setAttribute('data-expanded', String(!expanded));
+    var childrenEl = group.querySelector('.nav-children');
+    if (childrenEl) childrenEl.style.display = expanded ? 'none' : 'block';
+    updateNavArrows();
+    persistExpandedState();
+  },
+
+  setTimeRange(range) { this._state.activeTimeRange = range; this._notify('timerange'); },
+
+  setCompareMode(enabled, target) {
+    this._state.compareMode = enabled;
+    this._state.compareTarget = target || null;
+    this._notify('compare');
+  },
+
+  subscribe(event, callback) { this._listeners.push({ event: event, callback: callback }); },
+
+  _notify(event) {
+    this._listeners.filter(function(l){ return l.event === event; })
+                   .forEach(function(l){ l.callback(this._state); }, this);
+  }
+};
+console.log('[Phase1] SP framework loaded');
+
+/* ── Sidebar 两层导航初始化 ── */
+(function initSidebarNav() {
+  var nav = document.querySelector('.sidebar-nav');
+  if (!nav) return;
+
+  // 点击 nav-parent:切到该父页 + 展开/折叠子菜单
+  nav.querySelectorAll('.nav-parent').forEach(function(p) {
+    p.addEventListener('click', function() {
+      var group = this.closest('.nav-group');
+      var pageId = group.getAttribute('data-page');
+      var expanded = group.getAttribute('data-expanded') === 'true';
+      SP.switchToPage(pageId);
+      group.setAttribute('data-expanded', String(!expanded));
+      var childrenEl = group.querySelector('.nav-children');
+      if (childrenEl) childrenEl.style.display = expanded ? 'none' : 'block';
+      updateNavArrows();
+      persistExpandedState();
+    });
+  });
+
+  // 点击 nav-child:切到该子页(Phase 2 才会有子项;骨架先挂好)
+  nav.querySelectorAll('.nav-child').forEach(function(c) {
+    c.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var pageId = this.getAttribute('data-page');
+      SP.switchToPage(pageId);
+      updateNavActive(pageId);
+    });
+  });
+
+  restoreExpandedState();
+  updateNavArrows();
+  var groupCount = nav.querySelectorAll('.nav-group').length;
+  console.log('[Phase1] sidebar nav initialized, found ' + groupCount + ' groups');
+})();
+
+function updateNavArrows() {
+  // 根据 data-expanded 给 .nav-parent 加 ▼ / ▶ 前缀(纯文字,不写死在 HTML)
+  document.querySelectorAll('.nav-group').forEach(function(group) {
+    var parent = group.querySelector('.nav-parent');
+    if (!parent) return;
+    // 依 data-expanded 一律显示箭头,让展开/折叠有视觉反馈(Phase 1 子项虽空,骨架可见)
+    var arrow = group.getAttribute('data-expanded') === 'true' ? '▼ ' : '▶ ';
+    var idx = parent.querySelector('.nav-idx');
+    var prevPrefix = parent.querySelector('.nav-arrow');
+    if (prevPrefix) prevPrefix.remove();
+    if (arrow && idx) {
+      var span = document.createElement('span');
+      span.className = 'nav-arrow';
+      span.textContent = arrow;
+      idx.parentNode.insertBefore(span, idx);
+    }
+  });
+}
+
+function updateNavActive(pageId) {
+  document.querySelectorAll('.nav-child').forEach(function(c){ c.classList.remove('active'); });
+  document.querySelectorAll('.nav-child[data-page="'+pageId+'"]').forEach(function(c){ c.classList.add('active'); });
+}
+
+function persistExpandedState() {
+  var state = {};
+  document.querySelectorAll('.nav-group').forEach(function(g) {
+    state[g.getAttribute('data-page')] = g.getAttribute('data-expanded') === 'true';
+  });
+  try { localStorage.setItem('sp-nav-expanded', JSON.stringify(state)); } catch(e){}
+}
+
+function restoreExpandedState() {
+  var raw;
+  try { raw = localStorage.getItem('sp-nav-expanded'); } catch(e){ return; }
+  if (!raw) return;
+  var state;
+  try { state = JSON.parse(raw); } catch(e){ return; }
+  Object.keys(state).forEach(function(pageId) {
+    var group = document.querySelector('.nav-group[data-page="'+pageId+'"]');
+    if (!group) return;
+    group.setAttribute('data-expanded', String(!!state[pageId]));
+    var childrenEl = group.querySelector('.nav-children');
+    if (childrenEl) childrenEl.style.display = state[pageId] ? 'block' : 'none';
+  });
+}
 </script>
 
 <!-- ══════════════════════════════════════
