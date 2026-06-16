@@ -1,1 +1,6 @@
 .claude/
+
+# 本地备份档(各种命名规则)
+index.html.backup-*
+index.html.bak-*
+index-backup-*.html
