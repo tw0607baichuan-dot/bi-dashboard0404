@@ -10829,6 +10829,107 @@ else SP_REFUNDS.register();
 @media(max-width:1280px){ .sp-ag-kpis{grid-template-columns:repeat(3,1fr)} .sp-ag-2col{grid-template-columns:1fr} }
 </style>
 
+<!-- [Phase4-3] 质检子页样式(全 .sp-ql- 前缀,与 .sp-rf-/.sp-ag- 物理隔离) -->
+<style id="sp-ql-styles">
+/* 滚动容器(Phase 3.3 hotfix 教训:没滚动容器内容会被裁掉、测试不报错) */
+#page-quality .dashboard { padding:18px 24px 40px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden; }
+
+/* 控件栏 */
+.sp-ql-controls { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 14px; background:rgba(10,18,30,0.55); border:1px solid rgba(0,195,255,0.18); border-radius:6px; }
+.sp-ql-presets { display:flex; gap:4px; flex-wrap:wrap; }
+.sp-ql-presets button, .sp-ql-dept button { background:rgba(0,195,255,0.06); border:1px solid rgba(0,195,255,0.3); color:var(--text-secondary); font-family:inherit; font-size:12px; padding:5px 11px; border-radius:4px; cursor:pointer; transition:.15s; }
+.sp-ql-presets button:hover, .sp-ql-dept button:hover { border-color:var(--accent-cyan); color:#fff; }
+.sp-ql-presets button.active, .sp-ql-dept button.active { background:rgba(0,195,255,0.18); border-color:var(--accent-cyan); color:var(--accent-cyan); }
+.sp-ql-dept button:disabled { opacity:.35; cursor:not-allowed; }
+.sp-ql-custom { display:none; gap:6px; align-items:center; }
+.sp-ql-custom input { background:rgba(0,0,0,0.4); border:1px solid rgba(0,195,255,0.3); color:var(--text-secondary); font-family:inherit; font-size:12px; padding:4px 8px; border-radius:4px; }
+.sp-ql-sep { width:1px; height:22px; background:rgba(0,195,255,0.2); margin:0 4px; }
+.sp-ql-cmp-label { display:flex; align-items:center; gap:6px; color:var(--text-dim); font-size:12px; cursor:pointer; }
+.sp-ql-spacer { flex:1 1 auto; }
+.sp-ql-btn { background:rgba(0,195,255,0.1); border:1px solid rgba(0,195,255,0.45); color:var(--accent-cyan); font-family:inherit; font-size:12px; letter-spacing:.5px; padding:6px 13px; border-radius:4px; cursor:pointer; transition:.15s; }
+.sp-ql-btn:hover { background:rgba(0,195,255,0.2); color:#fff; }
+
+/* KPI 5 卡 */
+.sp-ql-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.sp-ql-kpi { background:rgba(10,18,30,0.6); border:1px solid rgba(0,195,255,0.18); border-radius:6px; padding:14px 16px; position:relative; overflow:hidden; }
+.sp-ql-kpi .k-label { color:var(--text-dim); font-size:11px; letter-spacing:.5px; margin-bottom:8px; }
+.sp-ql-kpi .k-value { color:var(--accent-cyan); font-family:var(--font-display); font-size:26px; line-height:1; font-weight:600; }
+.sp-ql-kpi .k-sub { color:var(--text-dim); font-size:11px; margin-top:6px; }
+.sp-ql-kpi-attention { border-color:rgba(255,150,60,0.6); background:rgba(40,22,8,0.5); }
+.sp-ql-kpi-attention .k-value { color:#ffae5c; }
+.sp-ql-kpi-attention::after { content:'关注'; position:absolute; top:8px; right:10px; font-size:10px; color:#ffae5c; border:1px solid rgba(255,150,60,0.5); border-radius:3px; padding:1px 5px; }
+
+/* 区块容器 */
+.sp-ql-block { background:rgba(10,18,30,0.5); border:1px solid rgba(0,195,255,0.15); border-radius:6px; padding:14px 16px; }
+.sp-ql-block h3 { color:var(--text-secondary); font-size:13px; letter-spacing:1px; margin:0 0 12px; font-weight:600; }
+.sp-ql-2col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+/* 明细表 */
+.sp-ql-summary-table { width:100%; border-collapse:collapse; font-size:12px; }
+.sp-ql-summary-table th { color:var(--text-dim); text-align:left; padding:7px 9px; border-bottom:1px solid rgba(0,195,255,0.22); font-weight:500; cursor:pointer; white-space:nowrap; }
+.sp-ql-summary-table th:hover { color:var(--accent-cyan); }
+.sp-ql-summary-table td { color:var(--text-secondary); padding:7px 9px; border-bottom:1px solid rgba(255,255,255,0.04); }
+.sp-ql-summary-table tr.sp-ql-row-warn td { background:rgba(255,140,40,0.08); color:#ffc89a; }
+.sp-ql-summary-table tr:hover td { background:rgba(0,195,255,0.05); }
+.sp-ql-pr-bad { color:#ff8c5a; font-weight:600; }
+
+/* 错误案例 */
+.sp-ql-cases { display:flex; flex-direction:column; gap:8px; }
+.sp-ql-case-card { border:1px solid rgba(0,195,255,0.18); border-radius:5px; overflow:hidden; }
+.sp-ql-case-head { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; background:rgba(0,195,255,0.04); }
+.sp-ql-case-head:hover { background:rgba(0,195,255,0.09); }
+.sp-ql-case-head .c-name { color:var(--accent-cyan); font-weight:600; font-size:13px; }
+.sp-ql-case-head .c-meta { color:var(--text-dim); font-size:11px; }
+.sp-ql-case-head .c-arrow { margin-left:auto; color:var(--text-dim); transition:.15s; }
+.sp-ql-case-card.open .c-arrow { transform:rotate(90deg); }
+.sp-ql-case-body { display:none; padding:4px 12px 12px; }
+.sp-ql-case-card.open .sp-ql-case-body { display:block; }
+.sp-ql-case-item { border-top:1px solid rgba(255,255,255,0.06); padding:10px 0; }
+.sp-ql-case-item .ci-top { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:6px; }
+.sp-ql-lv { font-size:10px; padding:1px 7px; border-radius:3px; letter-spacing:.5px; }
+.sp-ql-lv.severe { background:rgba(255,60,60,0.18); color:#ff7a7a; border:1px solid rgba(255,60,60,0.4); }
+.sp-ql-lv.medium { background:rgba(255,170,60,0.16); color:#ffba6e; border:1px solid rgba(255,170,60,0.4); }
+.sp-ql-lv.minor { background:rgba(120,200,255,0.14); color:#8fd0ff; border:1px solid rgba(120,200,255,0.35); }
+.sp-ql-case-item .ci-ded { color:#ff8c5a; font-size:12px; }
+.sp-ql-case-item .ci-field { margin:5px 0; font-size:12px; line-height:1.55; }
+.sp-ql-case-item .ci-field b { color:var(--text-dim); font-weight:500; }
+.sp-ql-conv { background:rgba(0,0,0,0.45); border:1px solid rgba(0,195,255,0.15); border-radius:4px; padding:10px; margin-top:6px; max-height:340px; overflow:auto; white-space:pre-wrap; word-break:break-word; font-size:11px; line-height:1.6; color:#9fb8c8; }
+
+/* 错误类型分布(条形) */
+.sp-ql-dist { display:flex; flex-direction:column; gap:7px; }
+.sp-ql-dist-row { display:flex; align-items:center; gap:10px; font-size:12px; }
+.sp-ql-dist-row .d-label { width:42%; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sp-ql-dist-bar-wrap { flex:1; background:rgba(0,0,0,0.35); border-radius:3px; height:16px; overflow:hidden; }
+.sp-ql-dist-bar { height:100%; background:linear-gradient(90deg,rgba(0,195,255,0.5),rgba(0,195,255,0.85)); }
+.sp-ql-dist-row .d-count { width:34px; text-align:right; color:var(--accent-cyan); }
+
+/* 进步榜 / 退步榜 */
+.sp-ql-imp-col h4 { font-size:12px; margin:0 0 8px; letter-spacing:.5px; }
+.sp-ql-imp-col.up h4 { color:#5fe08a; }
+.sp-ql-imp-col.down h4 { color:#ff8c5a; }
+.sp-ql-imp-row { display:flex; align-items:center; gap:8px; font-size:12px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.sp-ql-imp-row .ir-name { color:var(--text-secondary); flex:1; }
+.sp-ql-imp-row .ir-delta.up { color:#5fe08a; }
+.sp-ql-imp-row .ir-delta.down { color:#ff8c5a; }
+.sp-ql-empty { color:var(--text-dim); font-size:12px; padding:14px 4px; text-align:center; }
+
+/* 守门说明 */
+.sp-ql-notes { list-style:none; margin:0; padding:0; }
+.sp-ql-notes li { color:var(--text-dim); font-size:12px; line-height:1.6; padding:4px 0 4px 16px; position:relative; }
+.sp-ql-notes li::before { content:'·'; position:absolute; left:4px; color:var(--accent-cyan); }
+
+/* 上传 / 评分标准 modal 内部 */
+.sp-ql-drop { border:1px dashed rgba(0,195,255,0.4); border-radius:4px; padding:24px 16px; text-align:center; color:var(--text-dim); cursor:pointer; transition:.15s; }
+.sp-ql-drop:hover, .sp-ql-drop.drag { border-color:var(--accent-cyan); color:var(--text-secondary); background:rgba(0,195,255,0.05); }
+.sp-ql-fname { margin-top:10px; color:var(--accent-cyan); font-size:13px; word-break:break-all; }
+.sp-ql-hint { color:var(--text-dim); font-size:12px; margin-top:8px; line-height:1.6; }
+.sp-ql-submit { width:100%; margin-top:14px; padding:10px; font-family:inherit; font-size:13px; cursor:pointer; background:rgba(0,195,255,0.1); border:1px solid rgba(0,195,255,0.45); color:var(--accent-cyan); border-radius:4px; }
+.sp-ql-submit:disabled { opacity:.5; cursor:not-allowed; }
+.sp-ql-rules-pre { white-space:pre-wrap; word-break:break-word; max-height:60vh; overflow:auto; background:rgba(0,0,0,0.45); border:1px solid rgba(0,195,255,0.18); border-radius:4px; padding:14px; font-size:12px; line-height:1.7; color:#9fb8c8; }
+
+@media(max-width:1280px){ .sp-ql-kpis{grid-template-columns:repeat(3,1fr)} .sp-ql-2col{grid-template-columns:1fr} }
+</style>
+
 <!-- [Phase3-3] 人名管理 Modal(复用既有 .modal-overlay / .cyber-modal / showModal) -->
 <div class="modal-overlay" id="sp-ag-alias-modal">
   <div class="cyber-modal sp-ag-alias-modal">
@@ -11390,6 +11491,488 @@ var SP_AGENTS = (function(){
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_AGENTS.register);
 else SP_AGENTS.register();
+</script>
+
+<!-- [Phase4-3] 质检子页 SP_QUALITY(独立 IIFE,镜像 SP_AGENTS;全 .sp-ql- 前缀) -->
+<script>
+var SP_QUALITY = (function(){
+  var API = '/api/quality';
+
+  /* ── 状态机 ── */
+  var st = {
+    range:'month', start:null, end:null,
+    compare:false, compareTarget:'last-month',
+    dept:'all', view:'manager', myAgent:null, loaded:false,
+    sortKey:'pass_rate', sortDir:'asc',
+    summaryRows:[], casesGroups:[]
+  };
+  // range → 预设 compare 目标(同 Phase 2.3 / 3.3)
+  var CMP_DEFAULT = { 'today':'last-week', week:'last-week', 'last-week':'last-week', month:'last-month', quarter:'last-quarter', year:'last-year', custom:'yoy' };
+
+  /* ── 工具 ── */
+  function pad(n){ return (n<10?'0':'')+n; }
+  function iso(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function intf(n){ return Number(n||0).toLocaleString('zh-CN'); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function pct(r){ return (r==null) ? '—' : (Math.round(r*1000)/10)+'%'; }
+  function $(id){ return document.getElementById(id); }
+  function levelClass(lv){ var s=lv||''; if(s.indexOf('严重')>=0) return 'severe'; if(s.indexOf('中等')>=0) return 'medium'; if(s.indexOf('轻微')>=0) return 'minor'; return 'minor'; }
+
+  /* ── 角色 / 权限(沿用接线量;X-User-Name 一律英文 username)── */
+  function currentUser(){
+    try { return (typeof AuthManager!=='undefined' && AuthManager.getCurrentUser) ? AuthManager.getCurrentUser() : null; }
+    catch(e){ return null; }
+  }
+  function mapRole(r){
+    var m = { 'superadmin':'superadmin','超级管理员':'superadmin','主管':'manager','manager':'manager',
+              '组长':'leader','leader':'leader','维护':'maintainer','maintainer':'maintainer' };
+    return m[r] || (r||'');
+  }
+  function roleLevel(){
+    var u = currentUser(); if(!u) return 0;
+    try { return (AuthManager.ROLE_HIERARCHY && AuthManager.ROLE_HIERARCHY[u.role]) || 0; }
+    catch(e){ return 0; }
+  }
+  function authHeaders(){
+    var u = currentUser();
+    return { 'X-User-Role': mapRole(u && u.role), 'X-User-Name': (u && u.username) || mapRole(u && u.role) };
+  }
+  function toast(msg, type, ms){ if(typeof spToast==='function') spToast(msg, type, ms); else alert(msg); }
+
+  /* ── 视图判断:leader 以上(level>=2)= 主管视图;组员 = 自查视图 ── */
+  function detectView(){
+    var u = currentUser();
+    if(!u) return null;
+    if(roleLevel() >= 2){ st.view='manager'; st.myAgent=null; }
+    else { st.view='staff'; st.myAgent = u.username; }
+    return st.view;
+  }
+
+  function buildQuery(){
+    var qs = 'range=' + encodeURIComponent(st.range);
+    if(st.range==='custom' && st.start && st.end){ qs += '&start_date='+st.start+'&end_date='+st.end; }
+    if(st.compare) qs += '&compare=' + encodeURIComponent(st.compareTarget);
+    if(st.dept !== 'all') qs += '&dept=' + encodeURIComponent(st.dept);
+    if(st.view==='staff' && st.myAgent) qs += '&agent=' + encodeURIComponent(st.myAgent);
+    return qs;
+  }
+
+  /* ── 载入流程(失败显式报错,不 silent fail)── */
+  function showLoading(on){ var el=$('sp-ql-loading'); if(el) el.style.display = on?'block':'none'; }
+  function showError(msg){ var el=$('sp-ql-error'); if(el){ el.style.display='block'; el.textContent='⚠ '+msg; } toast(msg,'error',5000); }
+  function clearError(){ var el=$('sp-ql-error'); if(el){ el.style.display='none'; el.textContent=''; } }
+
+  function load(){
+    detectView();
+    applyViewVisibility();
+    clearError();
+    showLoading(true);
+    fetch(API + '/data?' + buildQuery(), { headers: authHeaders() })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, j:j}; }); })
+      .then(function(res){
+        showLoading(false);
+        if(!res.ok || !res.j || res.j.status!=='ok'){
+          showError((res.j && res.j.message) || ('载入失败 ('+res.status+')')); return;
+        }
+        var cur = res.j.current || {};
+        st.summaryRows = cur.summary_table || [];
+        st.casesGroups = cur.cases || [];
+        if(st.view==='manager') renderManager(cur, res.j);
+        else renderStaff(cur, res.j);
+      })
+      .catch(function(e){ showLoading(false); showError('网络错误:'+e.message); });
+  }
+
+  /* ── 主管视图渲染 ── */
+  function renderManager(cur, full){
+    renderKpis(cur.kpi || {});
+    renderSummaryTable();
+    renderCases(st.casesGroups, 'sp-ql-cases');
+    renderErrorDist(cur.error_type_dist || [], 'sp-ql-dist');
+    renderImprovements(cur.improvements);
+    renderQualityNotes(cur.data_quality_notes || []);
+    var rl = $('sp-ql-range-label'); if(rl) rl.textContent = (full.range && full.range.label) || '';
+  }
+
+  function renderKpis(kpi){
+    var box = $('sp-ql-kpis'); if(!box) return;
+    var top = kpi.top_attention_agent;
+    var cards = [
+      { label:'团队平均合格率', value:pct(kpi.avg_pass_rate), sub:'基于 Sheet 2 汇总' },
+      { label:'严重错误次数', value:intf(kpi.severe_count), sub:'组长定夺(Sheet 2)' },
+      { label:'全合格人数', value:(kpi.full_pass_agents||0)+' / '+(kpi.total_agents||0), sub:'合格率 100%' },
+      { label:'质检覆盖讯息', value:intf(kpi.total_messages_inspected), sub:'总讯息数' },
+      top ? { label:'重点关注组员', value:esc(top.agent_name), sub:top.total_cases+' 笔被审 · '+top.severe_cases+' 严重', attention:true }
+          : { label:'重点关注组员', value:'—', sub:'本期无案例' }
+    ];
+    box.innerHTML = cards.map(function(c){
+      return '<div class="sp-ql-kpi'+(c.attention?' sp-ql-kpi-attention':'')+'">'+
+             '<div class="k-label">'+c.label+'</div><div class="k-value">'+c.value+'</div>'+
+             '<div class="k-sub">'+c.sub+'</div></div>';
+    }).join('');
+  }
+
+  function renderSummaryTable(){
+    var box = $('sp-ql-summary'); if(!box) return;
+    var cols = [
+      {k:'canonical_name',l:'客服',num:false},{k:'shift',l:'班别',num:false},
+      {k:'total_messages',l:'总讯息',num:true},{k:'severe_count',l:'严重',num:true},
+      {k:'medium_count',l:'中等',num:true},{k:'minor_count',l:'轻微',num:true},
+      {k:'deduction_sum',l:'扣分',num:true},{k:'pass_rate',l:'合格率',num:true}
+    ];
+    var rows = st.summaryRows.slice();
+    var sk = st.sortKey, dir = st.sortDir==='asc'?1:-1;
+    rows.sort(function(a,b){
+      var x=a[sk], y=b[sk];
+      if(x==null && y==null) return 0; if(x==null) return 1; if(y==null) return -1;
+      if(typeof x==='number' && typeof y==='number') return (x-y)*dir;
+      return String(x).localeCompare(String(y),'zh')*dir;
+    });
+    var th = cols.map(function(c){
+      var arrow = (c.k===sk) ? (st.sortDir==='asc'?' ▲':' ▼') : '';
+      return '<th data-sort="'+c.k+'">'+c.l+arrow+'</th>';
+    }).join('') + '<th>案例</th>';
+    var body = rows.map(function(r){
+      var warn = (r.pass_rate!=null && r.pass_rate<0.90) ? ' class="sp-ql-row-warn"' : '';
+      var prCls = (r.pass_rate!=null && r.pass_rate<0.90) ? ' class="sp-ql-pr-bad"' : '';
+      return '<tr'+warn+'>'+
+        '<td>'+esc(r.canonical_name)+'</td>'+
+        '<td>'+esc(r.shift||'—')+'</td>'+
+        '<td>'+intf(r.total_messages)+'</td>'+
+        '<td>'+intf(r.severe_count)+'</td>'+
+        '<td>'+intf(r.medium_count)+'</td>'+
+        '<td>'+intf(r.minor_count)+'</td>'+
+        '<td>'+(r.deduction_sum||0)+'</td>'+
+        '<td'+prCls+'>'+pct(r.pass_rate)+'</td>'+
+        '<td>'+(r.has_cases?'有':'—')+'</td></tr>';
+    }).join('');
+    box.innerHTML = '<table class="sp-ql-summary-table"><thead><tr>'+th+'</tr></thead><tbody>'+
+      (body || '<tr><td colspan="9" class="sp-ql-empty">本期无质检汇总</td></tr>')+'</tbody></table>';
+  }
+
+  function renderCases(groups, containerId){
+    var box = $(containerId); if(!box) return;
+    if(!groups || !groups.length){ box.innerHTML = '<div class="sp-ql-empty">本期无错误案例</div>'; return; }
+    box.innerHTML = groups.map(function(g){
+      var items = g.cases.map(function(c){
+        var lc = levelClass(c.error_level);
+        return '<div class="sp-ql-case-item">'+
+          '<div class="ci-top"><span class="sp-ql-lv '+lc+'">'+esc(c.error_level)+'</span>'+
+          '<span class="ci-ded">'+(c.deduction!=null?c.deduction:'')+' 分</span>'+
+          '<span class="c-meta">序号 '+(c.case_no==null?'—':c.case_no)+(c.case_time?' · '+esc(c.case_time):'')+(c.app_name?' · '+esc(c.app_name):'')+'</span></div>'+
+          (c.error_desc?'<div class="ci-field"><b>错误:</b>'+esc(c.error_desc)+'</div>':'')+
+          (c.correct_reply?'<div class="ci-field"><b>正确回复:</b>'+esc(c.correct_reply)+'</div>':'')+
+          (c.conversation?'<div class="ci-field"><b>完整对话:</b></div><div class="sp-ql-conv">'+esc(c.conversation)+'</div>':'')+
+          '</div>';
+      }).join('');
+      return '<div class="sp-ql-case-card">'+
+        '<div class="sp-ql-case-head"><span class="c-name">'+esc(g.agent_name)+'</span>'+
+        '<span class="c-meta">'+g.total_cases+' 笔 · '+(g.severe_cases||0)+' 严重</span>'+
+        '<span class="c-arrow">▶</span></div>'+
+        '<div class="sp-ql-case-body">'+items+'</div></div>';
+    }).join('');
+  }
+
+  function renderErrorDist(dist, containerId){
+    var box = $(containerId); if(!box) return;
+    if(!dist || !dist.length){ box.innerHTML = '<div class="sp-ql-empty">本期无错误类型资料</div>'; return; }
+    var max = Math.max.apply(null, dist.map(function(d){ return d.count; }));
+    box.innerHTML = dist.map(function(d){
+      var w = max>0 ? Math.round(d.count/max*100) : 0;
+      return '<div class="sp-ql-dist-row"><span class="d-label" title="'+esc(d.error_type)+'">'+esc(d.error_type)+'</span>'+
+        '<span class="sp-ql-dist-bar-wrap"><span class="sp-ql-dist-bar" style="width:'+w+'%"></span></span>'+
+        '<span class="d-count">'+d.count+'</span></div>';
+    }).join('');
+  }
+
+  function renderImprovements(imp){
+    var box = $('sp-ql-improvements'); if(!box) return;
+    if(!imp){ box.innerHTML = '<div class="sp-ql-empty">对比期无质检资料,进步/退步榜需要至少两期数据。</div>'; return; }
+    function col(list, kind){
+      var title = kind==='up' ? '值得肯定(合格率上升)' : '建议关注(合格率下降)';
+      var rows = (list && list.length) ? list.map(function(r){
+        var dlt = (r.delta>0?'+':'')+pct(r.delta).replace('%','')+' pt';
+        return '<div class="sp-ql-imp-row"><span class="ir-name">'+esc(r.agent_name)+'</span>'+
+          '<span class="c-meta">'+pct(r.prev_pass_rate)+' → '+pct(r.cur_pass_rate)+'</span>'+
+          '<span class="ir-delta '+kind+'">'+dlt+'</span></div>';
+      }).join('') : '<div class="sp-ql-empty">无</div>';
+      return '<div class="sp-ql-imp-col '+kind+'"><h4>'+title+'</h4>'+rows+'</div>';
+    }
+    box.innerHTML = col(imp.improved,'up') + col(imp.declined,'down');
+  }
+
+  function renderQualityNotes(notes){
+    var box = $('sp-ql-notes'); if(!box) return;
+    box.innerHTML = (notes && notes.length)
+      ? '<ul class="sp-ql-notes">'+notes.map(function(n){ return '<li>'+esc(n)+'</li>'; }).join('')+'</ul>'
+      : '<div class="sp-ql-empty">无守门提示</div>';
+  }
+
+  /* ── 组员视图渲染(3 卡 + 我的案例 + 我的错误类型)── */
+  function renderStaff(cur, full){
+    var kpi = cur.kpi || {};
+    var row = (st.summaryRows && st.summaryRows[0]) || {};
+    var cards = [
+      { label:'我的合格率', value:pct(kpi.avg_pass_rate) },
+      { label:'我的错误数', value:intf((row.severe_count||0)+(row.medium_count||0)+(row.minor_count||0)) },
+      { label:'我的级别分布', value:'严'+(row.severe_count||0)+' 中'+(row.medium_count||0)+' 轻'+(row.minor_count||0) }
+    ];
+    var box = $('sp-ql-my-kpis');
+    if(box) box.innerHTML = cards.map(function(c){
+      return '<div class="sp-ql-kpi"><div class="k-label">'+c.label+'</div><div class="k-value">'+c.value+'</div></div>';
+    }).join('');
+    renderCases(st.casesGroups, 'sp-ql-my-cases');
+    // 组员只看到自己的资料(后端 agent filter 已限定);错误类型即「我的错误类型」
+    renderErrorDist(cur.error_type_dist || [], 'sp-ql-my-dist');
+    var rl = $('sp-ql-range-label'); if(rl) rl.textContent = (full.range && full.range.label) || '';
+  }
+
+  /* ── 视图显隐 ── */
+  function applyViewVisibility(){
+    var m = $('sp-ql-manager-view'), s = $('sp-ql-staff-view');
+    if(m) m.style.display = (st.view==='manager') ? '' : 'none';
+    if(s) s.style.display = (st.view==='staff') ? '' : 'none';
+  }
+  function applyRoleVisibility(){
+    var up = $('sp-ql-upload-btn');
+    if(up) up.style.display = (roleLevel()>=2) ? 'inline-block' : 'none';
+  }
+
+  /* ── 控件激活态 ── */
+  function setActivePreset(){
+    document.querySelectorAll('#page-quality .sp-ql-presets button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-range')===st.range);
+    });
+    var cust = $('sp-ql-custom'); if(cust) cust.style.display = (st.range==='custom') ? 'flex' : 'none';
+  }
+  function setActiveDept(){
+    document.querySelectorAll('#page-quality .sp-ql-dept button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-dept')===st.dept);
+    });
+  }
+
+  /* ── 上传 modal(权限 level>=2)── */
+  function openUpload(){
+    if(roleLevel() < 2){ toast('当前角色无上传权限','error'); return; }
+    var fn=$('sp-ql-up-fname'); if(fn) fn.textContent='';
+    var fi=$('sp-ql-up-file'); if(fi) fi.value='';
+    var sb=$('sp-ql-up-submit'); if(sb){ sb.disabled=true; sb.textContent='开始上传'; }
+    if(typeof showModal==='function') showModal('sp-ql-upload-modal');
+  }
+  function doUpload(){
+    var input = $('sp-ql-up-file');
+    if(!input || !input.files || !input.files[0]){ toast('请先选择档案','error'); return; }
+    var fd = new FormData(); fd.append('file', input.files[0]);
+    var btn = $('sp-ql-up-submit'); btn.disabled=true; btn.textContent='上传中…';
+    fetch(API + '/upload', { method:'POST', headers:authHeaders(), body:fd })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, j:j}; }); })
+      .then(function(res){
+        var j = res.j || {};
+        if(res.ok){
+          toast('成功:'+(j.inspections_count||0)+' 笔错误案例 + '+(j.summary_count||0)+' 笔客服汇总','ok',5000);
+          if(typeof hideModal==='function') hideModal('sp-ql-upload-modal');
+          load();
+        } else {
+          btn.disabled=false; btn.textContent='开始上传';
+          toast((j.message)||('上传失败 ('+res.status+')'),'error',5500);
+        }
+      })
+      .catch(function(e){ btn.disabled=false; btn.textContent='开始上传'; toast('网络错误:'+e.message,'error'); });
+  }
+
+  /* ── 评分标准 modal(全员可见)── */
+  function openRules(){
+    if(typeof showModal==='function') showModal('sp-ql-rules-modal');
+    var pre = $('sp-ql-rules-pre'); if(pre) pre.textContent='载入中…';
+    fetch(API + '/rules', { headers: authHeaders() })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j && j.has_rules && j.rules_text){
+          pre.textContent = j.rules_text;
+        } else {
+          pre.textContent = (j && j.message) || '暂无评分标准(最新上传未含 Sheet 3)';
+        }
+      })
+      .catch(function(e){ if(pre) pre.textContent='载入失败:'+e.message; });
+  }
+
+  /* ── 控件接线 ── */
+  function wire(){
+    var root = $('page-quality'); if(!root) return;
+    // 时间预设
+    root.querySelectorAll('.sp-ql-presets button').forEach(function(b){
+      b.addEventListener('click', function(){
+        st.range = b.getAttribute('data-range');
+        if(st.compare) st.compareTarget = CMP_DEFAULT[st.range] || 'last-month';
+        setActivePreset();
+        if(st.range!=='custom') load();
+      });
+    });
+    // 自订日期
+    var apply = $('sp-ql-custom-apply');
+    if(apply) apply.addEventListener('click', function(){
+      var s=$('sp-ql-start').value, e=$('sp-ql-end').value;
+      if(!s || !e){ toast('请选择起讫日期','error'); return; }
+      st.range='custom'; st.start=s; st.end=e;
+      if(st.compare) st.compareTarget = CMP_DEFAULT['custom'];
+      load();
+    });
+    // 部门切换
+    root.querySelectorAll('.sp-ql-dept button').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(b.disabled) return;
+        st.dept = b.getAttribute('data-dept'); setActiveDept(); load();
+      });
+    });
+    // 对比开关
+    var cmp = $('sp-ql-compare-chk');
+    if(cmp) cmp.addEventListener('change', function(){
+      st.compare = cmp.checked;
+      st.compareTarget = CMP_DEFAULT[st.range] || 'last-month';
+      load();
+    });
+    // 上传 / 评分标准
+    var upBtn=$('sp-ql-upload-btn'); if(upBtn) upBtn.addEventListener('click', openUpload);
+    var ruBtn=$('sp-ql-rules-btn'); if(ruBtn) ruBtn.addEventListener('click', openRules);
+    // 表头排序(委托)
+    var sumBox = $('sp-ql-summary');
+    if(sumBox) sumBox.addEventListener('click', function(ev){
+      var th = ev.target.closest && ev.target.closest('th[data-sort]');
+      if(!th) return;
+      var k = th.getAttribute('data-sort');
+      if(st.sortKey===k){ st.sortDir = (st.sortDir==='asc')?'desc':'asc'; }
+      else { st.sortKey=k; st.sortDir = (k==='canonical_name'||k==='shift')?'asc':'desc'; }
+      renderSummaryTable();
+    });
+    // 案例展开(委托:主管 + 组员两个容器)
+    ['sp-ql-cases','sp-ql-my-cases'].forEach(function(cid){
+      var box=$(cid); if(!box) return;
+      box.addEventListener('click', function(ev){
+        var head = ev.target.closest && ev.target.closest('.sp-ql-case-head');
+        if(!head) return;
+        head.parentNode.classList.toggle('open');
+      });
+    });
+    // 上传 modal 拖档
+    var drop=$('sp-ql-up-drop'), file=$('sp-ql-up-file'), submit=$('sp-ql-up-submit'), fname=$('sp-ql-up-fname');
+    function onPick(){ if(file.files && file.files[0]){ fname.textContent='已选:'+file.files[0].name; submit.disabled=false; } else { fname.textContent=''; submit.disabled=true; } }
+    if(drop && file){
+      drop.addEventListener('click', function(){ file.click(); });
+      drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('drag'); });
+      drop.addEventListener('dragleave', function(){ drop.classList.remove('drag'); });
+      drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('drag');
+        if(e.dataTransfer.files && e.dataTransfer.files[0]){ file.files=e.dataTransfer.files; onPick(); } });
+      file.addEventListener('change', onPick);
+    }
+    if(submit) submit.addEventListener('click', doUpload);
+  }
+
+  function onActivate(){
+    console.log('[Phase4-3] activateSubpage quality');
+    applyRoleVisibility();
+    detectView();
+    applyViewVisibility();
+    if(st.loaded) return;
+    st.loaded = true;
+    wire();
+    setActivePreset();
+    setActiveDept();
+    load();
+  }
+
+  var PAGE_HTML =
+    '<header class="header">'+
+      '<div><div class="header-title"><span class="ht-main">质检分析</span><span class="ht-sub">QUALITY INSPECTION</span></div></div>'+
+      '<div class="header-right"><div class="header-status-group"><div class="header-status"><span class="header-status-dot"></span>DATA MODULE</div><div class="header-status-label">QUALITY / quality_*</div></div></div>'+
+    '</header>'+
+    '<div class="dashboard">'+
+      '<section class="sp-ql-controls">'+
+        '<div class="sp-ql-presets">'+
+          '<button data-range="today">今日</button>'+
+          '<button data-range="week">本周</button>'+
+          '<button data-range="last-week">上周</button>'+
+          '<button data-range="month">本月</button>'+
+          '<button data-range="quarter">本季</button>'+
+          '<button data-range="year">今年</button>'+
+          '<button data-range="custom">自订</button>'+
+        '</div>'+
+        '<div class="sp-ql-custom" id="sp-ql-custom">'+
+          '<input type="date" id="sp-ql-start"><span style="color:var(--text-dim)">→</span><input type="date" id="sp-ql-end">'+
+          '<button class="sp-ql-btn" id="sp-ql-custom-apply">套用</button>'+
+        '</div>'+
+        '<span class="sp-ql-sep"></span>'+
+        '<div class="sp-ql-dept">'+
+          '<button data-dept="all">全部</button>'+
+          '<button data-dept="dx">1-1 DX系</button>'+
+          '<button data-dept="df" disabled title="尚未启用">1-2 DF系</button>'+
+        '</div>'+
+        '<span class="sp-ql-sep"></span>'+
+        '<label class="sp-ql-cmp-label"><input type="checkbox" id="sp-ql-compare-chk">对比上期</label>'+
+        '<span class="sp-ql-spacer"></span>'+
+        '<span class="c-meta" id="sp-ql-range-label" style="color:var(--text-dim);font-size:12px"></span>'+
+        '<button class="sp-ql-btn" id="sp-ql-upload-btn" style="display:none">⬆ 上传质检</button>'+
+        '<button class="sp-ql-btn" id="sp-ql-rules-btn">⚙ 评分标准</button>'+
+      '</section>'+
+
+      '<div id="sp-ql-error" class="sp-ql-empty" style="display:none;color:#ff8c5a;border:1px solid rgba(255,140,40,0.4);border-radius:5px;"></div>'+
+      '<div id="sp-ql-loading" class="sp-ql-empty" style="display:none">载入中…</div>'+
+
+      /* ── 主管视图 ── */
+      '<div id="sp-ql-manager-view">'+
+        '<section class="sp-ql-kpis" id="sp-ql-kpis"></section>'+
+        '<section class="sp-ql-block"><h3>客服质检明细(合格率升序)</h3><div id="sp-ql-summary"></div></section>'+
+        '<section class="sp-ql-block"><h3>错误案例(点客服名展开完整对话)</h3><div class="sp-ql-cases" id="sp-ql-cases"></div></section>'+
+        '<div class="sp-ql-2col">'+
+          '<section class="sp-ql-block"><h3>错误类型分布</h3><div class="sp-ql-dist" id="sp-ql-dist"></div></section>'+
+          '<section class="sp-ql-block"><h3>进步榜 / 退步榜(本期 vs 上期)</h3><div class="sp-ql-2col" id="sp-ql-improvements"></div></section>'+
+        '</div>'+
+        '<section class="sp-ql-block"><h3>资料守门说明</h3><div id="sp-ql-notes"></div></section>'+
+      '</div>'+
+
+      /* ── 组员视图 ── */
+      '<div id="sp-ql-staff-view" style="display:none">'+
+        '<section class="sp-ql-kpis" id="sp-ql-my-kpis" style="grid-template-columns:repeat(3,1fr)"></section>'+
+        '<section class="sp-ql-block"><h3>我的错误案例(点展开完整对话)</h3><div class="sp-ql-cases" id="sp-ql-my-cases"></div></section>'+
+        '<section class="sp-ql-block"><h3>我的错误类型分布</h3><div class="sp-ql-dist" id="sp-ql-my-dist"></div></section>'+
+      '</div>'+
+    '</div>'+
+
+    /* ── 上传 modal ── */
+    '<div class="modal-overlay" id="sp-ql-upload-modal">'+
+      '<div class="cyber-modal">'+
+        '<button class="modal-close" onclick="hideModal(\'sp-ql-upload-modal\')">&times;</button>'+
+        '<div class="modal-header"><h2>上传质检 Excel</h2><span class="modal-sub">QUALITY UPLOAD</span></div>'+
+        '<div class="modal-body">'+
+          '<div class="sp-ql-drop" id="sp-ql-up-drop">点击选择或拖入 .xlsx 档案<br><span style="font-size:12px;opacity:.7">质检明细 + 客服汇总(3 sheet)</span></div>'+
+          '<input type="file" id="sp-ql-up-file" accept=".xlsx,.xls" style="display:none">'+
+          '<div class="sp-ql-fname" id="sp-ql-up-fname"></div>'+
+          '<div class="sp-ql-hint">系统依档名/内容解析审核日期,内容重复(MD5)会被拒绝,同审核日同部门旧版自动归档。</div>'+
+          '<button class="sp-ql-submit" id="sp-ql-up-submit" disabled>开始上传</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    /* ── 评分标准 modal ── */
+    '<div class="modal-overlay" id="sp-ql-rules-modal">'+
+      '<div class="cyber-modal" style="max-width:760px">'+
+        '<button class="modal-close" onclick="hideModal(\'sp-ql-rules-modal\')">&times;</button>'+
+        '<div class="modal-header"><h2>质检评分标准</h2><span class="modal-sub">SCORING RULES · Sheet 3</span></div>'+
+        '<div class="modal-body"><pre class="sp-ql-rules-pre" id="sp-ql-rules-pre">载入中…</pre></div>'+
+      '</div>'+
+    '</div>';
+
+  function register(){
+    SP.registerSubpage({
+      id:'page-quality', parent:'page-overview', title:'质检', idx:'1·3',
+      dataAccess:'组员', html:PAGE_HTML, onActivate:onActivate
+    });
+    console.log('[Phase4-3] quality subpage registered');
+  }
+  return { register:register };
+})();
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_QUALITY.register);
+else SP_QUALITY.register();
 </script>
 
 </body>
