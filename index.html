@@ -3431,6 +3431,35 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
 
 
 </style>
+
+<!-- [Phase3-3] 全局滚动条:赛博朋克风格(全档案级别,所有滚动元素生效)-->
+<style id="cyber-scrollbar">
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 195, 255, 0.35) rgba(0, 12, 28, 0.4);
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(0, 12, 28, 0.4);
+  border-radius: 2px;
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(0, 240, 255, 0.4), rgba(0, 116, 255, 0.3));
+  border-radius: 2px;
+  border: 1px solid rgba(0, 195, 255, 0.2);
+  transition: background 0.2s;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(0, 240, 255, 0.7), rgba(0, 116, 255, 0.5));
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+*::-webkit-scrollbar-corner {
+  background: rgba(0, 12, 28, 0.4);
+}
+</style>
 </head>
 <body>
 
@@ -10130,7 +10159,7 @@ window.logout = function(){ AuthGate.logout(); };
      - 默认范围策略(修正版 A):依 latest 落点挑「会涵盖它」的预设按钮,按钮语义永远诚实
      ════════════════════════════════════════════════════════════════ -->
 <style id="sp-rf-styles">
-#page-refunds .dashboard { padding:18px 24px 40px; display:flex; flex-direction:column; gap:16px; }
+#page-refunds .dashboard { padding:18px 24px 40px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden; }
 .sp-rf-controls { display:flex; align-items:center; flex-wrap:wrap; gap:12px;
   background:linear-gradient(160deg,rgba(0,80,200,0.06),transparent 50%),var(--bg-card);
   border:1px solid var(--border-mech); border-radius:4px; padding:12px 16px; }
@@ -10667,6 +10696,700 @@ var SP_REFUNDS = (function(){
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_REFUNDS.register);
 else SP_REFUNDS.register();
+</script>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     [Phase3-3] 接线量子页样式(全用 .sp-ag- 前缀,与 Phase 2 .sp-rf- 完全隔离)
+     配色沿用赛博朋克 var:--accent-cyan/orange/red/green + --bg-card
+     ════════════════════════════════════════════════════════════════ -->
+<style id="sp-ag-styles">
+#page-agents .dashboard { padding:18px 24px 40px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden; }
+/* 控件栏 */
+.sp-ag-controls { display:flex; align-items:center; flex-wrap:wrap; gap:12px;
+  background:linear-gradient(160deg,rgba(0,80,200,0.06),transparent 50%),var(--bg-card);
+  border:1px solid var(--border-mech); border-radius:4px; padding:12px 16px; }
+.sp-ag-presets { display:flex; gap:6px; }
+.sp-ag-presets button, .sp-ag-custom button, .sp-ag-refresh, .sp-ag-sync, .sp-ag-alias-btn, .sp-ag-source-toggle button {
+  font-family:inherit; cursor:pointer; padding:7px 14px; border-radius:3px; font-size:13px;
+  background:rgba(0,20,44,0.6); color:var(--text-secondary);
+  border:1px solid rgba(0,195,255,0.28); transition:all .18s ease; }
+.sp-ag-presets button:hover, .sp-ag-refresh:hover, .sp-ag-source-toggle button:hover { border-color:var(--accent-cyan); color:var(--text-primary); }
+.sp-ag-presets button.active { background:linear-gradient(180deg,rgba(0,240,255,0.18),rgba(0,116,255,0.1));
+  border-color:var(--accent-cyan); color:var(--accent-cyan); box-shadow:0 0 14px rgba(0,240,255,0.25); }
+.sp-ag-custom { display:flex; align-items:center; gap:8px; color:var(--text-dim); font-size:13px; }
+.sp-ag-custom input[type=date] { font-family:inherit; background:rgba(0,12,28,0.8); color:var(--text-primary);
+  border:1px solid rgba(0,195,255,0.28); border-radius:3px; padding:6px 8px; color-scheme:dark; }
+/* 来源三态 toggle */
+.sp-ag-source-toggle { display:flex; gap:0; border:1px solid rgba(0,195,255,0.28); border-radius:4px; overflow:hidden; }
+.sp-ag-source-toggle button { border:none; border-right:1px solid rgba(0,195,255,0.18); border-radius:0; padding:7px 13px; }
+.sp-ag-source-toggle button:last-child { border-right:none; }
+.sp-ag-source-toggle button.active { background:linear-gradient(180deg,rgba(0,240,255,0.2),rgba(0,116,255,0.1));
+  color:var(--accent-cyan); text-shadow:0 0 4px rgba(0,240,255,0.4); }
+/* 右侧动作区 */
+.sp-ag-actions { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.sp-ag-compare-toggle { display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:13px; cursor:pointer; user-select:none; }
+.sp-ag-compare-toggle input { accent-color:var(--accent-cyan); width:15px; height:15px; cursor:pointer; }
+#sp-ag-compare-sel { font-family:inherit; background:rgba(0,12,28,0.8); color:var(--text-primary);
+  border:1px solid rgba(0,195,255,0.28); border-radius:3px; padding:6px 8px; font-size:13px; }
+.sp-ag-sync { border-color:rgba(0,255,136,0.4); color:var(--accent-green); display:inline-flex; align-items:center; gap:6px; }
+.sp-ag-sync:hover { border-color:var(--accent-green); box-shadow:0 0 14px rgba(0,255,136,0.25); }
+.sp-ag-sync:disabled { opacity:.65; cursor:wait; }
+.sp-ag-alias-btn { border-color:rgba(148,102,255,0.45); color:var(--accent-purple); }
+.sp-ag-alias-btn:hover { border-color:var(--accent-purple); box-shadow:0 0 14px rgba(148,102,255,0.25); }
+.sp-ag-spin { display:inline-block; width:12px; height:12px; border:2px solid rgba(0,255,136,0.25);
+  border-top-color:var(--accent-green); border-radius:50%; animation:sp-ag-spin .8s linear infinite; }
+@keyframes sp-ag-spin { to { transform:rotate(360deg); } }
+/* KPI 卡 */
+.sp-ag-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.sp-ag-kpi { position:relative; background:var(--bg-card); border:1px solid var(--border-mech);
+  border-radius:4px; padding:16px 14px; display:flex; flex-direction:column; gap:6px; }
+.sp-ag-kpi.warn { border-color:rgba(255,128,64,0.6); box-shadow:0 0 14px rgba(255,128,64,0.18); }
+.sp-ag-kpi-label { font-size:12px; color:var(--text-dim); letter-spacing:.5px; }
+.sp-ag-kpi-val { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent-cyan); }
+.sp-ag-kpi-val.cyan { color:var(--accent-cyan); } .sp-ag-kpi-val.green { color:var(--accent-green); } .sp-ag-kpi-val.orange { color:var(--accent-orange); }
+.sp-ag-kpi-delta { font-size:12px; font-variant-numeric:tabular-nums; }
+.sp-ag-kpi-delta.good { color:var(--accent-green); } .sp-ag-kpi-delta.bad { color:var(--accent-red); } .sp-ag-kpi-delta.flat { color:var(--text-dim); }
+/* 面板 */
+.sp-ag-panel { background:var(--bg-card); border:1px solid var(--border-mech); border-radius:4px; padding:14px 16px; }
+.sp-ag-panel-title { font-size:14px; color:var(--text-primary); margin-bottom:10px; letter-spacing:.5px;
+  border-bottom:1px solid rgba(0,195,255,0.15); padding-bottom:8px; }
+#sp-ag-trend-wrap { position:relative; height:300px; }
+.sp-ag-2col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* 客服明细表 */
+.sp-ag-table-scroll { max-height:440px; overflow:auto; }
+.sp-ag-table { width:100%; border-collapse:collapse; font-size:13px; }
+.sp-ag-table thead th { position:sticky; top:0; z-index:2; background:rgba(4,10,24,0.98); color:var(--text-secondary);
+  font-weight:600; text-align:right; padding:9px 12px; cursor:pointer; user-select:none; white-space:nowrap;
+  border-bottom:1px solid rgba(0,195,255,0.25); transition:color .15s; }
+.sp-ag-table thead th.l { text-align:left; }
+.sp-ag-table thead th:hover { color:var(--accent-cyan); }
+.sp-ag-table thead th.active { color:var(--accent-cyan); }
+.sp-ag-table tbody td { text-align:right; padding:8px 12px; color:var(--text-primary); font-variant-numeric:tabular-nums;
+  border-bottom:1px solid rgba(0,195,255,0.07); white-space:nowrap; }
+.sp-ag-table tbody td.l { text-align:left; }
+.sp-ag-table tbody tr:hover td { background:rgba(0,195,255,0.05); }
+.sp-ag-table td .dim { color:var(--text-dim); }
+.sp-ag-td-empty { text-align:center !important; color:var(--text-dim); padding:28px 0 !important; }
+.sp-ag-src-badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; letter-spacing:.5px; }
+.sp-ag-src-badge.yueda { color:var(--accent-orange); background:rgba(255,128,64,0.1); border:1px solid rgba(255,128,64,0.3); }
+.sp-ag-src-badge.remote { color:var(--accent-cyan); background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.3); }
+/* 异常名单 */
+.sp-ag-anomaly { display:flex; flex-direction:column; gap:8px; }
+.sp-ag-anomaly-item { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; padding:9px 12px; border-radius:3px;
+  background:rgba(0,12,28,0.5); border:1px solid var(--border-mech); border-left-width:3px; }
+.sp-ag-anomaly-item.warn { border-left-color:var(--accent-orange); }
+.sp-ag-anomaly-item.bad { border-left-color:var(--accent-red); }
+.sp-ag-anomaly-tag { font-size:11px; padding:2px 8px; border-radius:3px; white-space:nowrap; }
+.sp-ag-anomaly-item.warn .sp-ag-anomaly-tag { color:var(--accent-orange); background:rgba(255,128,64,0.12); }
+.sp-ag-anomaly-item.bad .sp-ag-anomaly-tag { color:var(--accent-red); background:rgba(255,68,102,0.12); }
+.sp-ag-anomaly-name { font-weight:700; color:var(--text-primary); }
+.sp-ag-anomaly-note { color:var(--text-secondary); }
+/* 守门说明 */
+.sp-ag-quality { display:flex; flex-direction:column; gap:8px; }
+.sp-ag-quality-note { display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.6; padding:9px 12px; border-radius:3px;
+  background:rgba(255,128,64,0.05); border:1px solid rgba(255,128,64,0.22); color:var(--text-secondary); }
+.sp-ag-quality-ico { color:var(--accent-orange); flex-shrink:0; }
+.sp-ag-empty-note { color:var(--text-dim); font-size:13px; padding:16px 4px; }
+/* 热力图 */
+.sp-ag-heatmap-scroll { overflow:auto; max-height:520px; }
+.sp-ag-hm { border-collapse:separate; border-spacing:2px; font-size:11px; }
+.sp-ag-hm th { color:var(--text-dim); font-weight:600; padding:4px 6px; white-space:nowrap; }
+.sp-ag-hm thead th { position:sticky; top:0; z-index:2; background:rgba(4,10,24,0.98); }
+.sp-ag-hm .sp-ag-hm-corner { position:sticky; left:0; z-index:3; background:rgba(4,10,24,0.98); text-align:left; }
+.sp-ag-hm .sp-ag-hm-rowh { position:sticky; left:0; z-index:1; background:rgba(4,10,24,0.96); color:var(--text-secondary);
+  text-align:left; max-width:96px; overflow:hidden; text-overflow:ellipsis; }
+.sp-ag-hm tbody td { width:38px; min-width:38px; height:24px; text-align:center; color:#05121f; font-weight:700;
+  border-radius:2px; font-variant-numeric:tabular-nums; }
+.sp-ag-hm td.sp-ag-hm-empty { background:rgba(255,255,255,0.03); }
+.sp-ag-rangelabel { text-align:right; color:var(--text-dim); font-size:12px; letter-spacing:.5px; }
+/* 人名管理 modal */
+.cyber-modal.sp-ag-alias-modal { width:680px; max-width:94vw; }
+.sp-ag-alias-sec-title { font-family:var(--font-display); font-size:12px; letter-spacing:2px; color:var(--accent-cyan);
+  margin:14px 0 8px; padding-bottom:6px; border-bottom:1px solid rgba(0,195,255,0.12); display:flex; align-items:center; justify-content:space-between; }
+.sp-ag-noise-toggle { display:flex; align-items:center; gap:6px; font-family:var(--font-body); font-size:12px; color:var(--text-secondary); cursor:pointer; letter-spacing:0; }
+.sp-ag-noise-toggle input { accent-color:var(--accent-cyan); }
+.sp-ag-alias-list, .sp-ag-suggest-list { display:flex; flex-direction:column; gap:6px; max-height:200px; overflow:auto; }
+.sp-ag-alias-row, .sp-ag-suggest-row { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:3px;
+  background:rgba(0,12,28,0.5); border:1px solid var(--border-mech); }
+.sp-ag-alias-info { display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1; font-size:13px; }
+.sp-ag-alias-from { color:var(--text-dim); }
+.sp-ag-alias-arrow { color:var(--accent-cyan); }
+.sp-ag-alias-to { font-weight:700; color:var(--text-primary); }
+.sp-ag-alias-meta { font-size:11px; color:var(--text-dim); }
+.sp-ag-conf { font-size:11px; color:var(--accent-green); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:1px 7px; }
+.sp-ag-alias-del { font-family:inherit; cursor:pointer; font-size:12px; padding:5px 12px; border-radius:3px;
+  background:rgba(255,68,102,0.08); color:var(--accent-red); border:1px solid rgba(255,68,102,0.35); }
+.sp-ag-alias-del:hover { border-color:var(--accent-red); }
+.sp-ag-suggest-ok { font-family:inherit; cursor:pointer; font-size:12px; padding:5px 12px; border-radius:3px;
+  background:rgba(0,255,136,0.08); color:var(--accent-green); border:1px solid rgba(0,255,136,0.35); white-space:nowrap; }
+.sp-ag-suggest-ok:hover { border-color:var(--accent-green); }
+.sp-ag-suggest-ok:disabled, .sp-ag-alias-del:disabled { opacity:.5; cursor:wait; }
+.sp-ag-alias-empty, .sp-ag-loading { color:var(--text-dim); font-size:13px; padding:12px 4px; text-align:center; }
+@media(max-width:1280px){ .sp-ag-kpis{grid-template-columns:repeat(3,1fr)} .sp-ag-2col{grid-template-columns:1fr} }
+</style>
+
+<!-- [Phase3-3] 人名管理 Modal(复用既有 .modal-overlay / .cyber-modal / showModal) -->
+<div class="modal-overlay" id="sp-ag-alias-modal">
+  <div class="cyber-modal sp-ag-alias-modal">
+    <button class="modal-close" onclick="hideModal('sp-ag-alias-modal')">&times;</button>
+    <div class="modal-header"><h2>人名管理</h2><span class="modal-sub">AGENT ALIASES</span></div>
+    <div class="modal-body">
+      <div class="sp-ag-alias-sec-title">已合并人名</div>
+      <div class="sp-ag-alias-list" id="sp-ag-alias-list"></div>
+      <div class="sp-ag-alias-sec-title">
+        <span>合并建议</span>
+        <label class="sp-ag-noise-toggle"><input type="checkbox" id="sp-ag-alias-noise">显示所有(含噪声)</label>
+      </div>
+      <div class="sp-ag-suggest-list" id="sp-ag-suggest-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- [Phase3-3] 接线量子页模块(独立 IIFE) -->
+<script>
+/* ════════════════════════════════════════════════════════════════
+   [Phase3-3] 接线量子页模块 SP_AGENTS
+   镜像 SP_REFUNDS 模式:完全自包含 IIFE,自带 PAGE_HTML + 私有 render,
+   不动 SP 框架核心、不挂任何函数到 SP 公共空间、与退费子页物理隔离。
+   ════════════════════════════════════════════════════════════════ */
+var SP_AGENTS = (function(){
+  var API = '/api/agents';
+  var trendChart = null;
+  var st = { range:'last-week', start:null, end:null, compare:false, compareTarget:'last-week',
+             source:'all', loaded:false, sortKey:'intake', sortDir:'desc', tableRows:[] };
+  // range → 预设的 compare 目标(同 Phase 2.3)
+  var CMP_DEFAULT = { 'last-week':'last-week', week:'last-week', month:'last-month', quarter:'last-quarter', year:'last-year', custom:'yoy' };
+
+  function intf(n){ return Number(n||0).toLocaleString('zh-CN'); }
+  function pad(n){ return (n<10?'0':'')+n; }
+  function iso(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function srcLabel(s){ return s==='yueda' ? '悦达' : (s==='remote' ? '远程' : (s||'全部')); }
+
+  /* ── 角色 / 权限(沿用退费的 mapRole;X-User-Name 一律用英文 username)── */
+  function currentUser(){
+    try { return (typeof AuthManager!=='undefined' && AuthManager.getCurrentUser) ? AuthManager.getCurrentUser() : null; }
+    catch(e){ return null; }
+  }
+  function mapRole(r){
+    var m = { 'superadmin':'superadmin','超级管理员':'superadmin','主管':'manager','manager':'manager',
+              '组长':'leader','leader':'leader','维护':'maintainer','maintainer':'maintainer' };
+    return m[r] || (r||'');
+  }
+  function roleLevel(){
+    var u = currentUser(); if(!u) return 0;
+    try { return (AuthManager.ROLE_HIERARCHY && AuthManager.ROLE_HIERARCHY[u.role]) || 0; }
+    catch(e){ return 0; }
+  }
+  function canManage(){ return roleLevel() >= 2; } // 组长以上:Sync + Alias 管理
+  function authHeaders(){
+    var u = currentUser();
+    return { 'X-User-Role': mapRole(u && u.role), 'X-User-Name': (u && u.username) || mapRole(u && u.role) };
+  }
+
+  /* ── 默认范围策略(修正版 A,同 Phase 2.3):挑会涵盖 latest 的最小预设 ── */
+  function pickDefaultRange(latestStr){
+    if(!latestStr) return 'last-week';
+    var today = new Date();
+    var latest = new Date(latestStr + 'T00:00:00');
+    var dow = (today.getDay()+6)%7;
+    var thisMonday = new Date(today); thisMonday.setDate(today.getDate()-dow); thisMonday.setHours(0,0,0,0);
+    var lastWeekStart = new Date(thisMonday); lastWeekStart.setDate(thisMonday.getDate()-7);
+    var lastWeekEnd = new Date(thisMonday); lastWeekEnd.setDate(thisMonday.getDate()-1); lastWeekEnd.setHours(23,59,59,999);
+    var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    var q = Math.floor(today.getMonth()/3)*3;
+    var quarterStart = new Date(today.getFullYear(), q, 1);
+    var yearStart = new Date(today.getFullYear(), 0, 1);
+    if(latest >= lastWeekStart && latest <= lastWeekEnd) return 'last-week';
+    if(latest >= monthStart && latest <= today) return 'month';
+    if(latest >= quarterStart && latest <= today) return 'quarter';
+    if(latest >= yearStart && latest <= today) return 'year';
+    return 'custom';
+  }
+  function weekOf(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    var dow = (d.getDay()+6)%7;
+    var s = new Date(d); s.setDate(d.getDate()-dow);
+    var e = new Date(s); e.setDate(s.getDate()+6);
+    return { start: iso(s), end: iso(e) };
+  }
+
+  /* ── UI 控件状态 ── */
+  function setActivePreset(range){
+    document.querySelectorAll('#page-agents .sp-ag-presets button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-range')===range);
+    });
+    var cust = document.getElementById('sp-ag-custom');
+    if(cust) cust.style.display = (range==='custom') ? 'flex' : 'none';
+  }
+  function setActiveSource(src){
+    document.querySelectorAll('#page-agents .sp-ag-source-toggle button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-source')===src);
+    });
+  }
+  function syncCompareSelUI(){
+    var sel = document.getElementById('sp-ag-compare-sel');
+    var chk = document.getElementById('sp-ag-compare-chk');
+    if(chk) chk.checked = st.compare;
+    if(sel){ sel.style.display = st.compare ? '' : 'none'; sel.value = st.compareTarget; }
+  }
+  function applyRoleVisibility(){
+    var show = canManage() ? '' : 'none';
+    ['sp-ag-sync-btn','sp-ag-alias-btn'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.style.display = show;
+    });
+  }
+
+  /* ── 查询 ── */
+  function buildQuery(){
+    var p = new URLSearchParams();
+    p.set('range', st.range);
+    if(st.range==='custom'){
+      if(st.start) p.set('start_date', st.start);
+      if(st.end) p.set('end_date', st.end);
+    }
+    p.set('compare', st.compare ? st.compareTarget : 'none');
+    p.set('source', st.source);
+    return p.toString();
+  }
+  function load(){
+    var url = API + '/data?' + buildQuery();
+    fetch(url).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(res){
+        if(!res.ok){ spToast((res.j && res.j.message) || '载入失败', 'error'); return; }
+        render(res.j);
+      })
+      .catch(function(e){ spToast('网络错误:'+e.message, 'error'); });
+  }
+
+  /* ── 渲染 6 区块 ── */
+  function render(data){
+    var cur = data.current || {};
+    var cmp = data.compare || null;
+    var lbl = document.getElementById('sp-ag-rangelabel');
+    if(lbl) lbl.textContent = data.range
+      ? ('范围:' + data.range.label + '  ·  来源:' + srcLabel(data.source_filter) + (cmp ? '  ·  对比:' + cmp.label : ''))
+      : '';
+    renderKpis(cur.kpi || {}, cmp ? cmp.kpi : null);
+    renderTrend(cur.trend || []);
+    st.tableRows = cur.agents_table || [];
+    renderAgentsTable();
+    renderAnomalies(cur.anomalies || []);
+    renderHeatmap(cur.matrix || {});
+    renderQualityNotes(cur.data_quality_notes || []);
+  }
+
+  var KPI_METRICS = [
+    {k:'active_agents',     label:'活跃客服',   cls:'cyan',   good:'up',   fmt:intf},
+    {k:'total_intake',      label:'总接待量',   cls:'cyan',   good:'up',   fmt:intf},
+    {k:'avg_response_sec',  label:'平均响应(秒)', cls:'orange', good:'down', fmt:function(n){ return n==null?'—':intf(Math.round(n)); }},
+    {k:'avg_quality_score', label:'平均质量分', cls:'green',  good:'up',   fmt:function(n){ return n==null?'—':Number(n).toFixed(2); }},
+    {k:'total_escalation',  label:'升级数',     cls:'orange', good:null,   fmt:intf}
+  ];
+  function renderKpis(kpi, prev){
+    var box = document.getElementById('sp-ag-kpis'); if(!box) return;
+    box.innerHTML = KPI_METRICS.map(function(m){
+      var cur = kpi[m.k];
+      var delta = '', warnCls = '';
+      if(prev){
+        var pv = prev[m.k];
+        if(pv!=null && pv!==0 && cur!=null){
+          var pct = ((cur-pv)/Math.abs(pv))*100;
+          var arrow = pct>0 ? '▲' : (pct<0 ? '▼' : '–');
+          var dirCls = 'flat';
+          if(m.good){
+            var goodChange = (m.good==='up' && pct>0) || (m.good==='down' && pct<0);
+            dirCls = (pct===0) ? 'flat' : (goodChange ? 'good' : 'bad');
+            if(!goodChange && pct!==0 && Math.abs(pct)>=10) warnCls = ' warn';
+          }
+          delta = '<div class="sp-ag-kpi-delta '+dirCls+'">'+arrow+' '+Math.abs(pct).toFixed(1)+'% vs 对比期</div>';
+        } else {
+          delta = '<div class="sp-ag-kpi-delta flat">对比期无数据</div>';
+        }
+      }
+      return '<div class="sp-ag-kpi'+warnCls+'"><div class="sp-ag-kpi-label">'+m.label+'</div>'+
+             '<div class="sp-ag-kpi-val '+m.cls+'">'+m.fmt(cur)+'</div>'+delta+'</div>';
+    }).join('');
+  }
+
+  function renderTrend(trend){
+    var canvas = document.getElementById('sp-ag-trend');
+    if(!canvas || typeof Chart==='undefined') return;
+    var labels = trend.map(function(t){ return t.date.slice(5); });
+    if(trendChart){ trendChart.destroy(); trendChart = null; }
+    trendChart = new Chart(canvas, {
+      type:'line',
+      data:{ labels:labels, datasets:[
+        { label:'总接待量', data:trend.map(function(t){return t.intake;}), yAxisID:'y',
+          borderColor:'#00f0ff', backgroundColor:'rgba(0,240,255,0.12)', fill:true, tension:0.3, pointRadius:2 },
+        { label:'在班客服', data:trend.map(function(t){return t.agents;}), yAxisID:'y1',
+          borderColor:'#ff8040', backgroundColor:'rgba(255,128,64,0.05)', fill:false, tension:0.3, pointRadius:2 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#b0c8e4', boxWidth:12 } } },
+        scales:{
+          x:{ ticks:{ color:'#8aa0c0', maxRotation:0, autoSkip:true }, grid:{ color:'rgba(0,195,255,0.06)' } },
+          y:{ position:'left', ticks:{ color:'#00f0ff' }, grid:{ color:'rgba(0,195,255,0.06)' } },
+          y1:{ position:'right', ticks:{ color:'#ff8040' }, grid:{ drawOnChartArea:false } }
+        } }
+    });
+  }
+
+  /* ── 客服明细表(可排序;NULL intake/响应 显示 — 且排序永远垫底)── */
+  var TABLE_COLS = [
+    {k:'canonical_name', label:'客服',     type:'str', align:'l'},
+    {k:'source',         label:'来源',     type:'str', align:'l'},
+    {k:'intake',         label:'接待量',   type:'num'},
+    {k:'avg_response_sec', label:'响应(秒)', type:'num'},
+    {k:'avg_quality_score', label:'质量分', type:'num'},
+    {k:'escalation_count', label:'升级',   type:'num'},
+    {k:'days_active',    label:'在班天数', type:'num'}
+  ];
+  function sortRows(rows){
+    var k = st.sortKey, dir = st.sortDir==='asc' ? 1 : -1;
+    var col = TABLE_COLS.filter(function(c){ return c.k===k; })[0] || {type:'num'};
+    return rows.slice().sort(function(a,b){
+      var av=a[k], bv=b[k], an=(av==null), bn=(bv==null);
+      if(an&&bn) return 0; if(an) return 1; if(bn) return -1; // NULL 永远垫底
+      if(col.type==='str') return String(av).localeCompare(String(bv),'zh')*dir;
+      return (av-bv)*dir;
+    });
+  }
+  function renderAgentsTable(){
+    var box = document.getElementById('sp-ag-table-wrap'); if(!box) return;
+    var rows = st.tableRows || [];
+    var head = TABLE_COLS.map(function(c){
+      var active = (st.sortKey===c.k);
+      var ind = active ? (st.sortDir==='asc' ? ' ▲' : ' ▼') : '';
+      return '<th data-k="'+c.k+'" class="'+(c.align==='l'?'l':'')+(active?' active':'')+'">'+c.label+ind+'</th>';
+    }).join('');
+    function numCell(v, f){ return '<td>'+(v==null ? '<span class="dim">—</span>' : (f ? f(v) : intf(v)))+'</td>'; }
+    var body = sortRows(rows).map(function(r){
+      return '<tr>'+
+        '<td class="l" title="'+esc((r.raw_names||[]).join(' / '))+'">'+esc(r.canonical_name)+'</td>'+
+        '<td class="l"><span class="sp-ag-src-badge '+esc(r.source)+'">'+srcLabel(r.source)+'</span></td>'+
+        numCell(r.intake)+
+        numCell(r.avg_response_sec, function(v){ return intf(Math.round(v)); })+
+        numCell(r.avg_quality_score, function(v){ return Number(v).toFixed(2); })+
+        numCell(r.escalation_count)+
+        numCell(r.days_active)+
+      '</tr>';
+    }).join('');
+    box.innerHTML = '<table class="sp-ag-table"><thead><tr>'+head+'</tr></thead><tbody>'+
+      (body || '<tr><td colspan="7" class="sp-ag-td-empty">本期无客服数据</td></tr>')+'</tbody></table>';
+    box.querySelectorAll('th[data-k]').forEach(function(th){
+      th.addEventListener('click', function(){
+        var k = th.getAttribute('data-k');
+        if(st.sortKey===k){ st.sortDir = st.sortDir==='asc' ? 'desc' : 'asc'; }
+        else { st.sortKey = k; st.sortDir = (k==='canonical_name'||k==='source') ? 'asc' : 'desc'; }
+        renderAgentsTable();
+      });
+    });
+  }
+
+  /* ── 异常名单(type 决定颜色)── */
+  var ANOMALY_META = {
+    low_intake:     {cls:'warn', label:'接待量偏低'},
+    no_submit:      {cls:'bad',  label:'未提交'},
+    slow_response:  {cls:'bad',  label:'响应过慢'},
+    high_escalation:{cls:'bad',  label:'升级异常'}
+  };
+  function renderAnomalies(list){
+    var box = document.getElementById('sp-ag-anomaly'); if(!box) return;
+    if(!list.length){ box.innerHTML = '<div class="sp-ag-empty-note">本期无异常 ✓</div>'; return; }
+    box.innerHTML = list.map(function(a){
+      var m = ANOMALY_META[a.type] || {cls:'', label:a.type};
+      return '<div class="sp-ag-anomaly-item '+m.cls+'">'+
+        '<span class="sp-ag-anomaly-tag">'+esc(m.label)+'</span>'+
+        '<span class="sp-ag-anomaly-name">'+esc(a.agent)+'</span>'+
+        '<span class="sp-ag-anomaly-note">'+esc(a.note)+'</span></div>';
+    }).join('');
+  }
+
+  /* ── 每日热力图(日期×客服×intake;colorscale 青→橙→红)── */
+  function mix(a,b,t){ return [Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t)]; }
+  function heatColor(t){
+    if(t<0) t=0; if(t>1) t=1;
+    var c = (t<0.5) ? mix([0,240,255],[255,128,64], t/0.5) : mix([255,128,64],[255,68,102], (t-0.5)/0.5);
+    return 'rgba('+c[0]+','+c[1]+','+c[2]+',0.82)';
+  }
+  function hmText(v){ return v>=1000 ? (Math.round(v/100)/10)+'k' : String(v); }
+  function renderHeatmap(matrix){
+    var box = document.getElementById('sp-ag-heatmap'); if(!box) return;
+    var agents = matrix.agents || [], dates = matrix.dates || [], cells = matrix.cells || [];
+    if(!agents.length || !dates.length){ box.innerHTML = '<div class="sp-ag-empty-note">本期无热力数据</div>'; return; }
+    var lut = {}, max = 0;
+    cells.forEach(function(c){ lut[c.agent+'|'+c.date] = c.intake; if(c.intake>max) max=c.intake; });
+    if(max<=0) max = 1;
+    var head = '<th class="sp-ag-hm-corner">客服＼日期</th>' + dates.map(function(d){ return '<th>'+d.slice(5)+'</th>'; }).join('');
+    var body = agents.map(function(ag){
+      var tds = dates.map(function(d){
+        var v = lut[ag+'|'+d];
+        if(v==null) return '<td class="sp-ag-hm-empty" title="'+esc(ag)+' '+d+':无"></td>';
+        return '<td style="background:'+heatColor(v/max)+'" title="'+esc(ag)+' '+d+':'+intf(v)+'">'+hmText(v)+'</td>';
+      }).join('');
+      return '<tr><th class="sp-ag-hm-rowh" title="'+esc(ag)+'">'+esc(ag)+'</th>'+tds+'</tr>';
+    }).join('');
+    box.innerHTML = '<table class="sp-ag-hm"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>';
+  }
+
+  /* ── 守门 / 透明度说明 ── */
+  function renderQualityNotes(notes){
+    var box = document.getElementById('sp-ag-quality'); if(!box) return;
+    if(!notes.length){ box.innerHTML = '<div class="sp-ag-empty-note">本期数据无特别说明 ✓</div>'; return; }
+    box.innerHTML = notes.map(function(n){
+      return '<div class="sp-ag-quality-note"><span class="sp-ag-quality-ico">⚙</span><span>'+esc(n)+'</span></div>';
+    }).join('');
+  }
+
+  /* ── 立即同步(leader+)── */
+  function doSync(){
+    if(!canManage()){ spToast('当前角色无同步权限', 'error'); return; }
+    var btn = document.getElementById('sp-ag-sync-btn'); if(!btn) return;
+    btn.disabled = true; var old = btn.innerHTML; btn.innerHTML = '<span class="sp-ag-spin"></span> 同步中…';
+    fetch(API + '/sync', { method:'POST', headers:authHeaders() })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, j:j}; }); })
+      .then(function(res){
+        btn.disabled = false; btn.innerHTML = old;
+        if(res.ok){
+          var j = res.j;
+          spToast('同步完成:悦达 +'+intf(j.yueda_imported)+',远程 +'+intf(j.remote_imported)+',修正 '+intf(j.remote_corrected)+' 笔', 'ok', 5000);
+          if(j.warnings && j.warnings.length) spToast('同步提醒:'+j.warnings.length+' 条警告(详见后端日志)', 'info', 4500);
+          initRangeThenLoad();
+        } else {
+          spToast((res.j && res.j.message) || ('同步失败 ('+res.status+')'), 'error', 5000);
+        }
+      })
+      .catch(function(e){ btn.disabled=false; btn.innerHTML=old; spToast('网络错误:'+e.message, 'error'); });
+  }
+
+  /* ── 人名管理 modal(leader+)── */
+  function openAliasModal(){
+    if(!canManage()){ spToast('当前角色无人名管理权限', 'error'); return; }
+    showModal('sp-ag-alias-modal');
+    loadAliases();
+    loadSuggestions();
+  }
+  function loadAliases(){
+    var box = document.getElementById('sp-ag-alias-list');
+    if(box) box.innerHTML = '<div class="sp-ag-loading">载入中…</div>';
+    fetch(API + '/aliases?page_size=200').then(function(r){ return r.json(); }).then(function(j){
+      var items = (j && j.items) || [];
+      if(!box) return;
+      if(!items.length){ box.innerHTML = '<div class="sp-ag-alias-empty">尚无已合并人名</div>'; return; }
+      box.innerHTML = items.map(function(it){
+        return '<div class="sp-ag-alias-row"><div class="sp-ag-alias-info">'+
+          '<span class="sp-ag-alias-from">'+esc(it.alias_name)+'</span><span class="sp-ag-alias-arrow">→</span>'+
+          '<span class="sp-ag-alias-to">'+esc(it.canonical_name)+'</span>'+
+          '<span class="sp-ag-src-badge '+esc(it.source)+'">'+srcLabel(it.source)+'</span>'+
+          (it.note ? '<span class="sp-ag-alias-meta">'+esc(it.note)+'</span>' : '')+
+        '</div><button class="sp-ag-alias-del" data-id="'+it.id+'">撤回</button></div>';
+      }).join('');
+      box.querySelectorAll('.sp-ag-alias-del').forEach(function(b){
+        b.addEventListener('click', function(){ deleteAlias(b.getAttribute('data-id'), b); });
+      });
+    }).catch(function(e){ if(box) box.innerHTML = '<div class="sp-ag-alias-empty">载入失败:'+esc(e.message)+'</div>'; });
+  }
+  function deleteAlias(id, btn){
+    if(btn){ btn.disabled = true; btn.textContent = '撤回中…'; }
+    fetch(API + '/aliases/' + id, { method:'DELETE', headers:authHeaders() })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(res){
+        if(res.ok){ spToast('已撤回合并', 'ok'); loadAliases(); loadSuggestions(); load(); }
+        else { if(btn){ btn.disabled=false; btn.textContent='撤回'; } spToast((res.j && res.j.message) || '撤回失败', 'error'); }
+      })
+      .catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='撤回'; } spToast('网络错误:'+e.message, 'error'); });
+  }
+  function loadSuggestions(){
+    var noise = document.getElementById('sp-ag-alias-noise');
+    var inc = noise && noise.checked;
+    var box = document.getElementById('sp-ag-suggest-list');
+    if(box) box.innerHTML = '<div class="sp-ag-loading">载入中…</div>';
+    fetch(API + '/alias-suggestions' + (inc ? '?include_noise=true' : ''))
+      .then(function(r){ return r.json(); }).then(function(j){
+        var list = (j && j.suggestions) || [];
+        if(!box) return;
+        if(!list.length){ box.innerHTML = '<div class="sp-ag-alias-empty">无待确认建议</div>'; return; }
+        box.innerHTML = list.map(function(s){
+          // canonical = 笔数较多者;alias = 笔数较少者
+          var aCanon = (s.a_count >= s.b_count);
+          var canon = aCanon ? s.name_a : s.name_b;
+          var alias = aCanon ? s.name_b : s.name_a;
+          var aliasSrc = (aCanon ? (s.b_in_sources||[]) : (s.a_in_sources||[]))[0] || '';
+          var conf = Math.round((s.confidence||0)*100);
+          return '<div class="sp-ag-suggest-row"><div class="sp-ag-alias-info">'+
+            '<span class="sp-ag-alias-from">'+esc(alias)+'</span><span class="sp-ag-alias-arrow">→</span>'+
+            '<span class="sp-ag-alias-to">'+esc(canon)+'</span>'+
+            '<span class="sp-ag-conf">'+conf+'%</span>'+
+            '<span class="sp-ag-alias-meta">'+esc(s.reason)+'</span>'+
+          '</div><button class="sp-ag-suggest-ok" data-canon="'+esc(canon)+'" data-alias="'+esc(alias)+
+            '" data-src="'+esc(aliasSrc)+'" data-conf="'+(s.confidence||'')+'">确认合并</button></div>';
+        }).join('');
+        box.querySelectorAll('.sp-ag-suggest-ok').forEach(function(b){
+          b.addEventListener('click', function(){
+            confirmSuggestion(b.getAttribute('data-canon'), b.getAttribute('data-alias'),
+              b.getAttribute('data-src'), b.getAttribute('data-conf'), b);
+          });
+        });
+      }).catch(function(e){ if(box) box.innerHTML = '<div class="sp-ag-alias-empty">载入失败:'+esc(e.message)+'</div>'; });
+  }
+  function confirmSuggestion(canon, alias, src, conf, btn){
+    if(btn){ btn.disabled = true; btn.textContent = '处理中…'; }
+    var body = { canonical_name:canon, alias_name:alias, note:'看板确认 fuzzy 推断' };
+    if(conf) body.confidence = Number(conf);
+    if(src) body.source = src;
+    var hdr = authHeaders(); hdr['Content-Type'] = 'application/json';
+    fetch(API + '/aliases', { method:'POST', headers:hdr, body:JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(res){
+        if(res.ok){ spToast('已合并:'+alias+' → '+canon, 'ok'); loadAliases(); loadSuggestions(); load(); }
+        else { if(btn){ btn.disabled=false; btn.textContent='确认合并'; } spToast((res.j && res.j.message) || '合并失败', 'error'); }
+      })
+      .catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='确认合并'; } spToast('网络错误:'+e.message, 'error'); });
+  }
+
+  /* ── 依 health-data 决定默认范围(注意:agents shape 与 refunds 不同,latest 要从 sources 取 max)── */
+  function initRangeThenLoad(){
+    fetch(API + '/health-data').then(function(r){ return r.json(); }).then(function(h){
+      var latest = null;
+      if(h && h.sources){
+        var ys = h.sources.yueda && h.sources.yueda.latest;
+        var rs = h.sources.remote && h.sources.remote.latest;
+        latest = [ys, rs].filter(Boolean).sort().pop() || null; // ISO 字串排序取 max
+      }
+      if(latest){
+        var rng = pickDefaultRange(latest);
+        st.range = rng;
+        st.compareTarget = CMP_DEFAULT[rng] || 'yoy';
+        if(rng==='custom'){
+          var w = weekOf(latest); st.start = w.start; st.end = w.end;
+          var si = document.getElementById('sp-ag-start'), ei = document.getElementById('sp-ag-end');
+          if(si) si.value = w.start; if(ei) ei.value = w.end;
+        }
+      } else {
+        st.range = 'last-week';
+      }
+      setActivePreset(st.range);
+      syncCompareSelUI();
+      load();
+    }).catch(function(){ setActivePreset(st.range); load(); });
+  }
+
+  /* ── 事件绑定 ── */
+  function wire(){
+    document.querySelectorAll('#page-agents .sp-ag-presets button').forEach(function(b){
+      b.addEventListener('click', function(){
+        var rng = b.getAttribute('data-range');
+        st.range = rng;
+        st.compareTarget = CMP_DEFAULT[rng] || 'yoy';
+        setActivePreset(rng);
+        syncCompareSelUI();
+        if(rng!=='custom') load();
+      });
+    });
+    var apply = document.getElementById('sp-ag-apply');
+    if(apply) apply.addEventListener('click', function(){
+      var s = document.getElementById('sp-ag-start').value, e = document.getElementById('sp-ag-end').value;
+      if(!s || !e){ spToast('请选择起讫日期', 'error'); return; }
+      if(s > e){ spToast('结束日期早于开始日期', 'error'); return; }
+      st.range='custom'; st.start=s; st.end=e; load();
+    });
+    // 来源 toggle
+    document.querySelectorAll('#page-agents .sp-ag-source-toggle button').forEach(function(b){
+      b.addEventListener('click', function(){
+        st.source = b.getAttribute('data-source');
+        setActiveSource(st.source);
+        load();
+      });
+    });
+    // 对比开关
+    var chk = document.getElementById('sp-ag-compare-chk');
+    if(chk) chk.addEventListener('change', function(){ st.compare = chk.checked; syncCompareSelUI(); load(); });
+    var sel = document.getElementById('sp-ag-compare-sel');
+    if(sel) sel.addEventListener('change', function(){ st.compareTarget = sel.value; if(st.compare) load(); });
+    // 刷新
+    var rf = document.getElementById('sp-ag-refresh');
+    if(rf) rf.addEventListener('click', function(){ load(); spToast('已刷新', 'info', 1500); });
+    // 同步
+    var sb = document.getElementById('sp-ag-sync-btn');
+    if(sb) sb.addEventListener('click', doSync);
+    // 人名管理
+    var ab = document.getElementById('sp-ag-alias-btn');
+    if(ab) ab.addEventListener('click', openAliasModal);
+    var nz = document.getElementById('sp-ag-alias-noise');
+    if(nz) nz.addEventListener('change', loadSuggestions);
+    // resize
+    window.addEventListener('resize', function(){ if(trendChart) trendChart.resize(); });
+  }
+
+  function onActivate(){
+    console.log('[Phase3-3] activateSubpage agents');
+    applyRoleVisibility();
+    if(st.loaded) return;
+    st.loaded = true;
+    wire();
+    initRangeThenLoad();
+  }
+
+  var PAGE_HTML =
+    '<header class="header">'+
+      '<div><div class="header-title"><span class="ht-main">接线量分析</span><span class="ht-sub">AGENT INTAKE</span></div></div>'+
+      '<div class="header-right"><div class="header-status-group"><div class="header-status"><span class="header-status-dot"></span>DATA MODULE</div><div class="header-status-label">AGENTS / daily_reports</div></div></div>'+
+    '</header>'+
+    '<div class="dashboard">'+
+      '<section class="sp-ag-controls">'+
+        '<div class="sp-ag-presets">'+
+          '<button data-range="last-week">上周</button>'+
+          '<button data-range="month">本月</button>'+
+          '<button data-range="quarter">本季</button>'+
+          '<button data-range="year">本年</button>'+
+          '<button data-range="custom">自订</button>'+
+        '</div>'+
+        '<div class="sp-ag-custom" id="sp-ag-custom" style="display:none">'+
+          '<input type="date" id="sp-ag-start"> ~ <input type="date" id="sp-ag-end">'+
+          '<button id="sp-ag-apply">套用</button>'+
+        '</div>'+
+        '<div class="sp-ag-source-toggle">'+
+          '<button data-source="all" class="active">全部</button>'+
+          '<button data-source="yueda">悦达</button>'+
+          '<button data-source="remote">远程</button>'+
+        '</div>'+
+        '<div class="sp-ag-actions">'+
+          '<label class="sp-ag-compare-toggle"><input type="checkbox" id="sp-ag-compare-chk">对比</label>'+
+          '<select id="sp-ag-compare-sel" style="display:none">'+
+            '<option value="last-week">上周</option><option value="last-month">上月</option>'+
+            '<option value="last-quarter">上季</option><option value="last-year">去年</option>'+
+            '<option value="yoy">去年同期</option>'+
+          '</select>'+
+          '<button class="sp-ag-refresh" id="sp-ag-refresh">⟳ 刷新</button>'+
+          '<button class="sp-ag-sync" id="sp-ag-sync-btn" style="display:none">⟳ 同步</button>'+
+          '<button class="sp-ag-alias-btn" id="sp-ag-alias-btn" style="display:none">⚙ 人名管理</button>'+
+        '</div>'+
+      '</section>'+
+      '<section class="sp-ag-kpis" id="sp-ag-kpis"></section>'+
+      '<section class="sp-ag-panel"><div class="sp-ag-panel-title">总接待量趋势</div><div id="sp-ag-trend-wrap"><canvas id="sp-ag-trend"></canvas></div></section>'+
+      '<section class="sp-ag-panel"><div class="sp-ag-panel-title">客服明细(点表头排序)</div><div class="sp-ag-table-scroll" id="sp-ag-table-wrap"></div></section>'+
+      '<section class="sp-ag-2col">'+
+        '<div class="sp-ag-panel"><div class="sp-ag-panel-title">异常名单(主管视角)</div><div class="sp-ag-anomaly" id="sp-ag-anomaly"></div></div>'+
+        '<div class="sp-ag-panel"><div class="sp-ag-panel-title">守门 / 数据透明度</div><div class="sp-ag-quality" id="sp-ag-quality"></div></div>'+
+      '</section>'+
+      '<section class="sp-ag-panel"><div class="sp-ag-panel-title">每日接待热力图</div><div class="sp-ag-heatmap-scroll" id="sp-ag-heatmap"></div></section>'+
+      '<div class="sp-ag-rangelabel" id="sp-ag-rangelabel"></div>'+
+    '</div>';
+
+  function register(){
+    SP.registerSubpage({
+      id:'page-agents', parent:'page-overview', title:'接线量', idx:'1·2',
+      dataAccess:'组员', html:PAGE_HTML, onActivate:onActivate
+    });
+    console.log('[Phase3-3] agents subpage registered');
+  }
+  return { register:register };
+})();
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_AGENTS.register);
+else SP_AGENTS.register();
 </script>
 
 </body>
