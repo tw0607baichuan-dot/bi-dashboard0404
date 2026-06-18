@@ -3617,8 +3617,8 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
   </section>
   <section class="kpi-row">
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">客服总人数</div><div class="kpi-value cyan">28</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉数量</div><div class="kpi-value orange">390</div></div>
-    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">投诉金额</div><div class="kpi-value orange">69,710</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">退费笔数</div><div class="kpi-value orange" id="kpi-refund-count">390</div></div>
+    <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">退费金额</div><div class="kpi-value orange" id="kpi-refund-amount">69,710</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan" id="kpi-weekly-inbound">0</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan" id="kpi-product-report">0</div></div>
     <div class="kpi-sync-cell"><span class="sync-last" id="kpi-sync-last">尚未同步</span></div>
@@ -6681,6 +6681,21 @@ window.__syncUtils=(function(){
     });
   }
 
+  // [段C] 退费 KPI:独立 fetch,不进主流程 Promise.all(端点挂了不影响 hero/SHEET_01/04)
+  function fetchRefundKpi(){
+    return fetch('/api/refunds/data?range=month',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(!data||!data.current||!data.current.kpi) return;
+        var kpi=data.current.kpi;
+        var cntEl=document.getElementById('kpi-refund-count');
+        if(cntEl) cntEl.textContent=Number(kpi.total_orders||0).toLocaleString('en-US');
+        var amtEl=document.getElementById('kpi-refund-amount');
+        if(amtEl) amtEl.textContent=Number(kpi.total_amount||0).toLocaleString('en-US');
+      })
+      .catch(function(err){console.warn('[KPI refund]',err);});
+  }
+
   function applyData(monthly,weekly,productReport){
     if(typeof flipTo==='function') flipTo(Math.round(monthly));
     var w=document.getElementById('kpi-weekly-inbound');
@@ -6702,6 +6717,8 @@ window.__syncUtils=(function(){
   function doSync(){
     if(btn&&btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
+    // [段C] 退费卡独立触发,不 await、不阻塞主流程
+    fetchRefundKpi();
     // [段B] 并行问 reply + ops 两表当月 gid,各自拼 URL 再拉 CSV
     return Promise.all([
       fetch(GID_API_REPLY,{cache:'no-store'}).then(function(res){
