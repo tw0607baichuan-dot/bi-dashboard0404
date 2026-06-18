@@ -6251,7 +6251,10 @@ window.__syncUtils=(function(){
 
 // ── SYS-02 同步：从 Google Sheets 拉班别回复量 ──
 (function(){
-  var SHEET_URL='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
+  // [Bug#2b] gid 不再写死;先问后端当月 tab gid,再动态拼 CSV URL
+  var GID_API='/api/sys02/current-month-gid';
+  var SHEET_ID='1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk';
+  function csvUrl(gid){return 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+gid;}
   var btn=document.getElementById('sys02-sync-btn');
   var last=document.getElementById('sys02-sync-last');
   if(!btn||!last) return;
@@ -6272,22 +6275,38 @@ window.__syncUtils=(function(){
     }
   }
 
-  // 三班栏位：早班 日期A(0) + B-F(1-5)、中班 日期G(6) + H-L(7-11)、夜班 日期M(12) + N-T(13-19)
+  // 兜底固定栏位(4 月布局)：动态侦测失败时才用
+  // 早班 日期A(0) + B-F(1-5)、中班 日期G(6) + H-L(7-11)、夜班 日期M(12) + N-T(13-19)
   var BLOCKS=[{date:0,start:1,end:5},{date:6,start:7,end:11},{date:12,start:13,end:19}];
+
+  // [Bug#2b] 从标题列动态定位 早/中/夜班 三区块(防月度布局漂移,如 5 月多空栏)
+  function buildBlocks(header){
+    var blocks=[];
+    if(!header) return blocks;
+    for(var i=0;i<header.length;i++){
+      var h=(header[i]||'').trim();
+      if(h==='早班日期'||h==='中班日期'||h==='夜班日期'){
+        if(blocks.length) blocks[blocks.length-1].end=i-1;
+        blocks.push({date:i,start:i+1,end:header.length-1,name:h});
+      }
+    }
+    return blocks;
+  }
 
   function fmtNum(n){return Math.round(n).toLocaleString('en-US')}
 
-  function aggregate(rows){
+  // 每个 tab 本身就是单一月份,故只需「不累计未来日期」即可:
+  // 当月 tab → month-to-date;退而求其次的过去月份 tab → 全月计入。
+  function aggregate(rows,blocks){
     var now=new Date();
-    var monthStart=new Date(now.getFullYear(),now.getMonth(),1);
-    var cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999);
+    var todayEnd=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999);
     var sums=[0,0,0];
     for(var r=1;r<rows.length;r++){
       var row=rows[r]; if(!row||!row.length) continue;
-      for(var b=0;b<BLOCKS.length;b++){
-        var B=BLOCKS[b], d=U.parseDate(row[B.date]);
+      for(var b=0;b<blocks.length&&b<3;b++){
+        var B=blocks[b], d=U.parseDate(row[B.date]);
         if(!d) continue;
-        if(d<monthStart||d>cutoff) continue;
+        if(d>todayEnd) continue; // 跳过未来日期(占位 0 列)
         for(var c=B.start;c<=B.end;c++) sums[b]+=U.toNum(row[c]);
       }
     }
@@ -6312,15 +6331,31 @@ window.__syncUtils=(function(){
   function doSync(){
     if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    var fallbackName=null;
+    // 1. 先问后端当月 tab 的 gid
+    return fetch(GID_API,{cache:'no-store'}).then(function(res){
+      if(!res.ok) throw new Error('gid API HTTP '+res.status);
+      return res.json();
+    }).then(function(g){
+      var gid;
+      if(g&&g.ok&&g.gid){ gid=g.gid; }
+      else if(g&&g.fallback_gid){ gid=g.fallback_gid; fallbackName=g.fallback_tab_name||''; console.warn('[SYS-02]',g.message); }
+      else { throw new Error((g&&g.message)||'SYS-02: 找不到任何 tab'); }
+      // 2. 拉当月(或退而求其次)tab 的 CSV
+      return fetch(csvUrl(gid),{cache:'no-store',redirect:'follow'});
+    }).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
       var rows=U.parseCSV(text);
-      var sums=aggregate(rows);
+      // 3. 标题列动态定位栏位;侦测不到三区块才回退固定索引
+      var blocks=buildBlocks(rows[0]);
+      if(blocks.length<3) blocks=BLOCKS;
+      var sums=aggregate(rows,blocks);
       if(sums[0]+sums[1]+sums[2]===0) throw new Error('本月无有效资料');
       applyData(sums);
-      setState('success','最后同步 '+U.hhmm(new Date()));
+      var msg=fallbackName ? ('当月待建·展示'+fallbackName+' '+U.hhmm(new Date())) : ('最后同步 '+U.hhmm(new Date()));
+      setState('success',msg);
       if(typeof renderMarquees==="function") renderMarquees();
       return {ok:true};
     }).catch(function(err){
@@ -6336,7 +6371,10 @@ window.__syncUtils=(function(){
 
 // ── SYS-03 同步：从 Google Sheets 拉阶段（周）回复量 ──
 (function(){
-  var SHEET_URL='https://docs.google.com/spreadsheets/d/1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk/export?format=csv&gid=1762805145';
+  // [Bug#2c] gid 不再写死;复用 SYS-02 当月 tab endpoint(同一张 Sheet),动态拼 CSV URL
+  var GID_API='/api/sys02/current-month-gid';
+  var SHEET_ID='1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk';
+  function csvUrl(gid){return 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+gid;}
   var btn=document.getElementById('sys03-sync-btn');
   var last=document.getElementById('sys03-sync-last');
   if(!btn||!last) return;
@@ -6406,7 +6444,19 @@ window.__syncUtils=(function(){
   function doSync(){
     if(btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    var fallbackName=null;
+    // 1. 先问后端当月 tab 的 gid(与 SYS-02 共用 endpoint)
+    return fetch(GID_API,{cache:'no-store'}).then(function(res){
+      if(!res.ok) throw new Error('gid API HTTP '+res.status);
+      return res.json();
+    }).then(function(g){
+      var gid;
+      if(g&&g.ok&&g.gid){ gid=g.gid; }
+      else if(g&&g.fallback_gid){ gid=g.fallback_gid; fallbackName=g.fallback_tab_name||''; console.warn('[SYS-03]',g.message); }
+      else { throw new Error((g&&g.message)||'SYS-03: 找不到任何 tab'); }
+      // 2. 拉当月(或退而求其次)tab 的 CSV
+      return fetch(csvUrl(gid),{cache:'no-store',redirect:'follow'});
+    }).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
@@ -6414,7 +6464,8 @@ window.__syncUtils=(function(){
       var weeks=buildWeeks(new Date());
       aggregate(rows,weeks);
       applyData(weeks);
-      setState('success','最后同步 '+U.hhmm(new Date()));
+      var msg=fallbackName ? ('当月待建·展示'+fallbackName+' '+U.hhmm(new Date())) : ('最后同步 '+U.hhmm(new Date()));
+      setState('success',msg);
       if(typeof renderMarquees==="function") renderMarquees();
       return {ok:true};
     }).catch(function(err){
@@ -9814,6 +9865,8 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
 
   // 进入看板自动同步：load 完延迟 1 秒触发；sessionStorage 防呆（手动按钮不受限）
   function autoSync(){
+    // [Bug#1-fix] 登入守卫 — 未登入不跑(避免同步遮罩盖在登入页)
+    if(localStorage.getItem('isLoggedIn')!=='true') return;
     var now=Date.now();
     try{
       var last=parseInt(sessionStorage.getItem(AUTO_KEY)||'0',10);
@@ -9822,6 +9875,8 @@ var bonusRecognitionList = _pfbLoad('pfb_recog_list', _pfbDefaults.bonusRecognit
     }catch(e){}
     syncAll();
   }
+  // [Bug#1-fix] 暴露给 AuthGate 登入完成回调跨 IIFE 触发
+  window.__triggerAutoSync=autoSync;
   if(document.readyState==='complete') setTimeout(autoSync,1000);
   else window.addEventListener('load',function(){setTimeout(autoSync,1000);});
 })();
@@ -10111,6 +10166,8 @@ var AuthGate = (function(){
       } catch(e){}
       // 淡出闸门
       setTimeout(hide, 200);
+      // [Bug#1-fix] 登入成功 → 1 秒后触发自动同步(确保登入流程完成后才同步)
+      setTimeout(function(){ if(typeof window.__triggerAutoSync==='function') window.__triggerAutoSync(); }, 1000);
       return ret;
     };
     AuthManager.__gateHooked = true;
