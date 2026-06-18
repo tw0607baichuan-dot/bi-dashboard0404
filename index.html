@@ -6480,26 +6480,30 @@ window.__syncUtils=(function(){
 
 // ── SYS-04 同步：从 Google Sheets 拉营运数据（当月加总） ──
 (function(){
-  var SHEET_URL='https://docs.google.com/spreadsheets/d/19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40/export?format=csv&gid=860680192';
+  // [段B] 营运表走当月 endpoint(原写死 gid=860680192 是 4月 tab)
+  var GID_API='/api/current-month-gid?sheet=ops';
+  var SHEET_ID='19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40';
+  function csvUrl(gid){return 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+gid;}
   var btn=document.getElementById('sys04-sync-btn');
   var last=document.getElementById('sys04-sync-last');
   if(!last) return;   // 同步按钮已移除,doSync/注册不依赖 btn
   var U=window.__syncUtils; if(!U) return;
   var btnTxt=btn?btn.querySelector('.sync-btn-txt'):null;
 
-  // CSV 栏位：A(0)=日期, B(1)=班别, C(2)~L(11)=10 个项目
-  var COLS=[
-    {idx:2, label:'产品回报数量'},
-    {idx:3, label:'移转会员'},
-    {idx:4, label:'恢复会员'},
-    {idx:5, label:'升级会员'},
-    {idx:6, label:'封禁或禁言'},
-    {idx:7, label:'退预约金'},
-    {idx:8, label:'删除帖子'},
-    {idx:9, label:'中奖活动'},
-    {idx:10,label:'裸聊问题'},
-    {idx:11,label:'AI相关问题'}
-  ];
+  // [段B] 动态栏位:读表头第一行,跳过 日期/班别/空字串/当月总统计
+  //   防 6 月新增「充值问题」(idx12)「邀请问题」(idx13)漏读(原写死 idx2-11 只 10 项)
+  function buildColsFromHeader(headerRow){
+    var cols=[];
+    if(!headerRow) return cols;
+    headerRow.forEach(function(h,i){
+      var t=(h||'').trim();
+      if(!t) return;
+      if(t==='日期'||t==='班别') return;
+      if(t==='当月总统计') return;
+      cols.push({idx:i,label:t});
+    });
+    return cols;
+  }
 
   function setState(state,lastMsg){
     if(btn) btn.dataset.state=state;
@@ -6515,19 +6519,19 @@ window.__syncUtils=(function(){
     }
   }
 
-  function aggregate(rows){
+  function aggregate(rows,cols){
     var today=new Date();
     var todayKey=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-    var sums=COLS.map(function(){return 0});
+    var sums=cols.map(function(){return 0});
     for(var r=1;r<rows.length;r++){
       var row=rows[r]; if(!row||!row.length) continue;
       var d=U.parseDate(row[0]);
       if(!d) continue;
       var dk=new Date(d.getFullYear(),d.getMonth(),d.getDate());
       if(dk>todayKey) continue; // 跳过未来日期
-      for(var i=0;i<COLS.length;i++) sums[i]+=U.toNum(row[COLS[i].idx]);
+      for(var i=0;i<cols.length;i++) sums[i]+=U.toNum(row[cols[i].idx]);
     }
-    return COLS.map(function(c,i){return {label:c.label,value:sums[i]}});
+    return cols.map(function(c,i){return {label:c.label,value:sums[i]}});
   }
 
   function applyData(totals){
@@ -6555,12 +6559,22 @@ window.__syncUtils=(function(){
   function doSync(){
     if(btn&&btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    return fetch(SHEET_URL,{cache:'no-store',redirect:'follow'}).then(function(res){
+    // [段B] 先问 ops 当月 gid,再拼 URL 拉 CSV;表头动态识别栏位
+    return fetch(GID_API,{cache:'no-store'}).then(function(res){
+      if(!res.ok) throw new Error('gid API HTTP '+res.status);
+      return res.json();
+    }).then(function(g){
+      var gid=(g&&g.ok&&g.gid)?g.gid:(g&&g.fallback_gid);
+      if(!gid) throw new Error((g&&g.message)||'SYS-04: 找不到 ops tab');
+      if(g&&!g.ok) console.warn('[SYS-04]',g.message);
+      return fetch(csvUrl(gid),{cache:'no-store',redirect:'follow'});
+    }).then(function(res){
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.text();
     }).then(function(text){
       var rows=U.parseCSV(text);
-      var totals=aggregate(rows);
+      var cols=buildColsFromHeader(rows[0]);
+      var totals=aggregate(rows,cols);
       applyData(totals);
       setState('success','最后同步 '+U.hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
@@ -6579,10 +6593,13 @@ window.__syncUtils=(function(){
 // ── KPI 总同步：并行拉 SYS-01 + SYS-04，更新顶部 flip / 本周总进线量 / 产品回报数量 ──
 (function(){
   // [段A] SHEET_01 不再写死 gid;走当月 endpoint(同 SYS-02/03)
-  var GID_API='/api/sys02/current-month-gid';
+  var GID_API_REPLY='/api/current-month-gid?sheet=reply';
   var SHEET_01_ID='1lKjyN-jDX4IliiNvOehXmyV9dOLIFn1J0syvCLdjWzk';
   function csvUrl01(gid){return 'https://docs.google.com/spreadsheets/d/'+SHEET_01_ID+'/export?format=csv&gid='+gid;}
-  var SHEET_04='https://docs.google.com/spreadsheets/d/19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40/export?format=csv&gid=860680192';
+  // [段B] SHEET_04 营运表同样走当月 endpoint(原写死 gid=860680192 是 4月 tab)
+  var GID_API_OPS='/api/current-month-gid?sheet=ops';
+  var SHEET_04_ID='19KeuX9iq7U-ox4IFOIUEVhNMm-kgSJhBNWtsC9h9g40';
+  function csvUrl04(gid){return 'https://docs.google.com/spreadsheets/d/'+SHEET_04_ID+'/export?format=csv&gid='+gid;}
   var btn=document.getElementById('kpi-sync-btn');
   var last=document.getElementById('kpi-sync-last');
   var note=document.getElementById('hero-sync-note');
@@ -6685,16 +6702,23 @@ window.__syncUtils=(function(){
   function doSync(){
     if(btn&&btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    // [段A] 先问 SHEET_01 当月 gid,再并行拉 当月回复量 + 营运(SHEET_04 段B 再改)
-    return fetch(GID_API,{cache:'no-store'}).then(function(res){
-      if(!res.ok) throw new Error('gid API HTTP '+res.status);
-      return res.json();
-    }).then(function(g){
-      var gid;
-      if(g&&g.ok&&g.gid){ gid=g.gid; }
-      else if(g&&g.fallback_gid){ gid=g.fallback_gid; console.warn('[KPI SHEET_01]',g.message); }
-      else { throw new Error((g&&g.message)||'KPI: 找不到 reply tab'); }
-      return Promise.all([fetchCsv(csvUrl01(gid)),fetchCsv(SHEET_04)]);
+    // [段B] 并行问 reply + ops 两表当月 gid,各自拼 URL 再拉 CSV
+    return Promise.all([
+      fetch(GID_API_REPLY,{cache:'no-store'}).then(function(res){
+        if(!res.ok) throw new Error('reply gid API HTTP '+res.status); return res.json();
+      }),
+      fetch(GID_API_OPS,{cache:'no-store'}).then(function(res){
+        if(!res.ok) throw new Error('ops gid API HTTP '+res.status); return res.json();
+      })
+    ]).then(function(gids){
+      var g1=gids[0], g4=gids[1];
+      var gid1=(g1&&g1.ok&&g1.gid)?g1.gid:(g1&&g1.fallback_gid);
+      if(!gid1) throw new Error((g1&&g1.message)||'KPI: 找不到 reply tab');
+      if(g1&&!g1.ok) console.warn('[KPI SHEET_01]',g1.message);
+      var gid4=(g4&&g4.ok&&g4.gid)?g4.gid:(g4&&g4.fallback_gid);
+      if(!gid4) throw new Error((g4&&g4.message)||'KPI: 找不到 ops tab');
+      if(g4&&!g4.ok) console.warn('[KPI SHEET_04]',g4.message);
+      return Promise.all([fetchCsv(csvUrl01(gid1)),fetchCsv(csvUrl04(gid4))]);
     }).then(function(texts){
       var a01=aggregate01(U.parseCSV(texts[0]));
       var pr=aggregate04(U.parseCSV(texts[1]));
