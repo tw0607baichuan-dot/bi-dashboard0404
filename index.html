@@ -724,7 +724,34 @@ body::after { content:''; position:fixed; inset:0; background:repeating-linear-g
 /* ══════════════════════════════════════
    Ops Tanks — 营运数据
    ══════════════════════════════════════ */
-.ops-tanks{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:4px 0;min-height:0}
+.ops-dashboard{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:6px 2px 4px;overflow:auto}
+.sp-op-hero{display:flex;gap:10px}
+.sp-op-hero-card{flex:1;border:1px solid rgba(0,200,255,0.18);border-radius:6px;padding:10px 12px;background:linear-gradient(180deg,rgba(0,195,255,0.05),rgba(0,0,0,0.18))}
+.sp-op-hero-label{font-family:'Noto Sans TC',sans-serif;font-size:11px;letter-spacing:2px;color:#7fa8c9;margin-bottom:4px}
+.sp-op-hero-num{font-family:Orbitron,monospace;font-size:26px;font-weight:900;color:#00f0ff;text-shadow:0 0 8px rgba(0,240,255,0.35);line-height:1}
+.sp-op-hero-sub{font-family:'Noto Sans TC',sans-serif;font-size:10px;color:#5a7a9a;margin-top:4px}
+.sp-op-sec-title{font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:#9ab5d4;margin:2px 0 6px;display:flex;align-items:center;gap:8px}
+.sp-op-mom-tag{font-size:9px;font-weight:400;letter-spacing:1px;color:#00ff88;border:1px solid rgba(0,255,136,0.3);border-radius:3px;padding:1px 5px}
+.sp-op-top5{display:flex;flex-direction:column;gap:4px}
+.sp-op-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;background:linear-gradient(180deg,rgba(10,18,35,0.55),rgba(0,0,0,0.2));border:1px solid rgba(120,160,200,0.08)}
+.sp-op-rank{font-family:Orbitron,monospace;font-size:13px;font-weight:900;width:18px;text-align:center;flex-shrink:0}
+.sp-op-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sp-op-name{font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:700;color:#dce8f4;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-op-val{font-family:Orbitron,monospace;font-size:15px;font-weight:900;color:#e8f4ff;width:70px;text-align:right;flex-shrink:0}
+.sp-op-share{font-family:Orbitron,monospace;font-size:11px;color:#7fa8c9;width:52px;text-align:right;flex-shrink:0}
+.sp-op-delta{font-family:Orbitron,monospace;font-size:11px;font-weight:700;width:78px;text-align:right;flex-shrink:0;letter-spacing:0.5px}
+.sp-op-delta-up{color:#ff5a6e}
+.sp-op-delta-down{color:#00e676}
+.sp-op-delta-flat{color:#6a8299}
+.sp-op-row-highlight{border-width:1px;border-style:solid}
+.sp-op-hl-up{background:linear-gradient(180deg,rgba(255,60,90,0.14),rgba(255,60,90,0.04));border-color:rgba(255,90,110,0.4)}
+.sp-op-hl-down{background:linear-gradient(180deg,rgba(0,230,118,0.12),rgba(0,230,118,0.03));border-color:rgba(0,230,118,0.38)}
+.sp-op-other-wrap{display:flex;flex-direction:column;gap:4px}
+.sp-op-other-toggle{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 10px;margin-top:2px;cursor:pointer;user-select:none;border:1px dashed rgba(0,200,255,0.22);border-radius:4px;background:linear-gradient(180deg,rgba(0,195,255,0.04),rgba(0,0,0,0.15));font-family:'Noto Sans TC',sans-serif;font-size:12px;color:#9ab5d4;letter-spacing:1px;transition:border-color 0.2s,color 0.2s}
+.sp-op-other-toggle:hover{border-color:rgba(0,240,255,0.42);color:#cfe3f7}
+.sp-op-tg-ico{font-size:14px;color:#00f0ff;font-weight:700}
+.sp-op-tg-hint{font-size:10px;color:#5a7a9a}
+.sp-op-other-expanded{display:flex;flex-direction:column;gap:4px;margin-top:2px}
 
 /* ══════════════════════════════════════
    Charts
@@ -3685,7 +3712,7 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
       <div class="gate-scene" id="gate-scene"></div>
     </div>
     <div class="panel"><div class="panel-title" data-module="SYS-04"><span class="pt-text">营运数据总览</span><div class="sync-ctrl"><span class="sync-last" id="sys04-sync-last">尚未同步</span></div></div>
-      <div class="ops-tanks" id="ops-tanks"></div>
+      <div class="ops-dashboard" id="ops-dashboard"></div>
     </div>
   </section>
   <section class="marquee-group">
@@ -6519,63 +6546,100 @@ window.__syncUtils=(function(){
     }
   }
 
-  function aggregate(rows,cols){
-    var today=new Date();
-    var todayKey=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  // [段D] 带日期区间的加总:fromKey/toKey 为 null 表示该端不限
+  function aggregateRange(rows,cols,fromKey,toKey){
     var sums=cols.map(function(){return 0});
     for(var r=1;r<rows.length;r++){
       var row=rows[r]; if(!row||!row.length) continue;
       var d=U.parseDate(row[0]);
       if(!d) continue;
       var dk=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-      if(dk>todayKey) continue; // 跳过未来日期
+      if(toKey && dk>toKey) continue;
+      if(fromKey && dk<fromKey) continue;
       for(var i=0;i<cols.length;i++) sums[i]+=U.toNum(row[cols[i].idx]);
     }
     return cols.map(function(c,i){return {label:c.label,value:sums[i]}});
   }
 
-  function applyData(totals){
-    // 顶部 KPI「产品回报数量」= C 栏加总
+  // [段D] 本周起点 = 当周周一(ISO,周一为 0)
+  function mondayOf(d){
+    var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    var wd=(x.getDay()+6)%7;
+    x.setDate(x.getDate()-wd);
+    return x;
+  }
+
+  // [段D] 顶部 KPI「产品回报数量」= totals[0]
+  function applyKpiProduct(totals){
+    if(!totals||!totals[0]) return;
     var kpiEls=document.querySelectorAll('.kpi-row .kpi-card');
     for(var i=0;i<kpiEls.length;i++){
       var lbl=kpiEls[i].querySelector('.kpi-label');
       if(lbl && lbl.textContent.trim()==='产品回报数量'){
         var val=kpiEls[i].querySelector('.kpi-value');
-        if(val) val.textContent=totals[0].value.toLocaleString('en-US');
+        if(val) val.textContent=(totals[0].value||0).toLocaleString('en-US');
         break;
       }
     }
-    // D~L 共 9 项 → OPS
-    var ops=totals.slice(1);
-    OPS.labels=ops.map(function(o){return o.label});
-    OPS.values=ops.map(function(o){return o.value});
-    // 内存同步 dashboardData.operations（不 save 到 localStorage，避免覆盖编辑数据）
-    if(window.dashboardData && Array.isArray(window.dashboardData.operations)){
-      window.dashboardData.operations=ops.map(function(o){return {name:o.label,value:o.value}});
-    }
-    if(typeof renderOpsTanks==='function') renderOpsTanks();
   }
 
   function doSync(){
     if(btn&&btn.dataset.state==='syncing') return Promise.resolve({ok:true,skipped:true});
     setState('syncing','同步中…');
-    // [段B] 先问 ops 当月 gid,再拼 URL 拉 CSV;表头动态识别栏位
-    return fetch(GID_API,{cache:'no-store'}).then(function(res){
-      if(!res.ok) throw new Error('gid API HTTP '+res.status);
-      return res.json();
-    }).then(function(g){
-      var gid=(g&&g.ok&&g.gid)?g.gid:(g&&g.fallback_gid);
-      if(!gid) throw new Error((g&&g.message)||'SYS-04: 找不到 ops tab');
-      if(g&&!g.ok) console.warn('[SYS-04]',g.message);
-      return fetch(csvUrl(gid),{cache:'no-store',redirect:'follow'});
-    }).then(function(res){
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.text();
-    }).then(function(text){
-      var rows=U.parseCSV(text);
+    // [段D] 并行问当月 + 上月 ops gid(上月失败则降级,只显示当月、无月环比)
+    return Promise.all([
+      fetch(GID_API,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('gid API HTTP '+r.status);return r.json();}),
+      fetch(GID_API+'&prev=true',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    ]).then(function(gs){
+      var gCur=gs[0], gPrev=gs[1];
+      var gidCur=(gCur&&gCur.ok&&gCur.gid)?gCur.gid:(gCur&&gCur.fallback_gid);
+      if(!gidCur) throw new Error((gCur&&gCur.message)||'SYS-04: 找不到当月 ops tab');
+      if(gCur&&!gCur.ok) console.warn('[SYS-04 cur]',gCur.message);
+      var gidPrev=(gPrev&&gPrev.ok&&gPrev.gid)?gPrev.gid:null;
+      if(gPrev&&!gPrev.ok) console.warn('[SYS-04 prev]',gPrev.message);
+      // [段D] 两份 CSV 并行拉;上月那份失败不挡当月
+      var jobs=[ fetch(csvUrl(gidCur),{cache:'no-store',redirect:'follow'}).then(function(r){if(!r.ok)throw new Error('cur CSV HTTP '+r.status);return r.text();}) ];
+      jobs.push(gidPrev
+        ? fetch(csvUrl(gidPrev),{cache:'no-store',redirect:'follow'}).then(function(r){return r.ok?r.text():null;}).catch(function(){return null;})
+        : Promise.resolve(null));
+      return Promise.all(jobs);
+    }).then(function(texts){
+      var curText=texts[0], prevText=texts[1];
+      var today=new Date();
+      var todayKey=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+
+      // ── 当月 ──
+      var rows=U.parseCSV(curText);
       var cols=buildColsFromHeader(rows[0]);
-      var totals=aggregate(rows,cols);
-      applyData(totals);
+      var monthTotals=aggregateRange(rows,cols,null,todayKey);
+      applyKpiProduct(monthTotals);
+      var curOps=monthTotals.slice(1); // 去掉产品回报数量,剩营运类别
+      OPS.labels=curOps.map(function(o){return o.label;});
+      OPS.values=curOps.map(function(o){return o.value;});
+      if(window.dashboardData && Array.isArray(window.dashboardData.operations)){
+        window.dashboardData.operations=curOps.map(function(o){return {name:o.label,value:o.value};});
+      }
+
+      // ── 本周新增(营运类别,本周周一~今天)──
+      var wkStart=mondayOf(today);
+      var wkTotals=aggregateRange(rows,cols,wkStart,todayKey);
+      var wkOpsSum=wkTotals.slice(1).reduce(function(a,b){return a+b.value;},0);
+      var wkDays=Math.round((todayKey-wkStart)/86400000)+1;
+      window.__opsWeek={value:wkOpsSum,days:wkDays};
+
+      // ── 上月营运类别 → prev map(月环比基准)──
+      if(prevText){
+        var prows=U.parseCSV(prevText);
+        var pcols=buildColsFromHeader(prows[0]);
+        var pTotals=aggregateRange(prows,pcols,null,null);
+        var pmap={};
+        pTotals.slice(1).forEach(function(o){pmap[o.label]=o.value;});
+        window.__opsPrev=pmap;
+      } else {
+        window.__opsPrev=null;
+      }
+
+      if(typeof renderOpsDashboard==='function') renderOpsDashboard();
       setState('success','最后同步 '+U.hhmm(new Date()));
       if(typeof renderMarquees==="function") renderMarquees();
       return {ok:true};
@@ -7085,120 +7149,117 @@ var OPS_FALLBACK=['#80a0ff','#ffa080','#80ffc0','#ffc080','#c080ff'];
 var OPS_COLLAPSE_AT=6;
 if(typeof window.__opsCollapsed==='undefined') window.__opsCollapsed=true;
 
-function renderOpsTanks(){
-  var ctn=document.getElementById('ops-tanks');
+// [段D] SYS-04 营运数据总览:Hero 双卡 + Top5(占比/月环比) + 其他类折叠
+function renderOpsDashboard(curData,prevData,weekInfo){
+  var ctn=document.getElementById('ops-dashboard');
   if(!ctn) return;
-  ctn.innerHTML='';
-  var oldOS=document.getElementById('ops-tanks-styles');if(oldOS)oldOS.remove();
 
-  var items=(OPS.labels||[]).map(function(lb,i){return {label:lb,value:(OPS.values||[])[i]||0}});
-  items.sort(function(a,b){return b.value-a.value});
-  if(!items.length) return;
+  // 数据来源:参数优先,否则读全域 OPS / window 缓存(toggle 重渲染走这条)
+  var cur = curData || (OPS.labels||[]).map(function(lb,i){return {label:lb,value:(OPS.values||[])[i]||0};});
+  cur = cur.filter(function(o){return o && o.label;});
 
-  var oMax=Math.max.apply(null,items.map(function(x){return x.value}))||1;
-  var oCSS='';
-  function hex(a){var h=Math.round(Math.min(1,Math.max(0,a))*255).toString(16);return h.length<2?'0'+h:h}
-  function pad2(n){return (n<10?'0':'')+n}
-  function colorOf(lb,rank){return OPS_COLOR_MAP[lb]||OPS_FALLBACK[rank%OPS_FALLBACK.length]}
+  var prevRaw = prevData || window.__opsPrev || null;
+  var prevMap = null;
+  if(prevRaw){
+    if(Array.isArray(prevRaw)){prevMap={};prevRaw.forEach(function(o){prevMap[o.label]=o.value;});}
+    else prevMap=prevRaw;
+  }
+  var wk = (weekInfo!=null)?weekInfo:(window.__opsWeek||null);
 
-  function buildTank(item,rank,dim){
-    var i=rank;
-    var v=item.value;
-    var pct=oMax>0?Math.round(v/oMax*100):0;
+  var TOP_N=5;
+  var total = cur.reduce(function(a,b){return a+(b.value||0);},0);
+  var items = cur.slice().sort(function(a,b){return b.value-a.value;});
+
+  function fmtN(n){return (n||0).toLocaleString('en-US');}
+  function colorOf(lb,rank){return OPS_COLOR_MAP[lb]||OPS_FALLBACK[rank%OPS_FALLBACK.length];}
+
+  function deltaHTML(label,value){
+    if(!prevMap || !(label in prevMap)) return '<span class="sp-op-delta sp-op-delta-flat">─ —</span>';
+    var pv=prevMap[label]||0;
+    if(pv===0) return value>0
+      ? '<span class="sp-op-delta sp-op-delta-up">▲ NEW</span>'
+      : '<span class="sp-op-delta sp-op-delta-flat">─ —</span>';
+    var pct=(value-pv)/pv*100;
+    var cls,arr;
+    if(pct>2){cls='sp-op-delta-up';arr='▲';}
+    else if(pct<-2){cls='sp-op-delta-down';arr='▼';}
+    else {cls='sp-op-delta-flat';arr='─';}
+    return '<span class="sp-op-delta '+cls+'">'+arr+' '+(pct>0?'+':'')+pct.toFixed(1)+'%</span>';
+  }
+  function anomalyClass(label,value){
+    if(!prevMap || !(label in prevMap)) return '';
+    var pv=prevMap[label]||0;
+    if(pv===0) return value>0 ? ' sp-op-row-highlight sp-op-hl-up' : '';
+    if(Math.abs((value-pv)/pv*100)>25) return value>=pv
+      ? ' sp-op-row-highlight sp-op-hl-up'
+      : ' sp-op-row-highlight sp-op-hl-down';
+    return '';
+  }
+  function rowHTML(item,rank){
+    var pct = total>0 ? (item.value/total*100) : 0;
     var c=colorOf(item.label,rank);
-    var glowMul=dim?0.32:Math.max(0.45, 0.9-rank*0.07);
-    var shellH=dim?24:32;
-    var lblSize=dim?11:13;
-    var tagSize=dim?7:8;
-    var valSize=dim?14:17;
-    var rowOpacity=dim?0.62:1;
-
-    var tank=document.createElement('div');
-    tank.style.cssText='display:flex;align-items:center;gap:8px;position:relative;opacity:'+rowOpacity;
-
-    // ── 左侧标签区 ──
-    var info=document.createElement('div');
-    info.style.cssText='width:120px;flex-shrink:0;text-align:right;padding-right:10px;border-right:2px solid '+c+'28;position:relative';
-    info.innerHTML=
-      '<div style="font-family:\'Noto Sans TC\',sans-serif;font-size:'+lblSize+'px;font-weight:700;color:#dce8f4;line-height:1.2;margin-bottom:3px;text-shadow:0 1px 2px rgba(0,0,0,0.4)">'+item.label+'</div>'+
-      '<div style="font-family:Orbitron,monospace;font-size:'+tagSize+'px;color:'+c+'77;letter-spacing:2px">OPS-'+pad2(rank+1)+'</div>'+
-      '<div style="position:absolute;right:-4px;top:50%;margin-top:-3px;width:6px;height:6px;border-radius:50%;background:'+c+';box-shadow:0 0 4px '+c+';animation:otLed 2.5s ease-in-out infinite '+(-rank*0.5)+'s"></div>';
-    tank.appendChild(info);
-
-    // ── 槽体起始装置头 ──
-    var head=document.createElement('div');
-    head.style.cssText='width:8px;height:'+shellH+'px;flex-shrink:0;position:relative;border-radius:2px 0 0 2px;background:linear-gradient(180deg,'+c+'33,'+c+'18 40%,'+c+'22 60%,'+c+'33);border:1px solid '+c+'22;border-right:none;box-shadow:inset 0 1px 0 '+c+'22';
-    head.innerHTML='<div style="position:absolute;top:6px;left:2px;width:3px;height:3px;border-radius:50%;border:0.5px solid '+c+'33;background:rgba(0,0,0,0.3)"></div><div style="position:absolute;bottom:6px;left:2px;width:3px;height:3px;border-radius:50%;border:0.5px solid '+c+'33;background:rgba(0,0,0,0.3)"></div>';
-    tank.appendChild(head);
-
-    // ── 储槽外壳 ──
-    var shell=document.createElement('div');
-    shell.style.cssText='flex:1;height:'+shellH+'px;position:relative;border:1px solid '+c+'2a;border-left:none;border-radius:0 3px 3px 0;background:linear-gradient(180deg,rgba(10,18,35,0.8),rgba(0,0,0,0.3));overflow:hidden;box-shadow:inset 0 1px 0 '+c+'12,inset 0 -1px 0 rgba(0,0,0,0.25)';
-
-    var ticksHTML=
-      '<div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 23px,'+c+'0a 23px,'+c+'0a 24px);pointer-events:none;z-index:1"></div>'+
-      '<div style="position:absolute;top:0;bottom:50%;background:repeating-linear-gradient(90deg,transparent,transparent 11px,'+c+'05 11px,'+c+'05 12px);pointer-events:none;z-index:1;left:0;right:0"></div>'+
-      '<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,'+c+'18,'+c+'0c 30%,transparent 80%);z-index:2"></div>';
-
-    var fillGlow=Math.round(10*glowMul);
-    ticksHTML+=
-      '<div style="position:absolute;top:2px;bottom:2px;left:0;width:'+pct+'%;border-radius:0 2px 2px 0;background:linear-gradient(180deg,'+c+hex(0.3*glowMul)+','+c+hex(0.12*glowMul)+' 40%,'+c+hex(0.18*glowMul)+' 60%,'+c+hex(0.25*glowMul)+');box-shadow:0 0 '+fillGlow+'px '+c+hex(0.12*glowMul)+';animation:otFill'+i+' 1.5s ease-out forwards;z-index:1;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.06),transparent 35%,transparent 75%,rgba(0,0,0,0.08))"></div></div>';
-
-    ticksHTML+=
-      '<div style="position:absolute;top:3px;bottom:3px;left:'+pct+'%;margin-left:-2px;width:3px;border-radius:1px;background:'+c+';box-shadow:0 0 6px '+c+',0 0 '+Math.round(12*glowMul)+'px '+c+'44;z-index:2;animation:otFill'+i+' 1.5s ease-out forwards,otEdge 2.5s ease-in-out infinite '+(-rank*0.6)+'s"></div>';
-
-    ticksHTML+=
-      '<div style="position:absolute;top:50%;right:8px;margin-top:-2.5px;width:5px;height:5px;border-radius:50%;background:'+c+';box-shadow:0 0 3px '+c+',0 0 6px '+c+'66;z-index:3;animation:otLed 2.5s ease-in-out infinite '+(-rank*0.4)+'s"></div>';
-
-    shell.innerHTML=ticksHTML;
-    tank.appendChild(shell);
-
-    var cap=document.createElement('div');
-    cap.style.cssText='width:4px;height:'+shellH+'px;flex-shrink:0;border-radius:0 2px 2px 0;background:linear-gradient(180deg,'+c+'22,'+c+'11 40%,'+c+'18);border:1px solid '+c+'1a;border-left:none';
-    tank.appendChild(cap);
-
-    var val=document.createElement('div');
-    val.style.cssText='width:72px;flex-shrink:0;text-align:right;padding-left:6px';
-    val.innerHTML=
-      '<div style="font-family:Orbitron,monospace;font-size:'+valSize+'px;font-weight:900;color:'+c+';text-shadow:0 0 5px '+c+'44;letter-spacing:1px;line-height:1">'+v.toLocaleString()+'</div>';
-    tank.appendChild(val);
-
-    ctn.appendChild(tank);
-    oCSS+='@keyframes otFill'+i+'{from{width:0}to{width:'+pct+'%}}';
+    return '<div class="sp-op-row'+anomalyClass(item.label,item.value)+'">'+
+      '<span class="sp-op-rank" style="color:'+c+'">'+(rank+1)+'</span>'+
+      '<span class="sp-op-dot" style="background:'+c+';box-shadow:0 0 6px '+c+'"></span>'+
+      '<span class="sp-op-name">'+item.label+'</span>'+
+      '<span class="sp-op-val">'+fmtN(item.value)+'</span>'+
+      '<span class="sp-op-share">'+pct.toFixed(1)+'%</span>'+
+      deltaHTML(item.label,item.value)+
+    '</div>';
   }
 
-  var topN=Math.min(OPS_COLLAPSE_AT, items.length);
-  for(var k=0;k<topN;k++) buildTank(items[k],k,false);
+  var html='';
 
-  if(items.length>OPS_COLLAPSE_AT){
-    var extras=items.slice(OPS_COLLAPSE_AT);
-    var extraSum=extras.reduce(function(a,b){return a+b.value},0);
+  // ── Hero 双卡 ──
+  var wkVal = wk ? wk.value : null;
+  var wkCover = (wkVal!=null && total>0) ? (wkVal/total*100) : null;
+  html+='<div class="sp-op-hero">'+
+    '<div class="sp-op-hero-card">'+
+      '<div class="sp-op-hero-label">本月营运总量</div>'+
+      '<div class="sp-op-hero-num">'+fmtN(total)+'</div>'+
+      '<div class="sp-op-hero-sub">'+items.length+' 个营运类别</div>'+
+    '</div>'+
+    '<div class="sp-op-hero-card">'+
+      '<div class="sp-op-hero-label">本周新增</div>'+
+      '<div class="sp-op-hero-num">'+(wkVal!=null?fmtN(wkVal):'—')+'</div>'+
+      '<div class="sp-op-hero-sub">'+(wkCover!=null?('占本月 '+wkCover.toFixed(1)+'%'):(wk?('近 '+wk.days+' 天'):'待同步'))+'</div>'+
+    '</div>'+
+  '</div>';
 
-    if(!window.__opsCollapsed){
-      for(var e=0;e<extras.length;e++) buildTank(extras[e], OPS_COLLAPSE_AT+e, true);
+  // ── Top 5 ──
+  html+='<div class="sp-op-top5"><div class="sp-op-sec-title">Top 5 营运类别'+(prevMap?'<span class="sp-op-mom-tag">含月环比</span>':'')+'</div>';
+  var topN=Math.min(TOP_N,items.length);
+  for(var k=0;k<topN;k++) html+=rowHTML(items[k],k);
+  html+='</div>';
+
+  // ── 其他类折叠 ──
+  if(items.length>TOP_N){
+    var extras=items.slice(TOP_N);
+    var extraSum=extras.reduce(function(a,b){return a+b.value;},0);
+    var collapsed=window.__opsCollapsed;
+    html+='<div class="sp-op-other-wrap">';
+    html+='<div class="sp-op-other-toggle" id="sp-op-toggle">'+
+      (collapsed
+        ? '<span class="sp-op-tg-ico">+</span>其他 '+extras.length+' 项（合计 '+fmtN(extraSum)+'）<span class="sp-op-tg-hint">▼ 展开</span>'
+        : '<span class="sp-op-tg-ico">−</span>收起其他 '+extras.length+' 项<span class="sp-op-tg-hint">▲</span>')+
+    '</div>';
+    if(!collapsed){
+      html+='<div class="sp-op-other-expanded">';
+      for(var e=0;e<extras.length;e++) html+=rowHTML(extras[e],TOP_N+e);
+      html+='</div>';
     }
-
-    var toggle=document.createElement('div');
-    toggle.style.cssText='display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 10px;margin-top:2px;cursor:pointer;user-select:none;border:1px dashed rgba(0,200,255,0.22);border-radius:4px;background:linear-gradient(180deg,rgba(0,195,255,0.04),rgba(0,0,0,0.15));font-family:\'Noto Sans TC\',sans-serif;font-size:12px;color:#9ab5d4;letter-spacing:1px;transition:border-color 0.2s,color 0.2s';
-    toggle.onmouseover=function(){this.style.borderColor='rgba(0,240,255,0.42)';this.style.color='#cfe3f7'};
-    toggle.onmouseout=function(){this.style.borderColor='rgba(0,200,255,0.22)';this.style.color='#9ab5d4'};
-    if(window.__opsCollapsed){
-      toggle.innerHTML='<span style="font-size:14px;color:#00f0ff;font-weight:700">+</span><span>其他 '+extras.length+' 项（合计 '+extraSum.toLocaleString()+'）</span><span style="font-size:10px;color:#5a7a9a">▼ 展开</span>';
-    } else {
-      toggle.innerHTML='<span style="font-size:14px;color:#00f0ff;font-weight:700">−</span><span>收起 '+extras.length+' 项</span><span style="font-size:10px;color:#5a7a9a">▲</span>';
-    }
-    toggle.addEventListener('click',function(){
-      window.__opsCollapsed=!window.__opsCollapsed;
-      renderOpsTanks();
-    });
-    ctn.appendChild(toggle);
+    html+='</div>';
   }
 
-  oCSS+='@keyframes otEdge{0%,100%{opacity:0.55}50%{opacity:1}}';
-  oCSS+='@keyframes otLed{0%,100%{opacity:0.35}50%{opacity:1}}';
-  var oSt=document.createElement('style');oSt.id='ops-tanks-styles';oSt.textContent=oCSS;document.head.appendChild(oSt);
+  ctn.innerHTML=html;
+
+  var tg=document.getElementById('sp-op-toggle');
+  if(tg) tg.addEventListener('click',function(){
+    window.__opsCollapsed=!window.__opsCollapsed;
+    renderOpsDashboard();
+  });
 }
-renderOpsTanks();
+renderOpsDashboard();
 
 // ── Download CSV / Excel (placeholder — replaced by edit system below) ──
 
@@ -7431,10 +7492,10 @@ renderMarquees();
     WEEKLY.labels=D.stages.map(function(s){return s.name});
     WEEKLY.values=D.stages.map(function(s){return s.value});
     renderGatePortal();
-    // 5. Ops tanks
+    // 5. Ops dashboard（编辑预览:仅当月,无月环比基准）
     OPS.labels=D.operations.map(function(o){return o.name});
     OPS.values=D.operations.map(function(o){return o.value});
-    renderOpsTanks();
+    renderOpsDashboard();
     // 6. Marquee
     renderMarquee();
     // 7. Chart (dailyTrend)
