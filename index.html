@@ -12185,15 +12185,19 @@ var SP_AI = (function(){
   }
 
   var PAGE_HTML =
-    '<div class="sp-ai-wrap">'+
-      '<div class="sp-ai-head">'+
-        '<div class="sp-ai-title">AI 解决率看板 <span class="sp-ai-sub">v1.2.0 · 每日 09:20 更新</span></div>'+
-      '</div>'+
+    '<header class="header">'+
+      '<div><div class="header-title"><span class="ht-main">AI 解决率</span>'+
+        '<span class="ht-sub">AI RESOLUTION RATE · v1.2.0</span></div></div>'+
+      '<div class="header-right"><div class="header-status-group">'+
+        '<div class="header-status"><span class="header-status-dot"></span>DATA MODULE</div>'+
+        '<div class="header-status-label">v1.2.0 / 每日 09:20</div></div></div>'+
+    '</header>'+
+    '<div class="dashboard">'+
       '<div class="sp-ai-tabs">'+
         '<div class="sp-ai-tabgrp"><span class="sp-ai-tablabel">汇总</span>'+tabBtns('summary')+'</div>'+
         '<div class="sp-ai-tabgrp"><span class="sp-ai-tablabel">产品线</span>'+tabBtns('line')+'</div>'+
       '</div>'+
-      '<iframe id="sp-ai-frame" src="about:blank" style="width:100%; height: calc(100vh - 280px); border:0;"></iframe>'+
+      '<iframe id="sp-ai-frame" src="about:blank"></iframe>'+
     '</div>';
 
   function urlOf(key){ for(var i=0;i<TABS.length;i++){ if(TABS[i].key===key) return TABS[i].url; } return null; }
@@ -12238,17 +12242,14 @@ else SP_AI.register();
 
 <style>
 /* Phase 5 · SP_AI 命名空间(与 sp-rf-/sp-ag-/sp-ql-/sp-op- 隔离)*/
-.sp-ai-wrap{padding:8px 4px;}
-.sp-ai-head{margin-bottom:10px;}
-.sp-ai-title{font-size:18px;font-weight:700;color:#7fe0ff;letter-spacing:1px;}
-.sp-ai-sub{font-size:12px;color:#6a8ba0;margin-left:8px;font-weight:400;}
+#page-ai-rate .dashboard{overflow:hidden;}  /* 让 iframe flex:1 填满,不撑爆 page */
 .sp-ai-tabs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
 .sp-ai-tabgrp{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
 .sp-ai-tablabel{font-size:12px;color:#6a8ba0;margin-right:4px;min-width:42px;}
 .sp-ai-tab{background:rgba(20,40,60,.6);border:1px solid rgba(90,160,200,.35);color:#bfe6f5;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s;}
 .sp-ai-tab:hover{border-color:#5ad0ff;color:#fff;}
 .sp-ai-tab.active{background:linear-gradient(135deg,#1a6aa0,#0fa3c0);border-color:#5ad0ff;color:#fff;box-shadow:0 0 10px rgba(90,200,255,.4);}
-#sp-ai-frame{background:#0a1420;border-radius:8px;}
+#sp-ai-frame{flex:1;min-height:0;width:100%;border:0;background:#0a1420;border-radius:8px;}
 </style>
 
 </body>
