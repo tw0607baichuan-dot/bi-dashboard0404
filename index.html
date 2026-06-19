@@ -3648,6 +3648,7 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">退费金额</div><div class="kpi-value orange" id="kpi-refund-amount">69,710</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">本周总进线量</div><div class="kpi-value cyan" id="kpi-weekly-inbound">0</div></div>
     <div class="kpi-card"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">产品回报数量</div><div class="kpi-value cyan" id="kpi-product-report">0</div></div>
+    <div class="kpi-card" id="kpi-ai-card" style="cursor:pointer" title="点击查看 AI 解决率看板"><span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span><div class="kpi-label">AI 解决率</div><div class="kpi-value cyan" id="kpi-ai-rate">—</div><div id="kpi-ai-total" style="font-size:11px;color:#6a8ba0;margin-top:2px;">—</div></div>
     <div class="kpi-sync-cell"><span class="sync-last" id="kpi-sync-last">尚未同步</span></div>
   </section>
   <section class="charts-row">
@@ -6760,6 +6761,20 @@ window.__syncUtils=(function(){
       .catch(function(err){console.warn('[KPI refund]',err);});
   }
 
+  // [Phase5] AI 解决率卡 — 独立非阻塞,读 v5 发布层 /v1.2.0/kpi.json
+  function fetchAiKpi(){
+    return fetch('/v1.2.0/kpi.json',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(!data||!data.today) return;
+        var rateEl=document.getElementById('kpi-ai-rate');
+        if(rateEl) rateEl.textContent=Number(data.today.ai_rate_pct||0).toFixed(1)+'%';
+        var totEl=document.getElementById('kpi-ai-total');
+        if(totEl) totEl.textContent=Number(data.today.total||0).toLocaleString('en-US')+' 笔';
+      })
+      .catch(function(err){console.warn('[KPI ai-rate]',err);});
+  }
+
   function applyData(monthly,weekly,productReport){
     if(typeof flipTo==='function') flipTo(Math.round(monthly));
     var w=document.getElementById('kpi-weekly-inbound');
@@ -6783,6 +6798,8 @@ window.__syncUtils=(function(){
     setState('syncing','同步中…');
     // [段C] 退费卡独立触发,不 await、不阻塞主流程
     fetchRefundKpi();
+    // [Phase5] AI 解决率卡独立触发,不 await、不阻塞主流程
+    fetchAiKpi();
     // [段B] 并行问 reply + ops 两表当月 gid,各自拼 URL 再拉 CSV
     return Promise.all([
       fetch(GID_API_REPLY,{cache:'no-store'}).then(function(res){
@@ -12144,7 +12161,95 @@ var SP_QUALITY = (function(){
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_QUALITY.register);
 else SP_QUALITY.register();
+
+/* ════════ AI 解决率模块 (Phase 5 · SP_AI) — 镜像 SP_QUALITY,iframe 套用 v5 立体卡 ════════ */
+var SP_AI = (function(){
+  var TABS = [
+    {key:'1部综合',  url:'/v1.2.0/1部各产品线.html', grp:'summary'},
+    {key:'1-1部',    url:'/v1.2.0/1-1部.html',       grp:'summary'},
+    {key:'1-2部',    url:'/v1.2.0/1-2部.html',       grp:'summary'},
+    {key:'悦达',     url:'/v1.2.0/lines/悦达.html',     grp:'line'},
+    {key:'鼎丰',     url:'/v1.2.0/lines/鼎丰.html',     grp:'line'},
+    {key:'万有引力', url:'/v1.2.0/lines/万有引力.html', grp:'line'},
+    {key:'极乐引擎', url:'/v1.2.0/lines/极乐引擎.html', grp:'line'},
+    {key:'恒丰',     url:'/v1.2.0/lines/恒丰.html',     grp:'line'},
+    {key:'伊甸维度', url:'/v1.2.0/lines/伊甸维度.html', grp:'line'}
+  ];
+  var DEFAULT='1部综合';
+  var st={ currentView:DEFAULT };
+
+  function tabBtns(grp){
+    return TABS.filter(function(t){return t.grp===grp;}).map(function(t){
+      return '<button class="sp-ai-tab" data-key="'+t.key+'" onclick="SP_AI.show(\''+t.key+'\')">'+t.key+'</button>';
+    }).join('');
+  }
+
+  var PAGE_HTML =
+    '<div class="sp-ai-wrap">'+
+      '<div class="sp-ai-head">'+
+        '<div class="sp-ai-title">AI 解决率看板 <span class="sp-ai-sub">v1.2.0 · 每日 09:20 更新</span></div>'+
+      '</div>'+
+      '<div class="sp-ai-tabs">'+
+        '<div class="sp-ai-tabgrp"><span class="sp-ai-tablabel">汇总</span>'+tabBtns('summary')+'</div>'+
+        '<div class="sp-ai-tabgrp"><span class="sp-ai-tablabel">产品线</span>'+tabBtns('line')+'</div>'+
+      '</div>'+
+      '<iframe id="sp-ai-frame" src="about:blank" style="width:100%; height: calc(100vh - 280px); border:0;"></iframe>'+
+    '</div>';
+
+  function urlOf(key){ for(var i=0;i<TABS.length;i++){ if(TABS[i].key===key) return TABS[i].url; } return null; }
+
+  function show(key){
+    var url=urlOf(key); if(!url) return;
+    st.currentView=key;
+    var fr=document.getElementById('sp-ai-frame');
+    if(fr) fr.src=url;
+    document.querySelectorAll('.sp-ai-tab').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-key')===key);
+    });
+  }
+
+  function onActivate(){
+    // 默认载入 1 部综合;若已切到别的 tab 则保留,不强制重载
+    var fr=document.getElementById('sp-ai-frame');
+    if(fr && (!fr.src || fr.src.indexOf('about:blank')>=0)){
+      show(st.currentView||DEFAULT);
+    }
+  }
+
+  function register(){
+    SP.registerSubpage({
+      id:'page-ai-rate', parent:'page-overview', title:'AI 解决率', idx:'1·4',
+      dataAccess:'组员', html:PAGE_HTML, onActivate:onActivate
+    });
+    // 顶部 KPI 卡点击 → 跳到本子页(等价于点左侧 nav-child,带展开+高亮+onActivate)
+    var card=document.getElementById('kpi-ai-card');
+    if(card) card.addEventListener('click', function(){
+      var c=document.querySelector('.nav-child[data-page="page-ai-rate"]');
+      if(c) c.click();
+    });
+    console.log('[Phase5] AI 解决率 subpage registered');
+  }
+  return { register:register, show:show };
+})();
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_AI.register);
+else SP_AI.register();
 </script>
+
+<style>
+/* Phase 5 · SP_AI 命名空间(与 sp-rf-/sp-ag-/sp-ql-/sp-op- 隔离)*/
+.sp-ai-wrap{padding:8px 4px;}
+.sp-ai-head{margin-bottom:10px;}
+.sp-ai-title{font-size:18px;font-weight:700;color:#7fe0ff;letter-spacing:1px;}
+.sp-ai-sub{font-size:12px;color:#6a8ba0;margin-left:8px;font-weight:400;}
+.sp-ai-tabs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.sp-ai-tabgrp{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.sp-ai-tablabel{font-size:12px;color:#6a8ba0;margin-right:4px;min-width:42px;}
+.sp-ai-tab{background:rgba(20,40,60,.6);border:1px solid rgba(90,160,200,.35);color:#bfe6f5;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s;}
+.sp-ai-tab:hover{border-color:#5ad0ff;color:#fff;}
+.sp-ai-tab.active{background:linear-gradient(135deg,#1a6aa0,#0fa3c0);border-color:#5ad0ff;color:#fff;box-shadow:0 0 10px rgba(90,200,255,.4);}
+#sp-ai-frame{background:#0a1420;border-radius:8px;}
+</style>
 
 </body>
 </html>
