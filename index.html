@@ -3509,6 +3509,90 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
   fill: var(--text-primary, #d8e4f0);
 }
 
+/* ──── 4·1 月度排名(SP_QUALITY_RANK)──── */
+.sp-qr-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(0, 12, 28, 0.4);
+  border: 1px solid rgba(0, 195, 255, 0.2);
+  border-radius: 6px;
+}
+.sp-qr-month-wrap { display: flex; gap: 8px; align-items: center; }
+.sp-qr-month-wrap label { color: var(--text-secondary); font-size: 13px; }
+.sp-qr-month-wrap input[type="month"] {
+  background: rgba(0, 12, 28, 0.8);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 195, 255, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.sp-qr-btn {
+  background: rgba(0, 195, 255, 0.2);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 195, 255, 0.5);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.sp-qr-btn:hover { background: rgba(0, 195, 255, 0.35); }
+
+.sp-qr-dept-chips { display: flex; gap: 8px; }
+.sp-qr-chip {
+  background: rgba(0, 12, 28, 0.4);
+  color: var(--text-secondary);
+  border: 1px solid rgba(0, 195, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+}
+.sp-qr-chip.active {
+  background: rgba(0, 195, 255, 0.3);
+  border-color: rgba(0, 195, 255, 0.7);
+  color: var(--text-primary);
+}
+.sp-qr-chip-disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sp-qr-threshold {
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.sp-qr-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sp-qr-section-title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  border-left: 3px solid rgba(0, 195, 255, 0.6);
+  padding-left: 10px;
+}
+
+.sp-qr-loading,
+.sp-qr-empty {
+  color: var(--text-dim);
+  text-align: center;
+  padding: 40px;
+  font-size: 14px;
+}
+
+.sp-qr-main,
+.sp-qr-low-volume { margin-bottom: 20px; }
+
 </style>
 
 <!-- [Phase3-3] 全局滚动条:赛博朋克风格(全档案级别,所有滚动元素生效)-->
@@ -3625,7 +3709,7 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
       <div class="nav-parent nav-item" data-page="page-attendance"><span class="nav-glow"></span><span class="nav-idx">03</span>出勤排班</div>
       <div class="nav-children" style="display:none"></div>
     </div>
-    <div class="nav-group" data-page="page-performance" data-expanded="false">
+    <div class="nav-group" data-page="page-performance" data-expanded="false" data-forward-to-first-child="true">
       <div class="nav-parent nav-item" data-page="page-performance"><span class="nav-glow"></span><span class="nav-idx">04</span>绩效质检</div>
       <div class="nav-children" style="display:none"></div>
     </div>
@@ -10207,6 +10291,20 @@ SP.attachDatePicker = function(startId, endId, applyId, onCommit) {
     p.addEventListener('click', function() {
       var group = this.closest('.nav-group');
       var pageId = group.getAttribute('data-page');
+      // forward:标了 data-forward-to-first-child 的 parent(如 04 绩效质检)
+      // 直接跳第一个子页,跳过写死占位页;若子页尚未注册则退回原行为。
+      if (group.getAttribute('data-forward-to-first-child') === 'true') {
+        var firstChild = group.querySelector('.nav-child');
+        if (firstChild) {
+          group.setAttribute('data-expanded', 'true');
+          var ch = group.querySelector('.nav-children');
+          if (ch) ch.style.display = 'block';
+          updateNavArrows();
+          persistExpandedState();
+          firstChild.click();
+          return;
+        }
+      }
       var expanded = group.getAttribute('data-expanded') === 'true';
       SP.switchToPage(pageId);
       group.setAttribute('data-expanded', String(!expanded));
@@ -12291,6 +12389,282 @@ var SP_QUALITY = (function(){
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', SP_QUALITY.register);
 else SP_QUALITY.register();
+</script>
+
+<!-- [Phase13-2] 月度排名子页 SP_QUALITY_RANK(4·1,独立 IIFE,全 .sp-qr- 前缀) -->
+<script>
+var SP_QUALITY_RANK = (function(){
+  var API = '/api/quality';
+  var st = {
+    loaded: false,
+    month: null,        // null = 当月
+    dept: 'dx',         // 默认 1-1 DX 系
+    minMessages: 50,    // 默认门槛
+    data: null,         // 最近 fetch 资料
+  };
+
+  // utils
+  function $(s, root) { return (root||document).querySelector(s); }
+  function fmt(n) { return (n||0).toLocaleString('zh-CN'); }
+  function esc(s) {
+    return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  // 角色 / 权限 header(沿用接线量/质检惯例:X-User-Role + X-User-Name,英文 username)
+  function currentUser(){
+    try { return (typeof AuthManager!=='undefined' && AuthManager.getCurrentUser) ? AuthManager.getCurrentUser() : null; }
+    catch(e){ return null; }
+  }
+  function mapRole(r){
+    var m = { 'superadmin':'superadmin','超级管理员':'superadmin','主管':'manager','manager':'manager',
+              '组长':'leader','leader':'leader','维护':'maintainer','maintainer':'maintainer' };
+    return m[r] || (r||'');
+  }
+  function authHeaders(){
+    var u = currentUser();
+    return { 'X-User-Role': mapRole(u && u.role), 'X-User-Name': (u && u.username) || mapRole(u && u.role) };
+  }
+
+  // PAGE_HTML 完整镜像 SP_QUALITY(header + dashboard)
+  var PAGE_HTML =
+    '<header class="header">'+
+      '<div><div class="header-title">'+
+        '<span class="ht-main">月度排名</span>'+
+        '<span class="ht-sub">PERFORMANCE RANKING · 月度绩效</span>'+
+      '</div></div>'+
+      '<div class="header-right"><div class="header-status-group">'+
+        '<div class="header-status"><span class="header-status-dot"></span>DATA MODULE</div>'+
+        '<div class="header-status-label">PERFORMANCE / monthly</div>'+
+      '</div></div>'+
+    '</header>'+
+    '<div class="dashboard">'+
+      '<section class="sp-qr-controls">'+
+        '<div class="sp-qr-month-wrap">'+
+          '<label>月份:</label>'+
+          '<input id="sp-qr-month" type="month" />'+
+          '<button id="sp-qr-apply" class="sp-qr-btn">套用</button>'+
+        '</div>'+
+        '<div class="sp-qr-dept-chips">'+
+          '<button class="sp-qr-chip active" data-dept="dx">1-1 DX 系</button>'+
+          '<button class="sp-qr-chip sp-qr-chip-disabled" data-dept="df" disabled>1-2 DF 系(尚未上资料)</button>'+
+        '</div>'+
+        '<div class="sp-qr-threshold">'+
+          '门槛:月讯息 ≥ <span id="sp-qr-threshold-val">50</span> 则'+
+        '</div>'+
+      '</section>'+
+      '<section class="sp-qr-kpis">'+
+        '<div class="kpi-card"><div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>'+
+          '<div class="kpi-label">质检覆盖天数</div>'+
+          '<div class="kpi-value" id="sp-qr-kpi-coverage">--</div>'+
+        '</div>'+
+        '<div class="kpi-card"><div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>'+
+          '<div class="kpi-label">严重错误总次数</div>'+
+          '<div class="kpi-value" id="sp-qr-kpi-severe">--</div>'+
+        '</div>'+
+        '<div class="kpi-card"><div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>'+
+          '<div class="kpi-label">团队加权合格率</div>'+
+          '<div class="kpi-value" id="sp-qr-kpi-team-rate">--</div>'+
+        '</div>'+
+        '<div class="kpi-card"><div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>'+
+          '<div class="kpi-label">月度第一名</div>'+
+          '<div class="kpi-value" id="sp-qr-kpi-top">--</div>'+
+        '</div>'+
+      '</section>'+
+      '<section class="sp-qr-main">'+
+        '<div class="sp-qr-section-title">月度排名(讯息 ≥ 门槛)</div>'+
+        '<div id="sp-qr-ranking-loading" class="sp-qr-loading">载入中...</div>'+
+        '<div id="sp-qr-ranking-empty" class="sp-qr-empty" style="display:none">本月无符合门槛的资料</div>'+
+        '<div id="sp-qr-ranking-wrap" style="display:none">'+
+          '<table class="sp-ag-table" id="sp-qr-ranking-table">'+
+            '<thead><tr>'+
+              '<th>排名</th>'+
+              '<th class="l">客服</th>'+
+              '<th class="l">班别</th>'+
+              '<th>月讯息</th>'+
+              '<th>严重</th>'+
+              '<th>中等</th>'+
+              '<th>轻微</th>'+
+              '<th>月扣分</th>'+
+              '<th>月加权合格率</th>'+
+              '<th>月度绩效分</th>'+
+            '</tr></thead>'+
+            '<tbody id="sp-qr-ranking-tbody"></tbody>'+
+          '</table>'+
+        '</div>'+
+      '</section>'+
+      '<section class="sp-qr-low-volume" id="sp-qr-low-volume-section" style="display:none">'+
+        '<div class="sp-qr-section-title">资料不足组员(本月讯息 &lt; 门槛,不参与排名)</div>'+
+        '<table class="sp-ag-table">'+
+          '<thead><tr>'+
+            '<th class="l">客服</th>'+
+            '<th class="l">班别</th>'+
+            '<th>月讯息</th>'+
+            '<th>严重</th>'+
+            '<th>合格率</th>'+
+          '</tr></thead>'+
+          '<tbody id="sp-qr-low-volume-tbody"></tbody>'+
+        '</table>'+
+      '</section>'+
+    '</div>';
+
+  function buildQuery() {
+    var p = [];
+    if (st.month) p.push('month=' + encodeURIComponent(st.month));
+    p.push('dept=' + encodeURIComponent(st.dept));
+    if (st.minMessages !== 50) p.push('min_messages=' + st.minMessages);
+    return p.join('&');
+  }
+
+  function load() {
+    var loadingEl = $('#sp-qr-ranking-loading');
+    var emptyEl = $('#sp-qr-ranking-empty');
+    var wrapEl = $('#sp-qr-ranking-wrap');
+    var lowSecEl = $('#sp-qr-low-volume-section');
+
+    if (loadingEl) { loadingEl.textContent = '载入中...'; loadingEl.style.display = 'block'; }
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (wrapEl) wrapEl.style.display = 'none';
+    if (lowSecEl) lowSecEl.style.display = 'none';
+
+    fetch(API + '/monthly_ranking?' + buildQuery(), { headers: authHeaders() })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        if (data && data.status !== 'ok') throw new Error(data.message || '资料错误');
+        st.data = data;
+        render(data);
+      })
+      .catch(function(err) {
+        console.warn('[SP_QUALITY_RANK] load error:', err);
+        if (loadingEl) { loadingEl.style.display = 'block'; loadingEl.textContent = '载入失败:' + err.message; }
+      });
+  }
+
+  function render(data) {
+    var loadingEl = $('#sp-qr-ranking-loading');
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    // KPI 卡
+    var kpi = data.kpi || {};
+    $('#sp-qr-kpi-coverage').textContent = (kpi.coverage_days || 0) + ' 天';
+    $('#sp-qr-kpi-severe').textContent = kpi.total_severe || 0;
+    $('#sp-qr-kpi-team-rate').textContent = (kpi.team_pass_rate_pct || 0).toFixed(2) + '%';
+    if (kpi.top_agent) {
+      $('#sp-qr-kpi-top').textContent = kpi.top_agent.name + ' ' + (kpi.top_agent.score || 0).toFixed(1);
+    } else {
+      $('#sp-qr-kpi-top').textContent = '--';
+    }
+
+    // 门槛显示(回填后端实际门槛)
+    var thVal = $('#sp-qr-threshold-val');
+    if (thVal && data.min_messages != null) thVal.textContent = data.min_messages;
+
+    // 主榜
+    var tbody = $('#sp-qr-ranking-tbody');
+    var ranking = data.ranking || [];
+    if (ranking.length === 0) {
+      $('#sp-qr-ranking-empty').style.display = 'block';
+      $('#sp-qr-ranking-wrap').style.display = 'none';
+    } else {
+      $('#sp-qr-ranking-empty').style.display = 'none';
+      $('#sp-qr-ranking-wrap').style.display = 'block';
+      tbody.innerHTML = ranking.map(function(r) {
+        return '<tr>'+
+          '<td>' + r.rank + '</td>'+
+          '<td class="l">' + esc(r.agent_name) + '</td>'+
+          '<td class="l">' + esc(r.shift) + '</td>'+
+          '<td>' + fmt(r.total_messages) + '</td>'+
+          '<td>' + r.severe_count + '</td>'+
+          '<td>' + r.medium_count + '</td>'+
+          '<td>' + r.minor_count + '</td>'+
+          '<td>' + r.deduction_sum.toFixed(1) + '</td>'+
+          '<td>' + r.pass_rate_pct.toFixed(2) + '%</td>'+
+          '<td><strong>' + r.score.toFixed(1) + '</strong></td>'+
+        '</tr>';
+      }).join('');
+    }
+
+    // 低量区
+    var lowSecEl = $('#sp-qr-low-volume-section');
+    var lowTbody = $('#sp-qr-low-volume-tbody');
+    var lv = data.low_volume || [];
+    if (lv.length > 0) {
+      lowSecEl.style.display = 'block';
+      lowTbody.innerHTML = lv.map(function(r) {
+        return '<tr>'+
+          '<td class="l">' + esc(r.agent_name) + '</td>'+
+          '<td class="l">' + esc(r.shift) + '</td>'+
+          '<td>' + fmt(r.total_messages) + '</td>'+
+          '<td>' + r.severe_count + '</td>'+
+          '<td>' + r.pass_rate_pct.toFixed(2) + '%</td>'+
+        '</tr>';
+      }).join('');
+    } else {
+      lowSecEl.style.display = 'none';
+    }
+  }
+
+  function wire() {
+    var applyBtn = $('#sp-qr-apply');
+    var monthInput = $('#sp-qr-month');
+
+    if (applyBtn && monthInput) {
+      applyBtn.addEventListener('click', function() {
+        st.month = monthInput.value || null;
+        load();
+      });
+    }
+
+    // dept chip
+    document.querySelectorAll('.sp-qr-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        if (chip.disabled) return;
+        document.querySelectorAll('.sp-qr-chip').forEach(function(c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+        st.dept = chip.getAttribute('data-dept');
+        load();
+      });
+    });
+  }
+
+  function onActivate() {
+    if (st.loaded) return;
+    st.loaded = true;
+
+    // 默认月份 = 当月
+    var now = new Date();
+    var yyyymm = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    var monthInput = $('#sp-qr-month');
+    if (monthInput) monthInput.value = yyyymm;
+
+    wire();
+    load();
+  }
+
+  function register() {
+    SP.registerSubpage({
+      id: 'page-perf-rank',
+      parent: 'page-performance',
+      title: '月度排名',
+      idx: '4·1',
+      dataAccess: '组员',
+      html: PAGE_HTML,
+      onActivate: onActivate,
+    });
+    console.log('[Phase13-2] perf-rank subpage registered');
+  }
+
+  return { register: register };
+})();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', SP_QUALITY_RANK.register);
+} else {
+  SP_QUALITY_RANK.register();
+}
 
 /* ════════ AI 解决率模块 (Phase 5 · SP_AI) — 镜像 SP_QUALITY,iframe 套用 v5 立体卡 ════════ */
 var SP_AI = (function(){
