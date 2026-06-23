@@ -11,6 +11,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/otpauth@9.3.6/dist/otpauth.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js"></script>
 <style>
 /* ══════════════════════════════════════
    Reset & Base
@@ -3456,6 +3459,55 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
 
 .ag-foot { margin-top:18px; text-align:center; font-size:10px; color:var(--text-dim); letter-spacing:2px; opacity:0.6; }
 
+/* ──── flatpickr 赛博朋克主题覆写 ──── */
+.flatpickr-calendar {
+  background: rgba(0, 12, 28, 0.95);
+  border: 1px solid rgba(0, 195, 255, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 195, 255, 0.15);
+  color: var(--text-primary, #d8e4f0);
+  font-family: inherit;
+}
+.flatpickr-months .flatpickr-month {
+  color: var(--text-primary, #d8e4f0);
+  fill: var(--text-primary, #d8e4f0);
+}
+.flatpickr-current-month input.cur-year,
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  color: var(--text-primary, #d8e4f0);
+  background: transparent;
+}
+.flatpickr-weekday {
+  color: rgba(0, 195, 255, 0.7);
+}
+.flatpickr-day {
+  color: var(--text-primary, #d8e4f0);
+}
+.flatpickr-day:hover {
+  background: rgba(0, 195, 255, 0.15);
+  border-color: rgba(0, 195, 255, 0.3);
+}
+.flatpickr-day.today {
+  border-color: rgba(0, 195, 255, 0.6);
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.inRange {
+  background: rgba(0, 195, 255, 0.3);
+  border-color: rgba(0, 195, 255, 0.6);
+  color: var(--text-primary, #d8e4f0);
+  box-shadow: none;
+}
+.flatpickr-day.inRange {
+  background: rgba(0, 195, 255, 0.15);
+  border-color: transparent;
+}
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  color: var(--text-primary, #d8e4f0);
+  fill: var(--text-primary, #d8e4f0);
+}
 
 </style>
 
@@ -10070,6 +10122,81 @@ window.SP = window.SP || {
 };
 console.log('[Phase1] SP framework loaded');
 
+/* ── 共用日期 range picker(Phase 13-1)── */
+SP.attachDatePicker = function(startId, endId, applyId, onCommit) {
+  /**
+   * 共用日期 picker 安装函数。
+   * 原 DOM 是两个 <input type="date"> + 套用按钮。这里:
+   *   - 保留两个原 input,但隐藏起来当「单一日期资料载体」
+   *     (既有 apply handler 直接读 startEl.value / endEl.value,各为单日,故不必改)
+   *   - 新插入 1 个可见 text input,挂 flatpickr range 模式,显示「起 → 讫」
+   *   - flatpickr onChange 把 range 拆成两个单日,写回两个原 input
+   *   - 套用按钮原 handler 自然读到正确的单日值;onCommit 为额外桥接 hook
+   *
+   * 参数化吸收三子页 id 命名不一致(sp-ql-custom-apply vs sp-rf-apply / sp-ag-apply)。
+   */
+  var startEl = document.getElementById(startId);
+  var endEl = document.getElementById(endId);
+  var applyEl = document.getElementById(applyId);
+  if (!startEl || !endEl || !applyEl) {
+    console.warn('[SP.attachDatePicker] missing element:', startId, endId, applyId);
+    return null;
+  }
+  if (startEl._fpDisplay) return startEl._fp; // 防重复 attach(幂等)
+
+  // 隐藏两个原生 date input(保留为资料载体)+ 中间的分隔符
+  // (退费/接线是文字节点「 ~ 」,质检是 <span>→</span>,一律处理)
+  startEl.style.display = 'none';
+  endEl.style.display = 'none';
+  var node = startEl.nextSibling;
+  while (node && node !== endEl) {
+    var next = node.nextSibling;
+    if (node.nodeType === 3) { node.textContent = ''; }                 // 文字节点分隔符
+    else if (node.nodeType === 1) { node.style.display = 'none'; }       // <span> 分隔符
+    node = next;
+  }
+
+  // 新插入可见的 flatpickr range input
+  var disp = document.createElement('input');
+  disp.type = 'text';
+  disp.readOnly = true;
+  disp.placeholder = '点选起讫日期';
+  disp.className = 'sp-fp-range';
+  disp.style.cssText = 'font-family:inherit;background:rgba(0,12,28,0.8);' +
+    'color:var(--text-primary,#d8e4f0);border:1px solid rgba(0,195,255,0.3);' +
+    'border-radius:4px;padding:4px 8px;font-size:12px;width:200px;cursor:pointer;';
+  startEl.parentNode.insertBefore(disp, startEl);
+  startEl._fpDisplay = disp;
+
+  // 初始化 flatpickr(range 模式)
+  var fp = flatpickr(disp, {
+    mode: 'range',
+    dateFormat: 'Y-m-d',
+    locale: 'zh',
+    maxDate: 'today',
+    onChange: function(selectedDates, dateStr, instance) {
+      if (selectedDates.length === 2) {
+        // 拆成两个单日写回原 input(既有 handler 期待单日)
+        startEl.value = instance.formatDate(selectedDates[0], 'Y-m-d');
+        endEl.value = instance.formatDate(selectedDates[1], 'Y-m-d');
+      }
+    }
+  });
+  startEl._fp = fp;
+
+  // 套用按钮额外 hook(原 handler 仍会跑;onCommit 供需要者扩充)
+  applyEl.addEventListener('click', function() {
+    var s = startEl.value, e = endEl.value;
+    if (!s || !e) {
+      console.warn('[SP.attachDatePicker] no range selected');
+      return;
+    }
+    if (typeof onCommit === 'function') onCommit(s, e);
+  });
+
+  return fp;
+};
+
 /* ── Sidebar 两层导航初始化 ── */
 (function initSidebarNav() {
   var nav = document.querySelector('.sidebar-nav');
@@ -10827,6 +10954,7 @@ var SP_REFUNDS = (function(){
     if(st.loaded) return; // 首次进入才载入
     st.loaded = true;
     wire();
+    SP.attachDatePicker('sp-rf-start', 'sp-rf-end', 'sp-rf-apply', function(){});
     initRangeThenLoad();
   }
 
@@ -11618,6 +11746,7 @@ var SP_AGENTS = (function(){
     if(st.loaded) return;
     st.loaded = true;
     wire();
+    SP.attachDatePicker('sp-ag-start', 'sp-ag-end', 'sp-ag-apply', function(){});
     initRangeThenLoad();
   }
 
@@ -12063,6 +12192,7 @@ var SP_QUALITY = (function(){
     if(st.loaded) return;
     st.loaded = true;
     wire();
+    SP.attachDatePicker('sp-ql-start', 'sp-ql-end', 'sp-ql-custom-apply', function(){});
     setActivePreset();
     setActiveDept();
     load();
