@@ -11284,7 +11284,7 @@ else SP_REFUNDS.register();
 .sp-ql-btn:hover { background:rgba(0,195,255,0.2); color:#fff; }
 
 /* KPI 5 卡 */
-.sp-ql-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.sp-ql-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
 .sp-ql-kpi { background:rgba(10,18,30,0.6); border:1px solid rgba(0,195,255,0.18); border-radius:6px; padding:14px 16px; position:relative; overflow:hidden; }
 .sp-ql-kpi .k-label { color:var(--text-dim); font-size:11px; letter-spacing:.5px; margin-bottom:8px; }
 .sp-ql-kpi .k-value { color:var(--accent-cyan); font-family:var(--font-display); font-size:26px; line-height:1; font-weight:600; }
@@ -11361,7 +11361,17 @@ else SP_REFUNDS.register();
 .sp-ql-submit:disabled { opacity:.5; cursor:not-allowed; }
 .sp-ql-rules-pre { white-space:pre-wrap; word-break:break-word; max-height:60vh; overflow:auto; background:rgba(0,0,0,0.45); border:1px solid rgba(0,195,255,0.18); border-radius:4px; padding:14px; font-size:12px; line-height:1.7; color:#9fb8c8; }
 
-@media(max-width:1280px){ .sp-ql-kpis{grid-template-columns:repeat(3,1fr)} .sp-ql-2col{grid-template-columns:1fr} }
+@media(max-width:1280px){ .sp-ql-kpis{grid-template-columns:repeat(2,1fr)} .sp-ql-2col{grid-template-columns:1fr} }
+
+/* [Phase13-3] 13b 低量 toggle / 13c Top5 chip / 13e Drive 状态条 */
+.sp-ql-lv-toggle { display:flex; align-items:center; gap:4px; color:var(--text-secondary); font-size:12px; margin-left:12px; }
+.sp-ql-lv-toggle input { cursor:pointer; }
+.sp-ql-lv-toggle span { cursor:pointer; }
+.sp-ql-case-severe-chip { background:rgba(255,100,0,0.2); color:#ff7a00; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold; }
+.sp-ql-case-meta { color:var(--text-secondary); font-size:11px; }
+.sp-ql-drive-bar { display:flex; align-items:center; gap:8px; padding:6px 12px; margin-bottom:12px; background:rgba(0,60,30,0.3); border:1px solid rgba(0,200,100,0.3); border-radius:4px; color:var(--text-secondary); font-size:12px; transition:all 0.3s; }
+.sp-ql-drive-bar.err { background:rgba(80,0,0,0.3); border-color:rgba(255,60,60,0.5); color:#ff8888; }
+.sp-ql-drive-icon { font-size:14px; }
 </style>
 
 <!-- [Phase3-3] 人名管理 Modal(复用既有 .modal-overlay / .cyber-modal / showModal) -->
@@ -11939,7 +11949,8 @@ var SP_QUALITY = (function(){
     compare:false, compareTarget:'last-month',
     dept:'all', view:'manager', myAgent:null, loaded:false,
     sortKey:'pass_rate', sortDir:'asc',
-    summaryRows:[], casesGroups:[]
+    summaryRows:[], casesGroups:[],
+    hideLowVolume:true   // [Phase13-3] 13b 默认隐藏 <50 则低量帐号
   };
   // range → 预设 compare 目标(同 Phase 2.3 / 3.3)
   var CMP_DEFAULT = { 'today':'last-week', week:'last-week', 'last-week':'last-week', month:'last-month', quarter:'last-quarter', year:'last-year', custom:'yoy' };
@@ -12022,7 +12033,7 @@ var SP_QUALITY = (function(){
   function renderManager(cur, full){
     renderKpis(cur.kpi || {});
     renderSummaryTable();
-    renderCases(st.casesGroups, 'sp-ql-cases');
+    renderAttentionTop5(st.casesGroups, 'sp-ql-cases');
     renderErrorDist(cur.error_type_dist || [], 'sp-ql-dist');
     renderImprovements(cur.improvements);
     renderQualityNotes(cur.data_quality_notes || []);
@@ -12031,14 +12042,12 @@ var SP_QUALITY = (function(){
 
   function renderKpis(kpi){
     var box = $('sp-ql-kpis'); if(!box) return;
-    var top = kpi.top_attention_agent;
+    // [Phase13-3] 13a 5→4 卡:移除单人关注卡(后端 kpi.top_attention_agent 仍传,前端忽略;改由下方「需关注组员 Top 5」专区呈现)
     var cards = [
       { label:'团队平均合格率', value:pct(kpi.avg_pass_rate), sub:'基于 Sheet 2 汇总' },
       { label:'严重错误次数', value:intf(kpi.severe_count), sub:'组长定夺(Sheet 2)' },
       { label:'全合格人数', value:(kpi.full_pass_agents||0)+' / '+(kpi.total_agents||0), sub:'合格率 100%' },
-      { label:'质检覆盖讯息', value:intf(kpi.total_messages_inspected), sub:'总讯息数' },
-      top ? { label:'重点关注组员', value:esc(top.agent_name), sub:top.total_cases+' 笔被审 · '+top.severe_cases+' 严重', attention:true }
-          : { label:'重点关注组员', value:'—', sub:'本期无案例' }
+      { label:'质检覆盖讯息', value:intf(kpi.total_messages_inspected), sub:'总讯息数' }
     ];
     box.innerHTML = cards.map(function(c){
       return '<div class="sp-ql-kpi'+(c.attention?' sp-ql-kpi-attention':'')+'">'+
@@ -12047,7 +12056,7 @@ var SP_QUALITY = (function(){
     }).join('');
   }
 
-  function renderSummaryTable(){
+  function renderSummaryTable(rowsIn){
     var box = $('sp-ql-summary'); if(!box) return;
     var cols = [
       {k:'canonical_name',l:'客服',num:false},{k:'shift',l:'班别',num:false},
@@ -12055,7 +12064,9 @@ var SP_QUALITY = (function(){
       {k:'medium_count',l:'中等',num:true},{k:'minor_count',l:'轻微',num:true},
       {k:'deduction_sum',l:'扣分',num:true},{k:'pass_rate',l:'合格率',num:true}
     ];
-    var rows = st.summaryRows.slice();
+    var rows = (rowsIn || st.summaryRows || []).slice();
+    // [Phase13-3] 13b 隐藏低量帐号(<50 则)
+    if(st.hideLowVolume){ rows = rows.filter(function(r){ return (r.total_messages||0) >= 50; }); }
     var sk = st.sortKey, dir = st.sortDir==='asc'?1:-1;
     rows.sort(function(a,b){
       var x=a[sk], y=b[sk];
@@ -12104,6 +12115,47 @@ var SP_QUALITY = (function(){
         '<div class="sp-ql-case-head"><span class="c-name">'+esc(g.agent_name)+'</span>'+
         '<span class="c-meta">'+g.total_cases+' 笔 · '+(g.severe_cases||0)+' 严重</span>'+
         '<span class="c-arrow">▶</span></div>'+
+        '<div class="sp-ql-case-body">'+items+'</div></div>';
+    }).join('');
+  }
+
+  /* ── [Phase13-3] 13c 需关注组员 Top 5(按严重次数 desc;沿用 .sp-ql-case-head/.body 折叠机制)── */
+  function renderAttentionTop5(groups, containerId){
+    var box = $(containerId); if(!box) return;
+    // JOIN summary_table(canonical_name + raw_names 别名)取班别 / 总讯息 / 合格率
+    var lookup = {};
+    (st.summaryRows || []).forEach(function(r){
+      lookup[r.canonical_name] = r;
+      (r.raw_names || []).forEach(function(rn){ lookup[rn] = r; });
+    });
+    // 按严重次数 desc，仅取有严重错误者，前 5
+    var top = (groups || []).slice()
+      .filter(function(g){ return (g.severe_cases||0) > 0; })
+      .sort(function(a,b){ return (b.severe_cases||0) - (a.severe_cases||0); })
+      .slice(0, 5);
+    if(!top.length){ box.innerHTML = '<div class="sp-ql-empty">本期无严重错误案例</div>'; return; }
+    box.innerHTML = top.map(function(g){
+      var meta = lookup[g.agent_name] || {};
+      // 展开态只显示严重案例
+      var severeCases = (g.cases || []).filter(function(c){ return (c.error_level||'').indexOf('严重') >= 0; });
+      var items = severeCases.map(function(c){
+        var lc = levelClass(c.error_level);
+        return '<div class="sp-ql-case-item">'+
+          '<div class="ci-top"><span class="sp-ql-lv '+lc+'">'+esc(c.error_level)+'</span>'+
+          '<span class="ci-ded">'+(c.deduction!=null?c.deduction:'')+' 分</span>'+
+          '<span class="c-meta">序号 '+(c.case_no==null?'—':c.case_no)+(c.case_time?' · '+esc(c.case_time):'')+(c.app_name?' · '+esc(c.app_name):'')+'</span></div>'+
+          (c.error_desc?'<div class="ci-field"><b>错误:</b>'+esc(c.error_desc)+'</div>':'')+
+          (c.correct_reply?'<div class="ci-field"><b>正确回复:</b>'+esc(c.correct_reply)+'</div>':'')+
+          (c.conversation?'<div class="ci-field"><b>完整对话:</b></div><div class="sp-ql-conv">'+esc(c.conversation)+'</div>':'')+
+          '</div>';
+      }).join('');
+      return '<div class="sp-ql-case-card">'+
+        '<div class="sp-ql-case-head">'+
+          '<span class="c-name">'+esc(g.agent_name)+'</span>'+
+          '<span class="sp-ql-case-severe-chip">'+(g.severe_cases||0)+' 严重</span>'+
+          '<span class="sp-ql-case-meta">'+esc(meta.shift||'—')+' · '+intf(meta.total_messages)+' 讯息 · 合格率 '+pct(meta.pass_rate)+'</span>'+
+          '<span class="c-arrow">▶</span>'+
+        '</div>'+
         '<div class="sp-ql-case-body">'+items+'</div></div>';
     }).join('');
   }
@@ -12279,6 +12331,12 @@ var SP_QUALITY = (function(){
       else { st.sortKey=k; st.sortDir = (k==='canonical_name'||k==='shift')?'asc':'desc'; }
       renderSummaryTable();
     });
+    // [Phase13-3] 13b 隐藏低量帐号 toggle
+    var hideLowEl = $('sp-ql-hide-low');
+    if(hideLowEl) hideLowEl.addEventListener('change', function(){
+      st.hideLowVolume = hideLowEl.checked;
+      renderSummaryTable();
+    });
     // 案例展开(委托:主管 + 组员两个容器)
     ['sp-ql-cases','sp-ql-my-cases'].forEach(function(cid){
       var box=$(cid); if(!box) return;
@@ -12302,6 +12360,40 @@ var SP_QUALITY = (function(){
     if(submit) submit.addEventListener('click', doUpload);
   }
 
+  /* ── [Phase13-3] 13e Drive 同步状态条 ── */
+  function fetchDriveSyncStatus(){
+    fetch(API + '/drive_sync_status', { headers: authHeaders() })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(data){
+        var el = $('sp-ql-drive-text'), bar = $('sp-ql-drive-bar');
+        if(!el || !bar) return;
+        if(!data){ el.textContent = 'Drive 同步:载入失败'; bar.classList.add('err'); return; }
+        var lastSync = data.last_sync_at || '';
+        var hasError = (data.errors && data.errors.length > 0) || data.success === false || data.ok === false;
+        // 下次同步:当下时间的下个 :00/:15/:30/:45(cron */15;+0.001 防整点卡住)
+        var now = new Date(); var next = new Date(now); next.setSeconds(0, 0);
+        var nextM = Math.ceil((next.getMinutes() + 0.001) / 15) * 15;
+        if(nextM >= 60){ next.setHours(next.getHours() + 1); next.setMinutes(nextM - 60); }
+        else { next.setMinutes(nextM); }
+        var lastStr = lastSync ? lastSync.substring(11, 16) : '?';   // HH:MM
+        var nextStr = pad(next.getHours()) + ':' + pad(next.getMinutes());
+        if(hasError){
+          bar.classList.add('err');
+          el.textContent = 'Drive 同步:' + lastStr + ' 失败(' + ((data.errors && data.errors.length) || 0) + ' 个错误)';
+          bar.style.cursor = 'pointer';
+          bar.onclick = function(){ alert('错误:\n' + JSON.stringify(data.errors || [], null, 2)); };
+        } else {
+          bar.classList.remove('err');
+          var skipped = (data.skipped || []).length, synced = (data.synced || []).length;
+          var info = synced ? (synced + ' 新档') : (skipped + ' 已同步');
+          el.textContent = 'Drive 同步:' + lastStr + ' · ' + info + ' · 下次 ' + nextStr;
+          bar.style.cursor = 'default';
+          bar.onclick = null;
+        }
+      })
+      .catch(function(err){ console.warn('[SP_QUALITY] drive sync status:', err); });
+  }
+
   function onActivate(){
     console.log('[Phase4-3] activateSubpage quality');
     applyRoleVisibility();
@@ -12314,6 +12406,9 @@ var SP_QUALITY = (function(){
     setActivePreset();
     setActiveDept();
     load();
+    // [Phase13-3] 13e Drive 同步状态条:首次 + 每 5 分钟刷新
+    fetchDriveSyncStatus();
+    setInterval(fetchDriveSyncStatus, 5 * 60 * 1000);
   }
 
   var PAGE_HTML =
@@ -12343,6 +12438,10 @@ var SP_QUALITY = (function(){
           '<button data-dept="df" disabled title="尚未启用">1-2 DF系</button>'+
         '</div>'+
         '<span class="sp-ql-sep"></span>'+
+        '<label class="sp-ql-lv-toggle">'+
+          '<input type="checkbox" id="sp-ql-hide-low" checked />'+
+          '<span>隐藏低量帐号(&lt;50 则)</span>'+
+        '</label>'+
         '<label class="sp-ql-cmp-label"><input type="checkbox" id="sp-ql-compare-chk">对比上期</label>'+
         '<span class="sp-ql-spacer"></span>'+
         '<span class="c-meta" id="sp-ql-range-label" style="color:var(--text-dim);font-size:12px"></span>'+
@@ -12355,9 +12454,13 @@ var SP_QUALITY = (function(){
 
       /* ── 主管视图 ── */
       '<div id="sp-ql-manager-view">'+
+        '<div class="sp-ql-drive-bar" id="sp-ql-drive-bar">'+
+          '<span class="sp-ql-drive-icon">📁</span>'+
+          '<span class="sp-ql-drive-text" id="sp-ql-drive-text">Drive 同步:载入中...</span>'+
+        '</div>'+
         '<section class="sp-ql-kpis" id="sp-ql-kpis"></section>'+
         '<section class="sp-ql-block"><h3>客服质检明细(合格率升序)</h3><div id="sp-ql-summary"></div></section>'+
-        '<section class="sp-ql-block"><h3>错误案例(点客服名展开完整对话)</h3><div class="sp-ql-cases" id="sp-ql-cases"></div></section>'+
+        '<section class="sp-ql-block"><h3>需关注组员 Top 5(按严重错误次数,展开看具体对话)</h3><div class="sp-ql-cases" id="sp-ql-cases"></div></section>'+
         '<div class="sp-ql-2col">'+
           '<section class="sp-ql-block"><h3>错误类型分布</h3><div class="sp-ql-dist" id="sp-ql-dist"></div></section>'+
           '<section class="sp-ql-block"><h3>进步榜 / 退步榜(本期 vs 上期)</h3><div class="sp-ql-2col" id="sp-ql-improvements"></div></section>'+
