@@ -3593,6 +3593,26 @@ body.auth-gate-active .app-layout { filter: blur(22px) brightness(0.18) saturate
 .sp-qr-main,
 .sp-qr-low-volume { margin-bottom: 20px; }
 
+/* [Phase13-2 段2.5] 排名表可点击排序 */
+#sp-qr-ranking-table thead th[data-sort-key] {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+#sp-qr-ranking-table thead th[data-sort-key]:hover {
+  background: rgba(0, 195, 255, 0.1);
+}
+#sp-qr-ranking-table thead th.sort-asc::after {
+  content: ' ▲';
+  color: rgba(0, 195, 255, 0.8);
+  font-size: 10px;
+}
+#sp-qr-ranking-table thead th.sort-desc::after {
+  content: ' ▼';
+  color: rgba(0, 195, 255, 0.8);
+  font-size: 10px;
+}
+
 </style>
 
 <!-- [Phase3-3] 全局滚动条:赛博朋克风格(全档案级别,所有滚动元素生效)-->
@@ -12401,6 +12421,8 @@ var SP_QUALITY_RANK = (function(){
     dept: 'dx',         // 默认 1-1 DX 系
     minMessages: 50,    // 默认门槛
     data: null,         // 最近 fetch 资料
+    sortKey: 'rank',    // 默认按 rank 排(即 score 降序)
+    sortAsc: true,      // rank 升序(1 在最前)
   };
 
   // utils
@@ -12478,16 +12500,16 @@ var SP_QUALITY_RANK = (function(){
         '<div id="sp-qr-ranking-wrap" style="display:none">'+
           '<table class="sp-ag-table" id="sp-qr-ranking-table">'+
             '<thead><tr>'+
-              '<th>排名</th>'+
-              '<th class="l">客服</th>'+
-              '<th class="l">班别</th>'+
-              '<th>月讯息</th>'+
-              '<th>严重</th>'+
-              '<th>中等</th>'+
-              '<th>轻微</th>'+
-              '<th>月扣分</th>'+
-              '<th>月加权合格率</th>'+
-              '<th>月度绩效分</th>'+
+              '<th data-sort-key="rank">排名</th>'+
+              '<th class="l" data-sort-key="agent_name">客服</th>'+
+              '<th class="l" data-sort-key="shift">班别</th>'+
+              '<th data-sort-key="total_messages">月讯息</th>'+
+              '<th data-sort-key="severe_count">严重</th>'+
+              '<th data-sort-key="medium_count">中等</th>'+
+              '<th data-sort-key="minor_count">轻微</th>'+
+              '<th data-sort-key="deduction_sum">月扣分</th>'+
+              '<th data-sort-key="pass_rate_pct">月加权合格率</th>'+
+              '<th data-sort-key="score">月度绩效分</th>'+
             '</tr></thead>'+
             '<tbody id="sp-qr-ranking-tbody"></tbody>'+
           '</table>'+
@@ -12543,6 +12565,34 @@ var SP_QUALITY_RANK = (function(){
       });
   }
 
+  // [Phase13-2 段2.5] 客户端排序主榜(不影响 r.rank 原始排名数字)
+  function sortRanking(arr) {
+    var k = st.sortKey;
+    var asc = st.sortAsc;
+    return arr.slice().sort(function(a, b) {
+      var av = a[k], bv = b[k];
+      if (k === 'agent_name' || k === 'shift') {
+        av = String(av || '');
+        bv = String(bv || '');
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      }
+      av = Number(av) || 0;
+      bv = Number(bv) || 0;
+      return asc ? av - bv : bv - av;
+    });
+  }
+
+  // [Phase13-2 段2.5] 表头视觉指示 ▲ ▼
+  function updateSortIndicator() {
+    document.querySelectorAll('#sp-qr-ranking-table thead th[data-sort-key]').forEach(function(th) {
+      var key = th.getAttribute('data-sort-key');
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (key === st.sortKey) {
+        th.classList.add(st.sortAsc ? 'sort-asc' : 'sort-desc');
+      }
+    });
+  }
+
   function render(data) {
     var loadingEl = $('#sp-qr-ranking-loading');
     if (loadingEl) loadingEl.style.display = 'none';
@@ -12571,7 +12621,7 @@ var SP_QUALITY_RANK = (function(){
     } else {
       $('#sp-qr-ranking-empty').style.display = 'none';
       $('#sp-qr-ranking-wrap').style.display = 'block';
-      tbody.innerHTML = ranking.map(function(r) {
+      tbody.innerHTML = sortRanking(ranking).map(function(r) {
         return '<tr>'+
           '<td>' + r.rank + '</td>'+
           '<td class="l">' + esc(r.agent_name) + '</td>'+
@@ -12605,6 +12655,9 @@ var SP_QUALITY_RANK = (function(){
     } else {
       lowSecEl.style.display = 'none';
     }
+
+    // [Phase13-2 段2.5] 首次/每次渲染后刷新表头排序指示
+    updateSortIndicator();
   }
 
   function wire() {
@@ -12626,6 +12679,22 @@ var SP_QUALITY_RANK = (function(){
         chip.classList.add('active');
         st.dept = chip.getAttribute('data-dept');
         load();
+      });
+    });
+
+    // [Phase13-2 段2.5] 表头点击排序(不必重 fetch,直接重渲染缓存 st.data)
+    document.querySelectorAll('#sp-qr-ranking-table thead th[data-sort-key]').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var key = th.getAttribute('data-sort-key');
+        if (st.sortKey === key) {
+          st.sortAsc = !st.sortAsc;
+        } else {
+          st.sortKey = key;
+          // 数字栏默认降序(高低排),字串栏 + rank 默认升序
+          st.sortAsc = (key === 'agent_name' || key === 'shift' || key === 'rank');
+        }
+        if (st.data) render(st.data);
+        updateSortIndicator();
       });
     });
   }
